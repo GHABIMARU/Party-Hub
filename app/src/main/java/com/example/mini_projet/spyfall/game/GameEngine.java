@@ -43,8 +43,9 @@ public class GameEngine {
     private String    secretWord;
     private String    result;
 
-    private final Set<Integer> impostorIds  = new HashSet<>();
-    private int                impostorCount = 1;
+    private final Set<Integer>    impostorIds    = new HashSet<>();
+    private int                   impostorCount  = 1;
+    private List<WordList.Theme>  selectedThemes = new ArrayList<>();
 
     // ── Mode / network ────────────────────────────────────────────────────────
     public enum Mode { PASS_PLAY, HOST, CLIENT }
@@ -74,6 +75,10 @@ public class GameEngine {
 
     public void setImpostorCount(int n) {
         this.impostorCount = Math.max(1, n);
+    }
+
+    public void setSelectedThemes(List<WordList.Theme> themes) {
+        this.selectedThemes = (themes != null) ? new ArrayList<>(themes) : new ArrayList<>();
     }
 
     public boolean isImpostor(int playerId) {
@@ -123,7 +128,7 @@ public class GameEngine {
         impostorIds.clear();
         for (int i = 0; i < actualImpostors; i++) impostorIds.add(ids.get(i));
 
-        secretWord = WordList.getRandom();
+        secretWord = WordList.getRandom(selectedThemes.isEmpty() ? null : selectedThemes);
         Log.d(TAG, "startGame: word=" + secretWord
                 + " impostors=" + impostorIds + " total=" + snap.size());
 
@@ -164,8 +169,7 @@ public class GameEngine {
 
     public void addVote(int votedPlayerId) {
         synchronized (votes) {
-            Integer current = votes.get(votedPlayerId);
-            votes.put(votedPlayerId, current != null ? current + 1 : 1);
+            votes.merge(votedPlayerId, 1, Integer::sum);
         }
         if (gameMode == Mode.HOST) checkIfAllVoted();
     }
@@ -244,7 +248,6 @@ public class GameEngine {
                 }
             }
             if (eliminated == null) {
-                // Shouldn't happen — treat as impostors winning
                 setResult(buildImpostorNames() + " win! 😈");
                 goToResult();
                 return;
@@ -255,13 +258,11 @@ public class GameEngine {
             impostorIds.remove(eliminated.getId());
 
             if (wasImpostor) {
-                // Crewmates picked correctly — impostors found
                 eliminatedImpostorNames.add(eliminated.getName());
                 String label = eliminatedImpostorNames.size() == 1
                         ? " was the impostor" : " were the impostors";
                 setResult(buildNameList(eliminatedImpostorNames) + label + "! Crewmates win! 🎉");
             } else {
-                // Crewmates picked wrong — impostors win
                 setResult(eliminated.getName() + " was innocent. "
                         + buildImpostorNames() + " win! 😈");
             }
@@ -362,6 +363,7 @@ public class GameEngine {
         synchronized (readyPlayers)    { readyPlayers.clear(); }
         impostorIds.clear();
         eliminatedImpostorNames.clear();
+        selectedThemes.clear();
         gameState     = GameState.LOBBY;
         revealIndex   = 0;
         secretWord    = null;
@@ -375,7 +377,6 @@ public class GameEngine {
     }
 
     public void restartGame() {
-        // Restore the full original roster — brings back any eliminated players
         synchronized (players) {
             players.clear();
             synchronized (originalPlayers) {
@@ -386,6 +387,7 @@ public class GameEngine {
         synchronized (readyPlayers) { readyPlayers.clear(); }
         impostorIds.clear();
         eliminatedImpostorNames.clear();
+        // Keep selectedThemes so Play Again uses the same theme selection
         gameState   = GameState.LOBBY;
         revealIndex = 0;
         secretWord  = null;

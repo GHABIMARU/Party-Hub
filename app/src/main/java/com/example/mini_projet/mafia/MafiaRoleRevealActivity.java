@@ -244,9 +244,16 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         btn_civilian_done.setVisibility(View.GONE);
 
         ll_action_player_list.removeAllViews();
-        for (Player target : getAlivePlayers()) {
+        List<Player> alive = getAlivePlayers();
+        for (Player target : alive) {
             if (actor.getRole() == Player.Role.MAFIA
                     && target.getRole() == Player.Role.MAFIA) continue;
+            // Mafia and Detective cannot target themselves; Doctor can self-protect
+            if (actor.getRole() != Player.Role.DOCTOR) {
+                if (target == actor) continue;
+                if (target.getId() == actor.getId()) continue;
+                if (target.getName().equals(actor.getName())) continue;
+            }
 
             LinearLayout row = buildActionRow(target, actor.getRole());
             ll_action_player_list.addView(row);
@@ -257,10 +264,10 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         // Pick highlight color based on role
         int highlightColor;
         switch (actorRole) {
-            case MAFIA:      highlightColor = 0xFFCC0000; break;
-            case DOCTOR:     highlightColor = 0xFF2ECC71; break;
-            case DETECTIVE:  highlightColor = 0xFF3B9EFF; break;
-            default:         highlightColor = 0xFFF0B429; break;
+            case MAFIA:      highlightColor = 0xFFCC0000; break; // blood red
+            case DOCTOR:     highlightColor = 0xFF2ECC71; break; // green
+            case DETECTIVE:  highlightColor = 0xFF3B9EFF; break; // blue
+            default:         highlightColor = 0xFFF0B429; break; // gold fallback
         }
 
         LinearLayout row = new LinearLayout(this);

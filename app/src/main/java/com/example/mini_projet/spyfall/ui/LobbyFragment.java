@@ -266,8 +266,8 @@ public class LobbyFragment extends Fragment {
                     "Need at least " + GameEngine.MIN_PLAYERS + " players", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (engine.startGame())
-            ((MainActivity) requireActivity()).navigateTo(engine.getGameState());
+        // Go to theme picker — it will call startGame() after theme selection
+        ((MainActivity) requireActivity()).navigateTo(GameState.THEME_PICKER);
     }
 
     private void startHosting(String name, EditText nameInput,
@@ -304,10 +304,9 @@ public class LobbyFragment extends Fragment {
                         "Need at least " + GameEngine.MIN_PLAYERS + " agents", Toast.LENGTH_SHORT).show();
                 return;
             }
-            if (engine.startGame()) {
-                engine.getHostServer().sendStartGame();
-                ((MainActivity) requireActivity()).navigateTo(GameState.ROLE_REVEAL);
-            }
+            // Go to theme picker — ThemePickerFragment handles startGame()
+            // and sendStartGame() for host mode
+            ((MainActivity) requireActivity()).navigateTo(GameState.THEME_PICKER);
         });
 
         startPolling();

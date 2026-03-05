@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(() -> {
             Fragment fragment;
             switch (state) {
+                case THEME_PICKER: fragment = new ThemePickerFragment(); break;
                 case ROLE_REVEAL: fragment = new RoleRevealFragment(); break;
                 case DISCUSSION:  fragment = new DiscussionFragment();  break;
                 case VOTING:      fragment = new VotingFragment();      break;
