@@ -22,7 +22,6 @@ import java.util.List;
 
 public class Mafiasetupactivity extends AppCompatActivity {
 
-    // ── Step 1 views ──────────────────────────────────────────────────────────
     private LinearLayout layout_step1;
     private Button       btn_players_minus, btn_players_plus;
     private Button       btn_mafia_minus, btn_mafia_plus;
@@ -30,13 +29,11 @@ public class Mafiasetupactivity extends AppCompatActivity {
     private Switch       switch_doctor, switch_detective;
     private Button       btn_next_to_names;
 
-    // ── Step 2 views ──────────────────────────────────────────────────────────
     private LinearLayout layout_step2;
-    private LinearLayout ll_name_inputs;       // populated dynamically
+    private LinearLayout ll_name_inputs;
     private TextView     btn_back_to_settings;
     private Button       btn_start_game;
 
-    // ── State ─────────────────────────────────────────────────────────────────
     private int playerCount = 6;
     private int mafiaCount  = 2;
 
@@ -57,9 +54,7 @@ public class Mafiasetupactivity extends AppCompatActivity {
         setListeners();
     }
 
-    // ── Bind all views ────────────────────────────────────────────────────────
     private void bindViews() {
-        // Step 1
         layout_step1       = findViewById(R.id.layout_step1);
         btn_players_minus  = findViewById(R.id.btn_players_minus);
         btn_players_plus   = findViewById(R.id.btn_players_plus);
@@ -71,14 +66,12 @@ public class Mafiasetupactivity extends AppCompatActivity {
         switch_detective   = findViewById(R.id.switch_detective);
         btn_next_to_names  = findViewById(R.id.btn_next_to_names);
 
-        // Step 2
         layout_step2       = findViewById(R.id.layout_step2);
         ll_name_inputs     = findViewById(R.id.ll_name_inputs);
         btn_back_to_settings = findViewById(R.id.btn_back_to_settings);
         btn_start_game     = findViewById(R.id.btn_start_game);
     }
 
-    // ── Listeners ─────────────────────────────────────────────────────────────
     private void setListeners() {
 
         btn_players_minus.setOnClickListener(v -> {
@@ -121,7 +114,6 @@ public class Mafiasetupactivity extends AppCompatActivity {
             }
         });
 
-        // NEXT → go to name entry step
         btn_next_to_names.setOnClickListener(v -> {
             boolean includeDoctor    = switch_doctor.isChecked();
             boolean includeDetective = switch_detective.isChecked();
@@ -140,16 +132,10 @@ public class Mafiasetupactivity extends AppCompatActivity {
             showNameInputStep();
         });
 
-        // BACK → return to settings step
         btn_back_to_settings.setOnClickListener(v -> showSettingsStep());
 
-        // START GAME
         btn_start_game.setOnClickListener(v -> startGame());
     }
-
-    // ════════════════════════════════════════════════════════════════════════
-    // STEP 1 ↔ STEP 2 transitions
-    // ════════════════════════════════════════════════════════════════════════
 
     private void showSettingsStep() {
         layout_step1.setVisibility(View.VISIBLE);
@@ -162,14 +148,12 @@ public class Mafiasetupactivity extends AppCompatActivity {
         buildNameInputs();
     }
 
-    // ── Build one input row per player ────────────────────────────────────────
     private void buildNameInputs() {
         ll_name_inputs.removeAllViews();
 
         for (int i = 0; i < playerCount; i++) {
             final int index = i;
 
-            // Row: number label + edit text
             LinearLayout row = new LinearLayout(this);
             row.setOrientation(LinearLayout.HORIZONTAL);
             row.setGravity(Gravity.CENTER_VERTICAL);
@@ -180,7 +164,6 @@ public class Mafiasetupactivity extends AppCompatActivity {
             rowLp.setMargins(0, 0, 0, dpToPx(i < playerCount - 1 ? 12 : 0));
             row.setLayoutParams(rowLp);
 
-            // Player number badge
             TextView tvNum = new TextView(this);
             tvNum.setText(String.valueOf(i + 1));
             tvNum.setTextSize(13);
@@ -189,7 +172,6 @@ public class Mafiasetupactivity extends AppCompatActivity {
             tvNum.setMinWidth(dpToPx(28));
             tvNum.setGravity(Gravity.CENTER);
 
-            // Name input
             EditText etName = new EditText(this);
             etName.setId(View.generateViewId());
             etName.setTag("name_input_" + i);
@@ -206,12 +188,10 @@ public class Mafiasetupactivity extends AppCompatActivity {
                     0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
             etName.setLayoutParams(etLp);
 
-            // Divider below (except last)
             row.addView(tvNum);
             row.addView(etName);
             ll_name_inputs.addView(row);
 
-            // Thin divider between rows
             if (i < playerCount - 1) {
                 View divider = new View(this);
                 LinearLayout.LayoutParams divLp = new LinearLayout.LayoutParams(
@@ -225,18 +205,15 @@ public class Mafiasetupactivity extends AppCompatActivity {
         }
     }
 
-    // ── Collect names and start game ──────────────────────────────────────────
     private void startGame() {
-        // Collect and validate names
         List<String> names = new ArrayList<>();
 
         for (int i = 0; i < playerCount; i++) {
             EditText et = ll_name_inputs.findViewWithTag("name_input_" + i);
             String name = (et != null && et.getText().length() > 0)
                     ? et.getText().toString().trim()
-                    : "Player " + (i + 1);   // fallback if left blank
+                    : "Player " + (i + 1);
 
-            // Check for duplicates
             if (names.contains(name)) {
                 Toast.makeText(this,
                         "\"" + name + "\" is already used — each player needs a unique name",
@@ -246,7 +223,6 @@ public class Mafiasetupactivity extends AppCompatActivity {
             names.add(name);
         }
 
-        // Build roles
         boolean includeDoctor    = switch_doctor.isChecked();
         boolean includeDetective = switch_detective.isChecked();
 
@@ -257,20 +233,17 @@ public class Mafiasetupactivity extends AppCompatActivity {
         while (roles.size() < playerCount) roles.add(Player.Role.CIVILIAN);
         Collections.shuffle(roles);
 
-        // Build players with real names
         ArrayList<Player> players = new ArrayList<>();
         for (int i = 0; i < playerCount; i++) {
             players.add(new Player(i, names.get(i), roles.get(i)));
         }
 
-        // Launch Role Reveal
         Intent intent = new Intent(this, MafiaRoleRevealActivity.class);
         intent.putExtra(MafiaRoleRevealActivity.EXTRA_PLAYERS, players);
         intent.putExtra(MafiaRoleRevealActivity.EXTRA_ROUND, 1);
         startActivity(intent);
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
     private int maxAllowedMafia() { return playerCount / 3; }
     private void updatePlayerCountUI() { tv_player_count.setText(String.valueOf(playerCount)); }
     private void updateMafiaCountUI()  { tv_mafia_count.setText(String.valueOf(mafiaCount)); }

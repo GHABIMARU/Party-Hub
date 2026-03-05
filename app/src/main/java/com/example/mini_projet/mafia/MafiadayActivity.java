@@ -22,13 +22,11 @@ import java.util.Map;
 public class MafiadayActivity extends AppCompatActivity
         implements MafiaNetworkServer.VoteCallback {
 
-    // ── Intent keys ───────────────────────────────────────────────────────────
     public static final String EXTRA_PLAYERS      = "extra_players";
     public static final String EXTRA_ROUND        = "extra_round";
     public static final String EXTRA_NIGHT_RESULT = "extra_night_result";
     public static final String EXTRA_IS_HOST      = "is_host";
 
-    // ── Views ─────────────────────────────────────────────────────────────────
     private TextView     tv_day_round;
     private TextView     tv_night_result_emoji;
     private TextView     tv_night_result_text;
@@ -39,7 +37,6 @@ public class MafiadayActivity extends AppCompatActivity
     private TextView     btn_eliminate;
     private TextView     btn_skip_vote;
 
-    // ── State ─────────────────────────────────────────────────────────────────
     private ArrayList<Player> players;
     private int    round;
     private String nightResultText;
@@ -49,7 +46,7 @@ public class MafiadayActivity extends AppCompatActivity
     private final Map<Integer, TextView> voteBadges = new HashMap<>();
     private int totalVotes  = 0;
     private int totalVoters = 0;
-    private int currentVoterIndex = 0;   // index in alive list — whose turn to vote
+    private int currentVoterIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,10 +58,8 @@ public class MafiadayActivity extends AppCompatActivity
         nightResultText = getIntent().getStringExtra(EXTRA_NIGHT_RESULT);
         isHost          = getIntent().getBooleanExtra(EXTRA_IS_HOST, false);
 
-        // Register as vote receiver so client votes come in via VoteCallback
         if (isHost && MafiaServerHolder.isHosting()) {
             MafiaServerHolder.get().setVoteCallback(this);
-            // Tell all clients to navigate to the day voting screen
             MafiaServerHolder.get().broadcastState("DAY");
         }
 
@@ -74,7 +69,6 @@ public class MafiadayActivity extends AppCompatActivity
         checkWinCondition();
     }
 
-    // ── Bind views ────────────────────────────────────────────────────────────
     private void bindViews() {
         tv_day_round          = findViewById(R.id.tv_day_round);
         tv_night_result_emoji = findViewById(R.id.tv_night_result_emoji);
@@ -91,7 +85,6 @@ public class MafiadayActivity extends AppCompatActivity
         btn_skip_vote.setOnClickListener(v -> confirmSkip());
     }
 
-    // ── Night result banner ───────────────────────────────────────────────────
     private void setupNightResult() {
         if (nightResultText == null) return;
         if (nightResultText.contains("saved")) {
@@ -109,7 +102,6 @@ public class MafiadayActivity extends AppCompatActivity
         tv_night_result_text.setText(nightResultText);
     }
 
-    // ── Vote list ─────────────────────────────────────────────────────────────
     private void buildVoteList() {
         ll_vote_list.removeAllViews();
         voteMap.clear();
@@ -186,7 +178,6 @@ public class MafiadayActivity extends AppCompatActivity
         return btn;
     }
 
-    // ── Vote logic ────────────────────────────────────────────────────────────
     private void addVote(int playerId) {
         if (totalVotes >= totalVoters) {
             Toast.makeText(this, "All votes already cast", Toast.LENGTH_SHORT).show();
@@ -213,15 +204,10 @@ public class MafiadayActivity extends AppCompatActivity
         refreshVotesRemaining();
     }
 
-    // ── VoteCallback — called when a network client submits a vote ────────────
     @Override
     public void onVoteReceived(int voterId, int targetId) {
-        // Count each client's vote (one vote per player)
         runOnUiThread(() -> {
-            // Remove any previous vote from this voter
-            // (simple approach: just add the vote to the target's count)
             addVote(targetId);
-            // Auto-eliminate when all network players have voted
             if (isHost && totalVotes >= totalVoters) {
                 confirmElimination();
             }
@@ -253,20 +239,15 @@ public class MafiadayActivity extends AppCompatActivity
                 ? "All votes cast ✓"
                 : remaining + (remaining == 1 ? " vote remaining" : " votes remaining"));
     }
-
-    // ── Eliminate leader ──────────────────────────────────────────────────────
-    // ── Eliminate leader ──────────────────────────────────────────────────────
     private void confirmElimination() {
         if (voteMap.isEmpty() || totalVotes == 0) {
             Toast.makeText(this, "No votes cast yet", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Find max votes
         int maxVotes = 0;
         for (int v : voteMap.values()) if (v > maxVotes) maxVotes = v;
 
-        // Count how many players share the max — draw if more than one
         List<Player> tied = new ArrayList<>();
         for (Player p : getAlivePlayers()) {
             if (voteMap.getOrDefault(p.getId(), 0) == maxVotes) tied.add(p);
@@ -288,7 +269,6 @@ public class MafiadayActivity extends AppCompatActivity
         showEliminationDialog(leader);
     }
 
-    // ── Draw → go straight to night, no elimination ───────────────────────────
     private void showDrawDialog(List<Player> tied) {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -296,7 +276,6 @@ public class MafiadayActivity extends AppCompatActivity
         root.setBackgroundColor(0xFF12141F);
         root.setPadding(dpToPx(32), dpToPx(40), dpToPx(32), dpToPx(32));
 
-        // Icon
         TextView tvIcon = new TextView(this);
         tvIcon.setText("⚖️");
         tvIcon.setTextSize(64);
@@ -307,7 +286,6 @@ public class MafiadayActivity extends AppCompatActivity
         tvIcon.setLayoutParams(iLp);
         root.addView(tvIcon);
 
-        // Title
         TextView tvTitle = new TextView(this);
         tvTitle.setText("IT'S A DRAW");
         tvTitle.setTextSize(24);
@@ -321,7 +299,6 @@ public class MafiadayActivity extends AppCompatActivity
         tvTitle.setLayoutParams(tLp);
         root.addView(tvTitle);
 
-        // Tied player names
         StringBuilder names = new StringBuilder();
         for (Player p : tied) names.append("• ").append(p.getName()).append("\n");
         TextView tvTied = new TextView(this);
@@ -336,7 +313,6 @@ public class MafiadayActivity extends AppCompatActivity
         tvTied.setLayoutParams(nLp);
         root.addView(tvTied);
 
-        // Subtitle
         TextView tvSub = new TextView(this);
         tvSub.setText("No one is eliminated.\nThe night begins.");
         tvSub.setTextSize(13);
@@ -349,7 +325,6 @@ public class MafiadayActivity extends AppCompatActivity
         tvSub.setLayoutParams(sLp);
         root.addView(tvSub);
 
-        // Continue to night button
         TextView btnContinue = new TextView(this);
         btnContinue.setText("🌙  BEGIN NIGHT");
         btnContinue.setTextSize(14);
@@ -375,7 +350,6 @@ public class MafiadayActivity extends AppCompatActivity
     }
 
     private void showEliminationDialog(Player victim) {
-        // Colors by role
         int bgColor, accentColor;
         String emoji, verdict, flavour;
         switch (victim.getRole()) {
@@ -415,7 +389,6 @@ public class MafiadayActivity extends AppCompatActivity
         root.setBackgroundColor(bgColor);
         root.setPadding(dpToPx(32), dpToPx(40), dpToPx(32), dpToPx(32));
 
-        // Big role emoji
         TextView tvEmoji = new TextView(this);
         tvEmoji.setText(emoji);
         tvEmoji.setTextSize(64);
@@ -426,7 +399,6 @@ public class MafiadayActivity extends AppCompatActivity
         tvEmoji.setLayoutParams(eLp);
         root.addView(tvEmoji);
 
-        // Role verdict (e.g. "MAFIA MEMBER")
         TextView tvVerdict = new TextView(this);
         tvVerdict.setText(verdict);
         tvVerdict.setTextSize(24);
@@ -440,7 +412,6 @@ public class MafiadayActivity extends AppCompatActivity
         tvVerdict.setLayoutParams(vLp);
         root.addView(tvVerdict);
 
-        // Victim name
         TextView tvName = new TextView(this);
         tvName.setText(victim.getName());
         tvName.setTextSize(22);
@@ -453,7 +424,6 @@ public class MafiadayActivity extends AppCompatActivity
         tvName.setLayoutParams(nLp);
         root.addView(tvName);
 
-        // Flavour description
         TextView tvDesc = new TextView(this);
         tvDesc.setText(flavour);
         tvDesc.setTextSize(13);
@@ -466,7 +436,6 @@ public class MafiadayActivity extends AppCompatActivity
         tvDesc.setLayoutParams(dLp);
         root.addView(tvDesc);
 
-        // Continue button
         TextView btnContinue = new TextView(this);
         btnContinue.setText("CONTINUE  →");
         btnContinue.setTextSize(14);
@@ -491,7 +460,6 @@ public class MafiadayActivity extends AppCompatActivity
         dialog.show();
     }
 
-    // ── Skip voting ───────────────────────────────────────────────────────────
     private void confirmSkip() {
         new AlertDialog.Builder(this)
                 .setTitle("Skip Voting?")
@@ -501,7 +469,6 @@ public class MafiadayActivity extends AppCompatActivity
                 .show();
     }
 
-    // ── Win condition ─────────────────────────────────────────────────────────
     private boolean checkWinCondition() {
         int mafiaAlive = 0, townAlive = 0;
         for (Player p : players) {
@@ -537,7 +504,6 @@ public class MafiadayActivity extends AppCompatActivity
         return sb.toString().trim();
     }
 
-    // ── Game over dialog ──────────────────────────────────────────────────────
     private void showGameOver(String title, String message) {
         btn_eliminate.setClickable(false);
         btn_skip_vote.setClickable(false);
@@ -602,9 +568,7 @@ public class MafiadayActivity extends AppCompatActivity
         dialog.show();
     }
 
-    // ── Go to next night ──────────────────────────────────────────────────────
     private void goToNightPhase() {
-        // Broadcast ROLE_REVEAL so clients navigate to next night screen
         if (isHost && MafiaServerHolder.isHosting()) {
             MafiaServerHolder.get().broadcastState("ROLE_REVEAL");
         }
@@ -617,7 +581,6 @@ public class MafiadayActivity extends AppCompatActivity
         finish();
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
     private Player getLeader() {
         int maxVotes = 0;
         for (int v : voteMap.values()) if (v > maxVotes) maxVotes = v;

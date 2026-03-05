@@ -47,11 +47,9 @@ public class ClientConnection {
             for (int i = 1; i <= DISCOVER_TRIES; i++) {
                 Log.d(TAG, "Discovery attempt " + i + "/" + DISCOVER_TRIES);
                 try {
-                    // Broadcast to 255.255.255.255
                     udp.send(new DatagramPacket(sendBuf, sendBuf.length,
                             InetAddress.getByName("255.255.255.255"), Utils.UDP_PORT));
 
-                    // Also broadcast to subnet (e.g. 192.168.43.255)
                     String localIp = Utils.getLocalIp();
                     if (localIp != null) {
                         String subnet = subnetBroadcast(localIp);
@@ -62,7 +60,6 @@ public class ClientConnection {
                         }
                     }
 
-                    // Wait for reply
                     byte[] recvBuf = new byte[256];
                     DatagramPacket reply = new DatagramPacket(recvBuf, recvBuf.length);
                     udp.receive(reply);

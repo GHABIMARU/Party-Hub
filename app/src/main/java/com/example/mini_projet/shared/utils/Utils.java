@@ -7,14 +7,11 @@ import java.util.Enumeration;
 
 public class Utils {
 
-    public static final int TCP_PORT = 8080;  // game communication
-    public static final int UDP_PORT = 8888;  // host discovery
+    public static final int TCP_PORT = 8080;
+    public static final int UDP_PORT = 8888;
     public static final String DISCOVER_MSG = "SPYFALL_DISCOVER";
     public static final String DISCOVER_ACK = "SPYFALL_HOST";
 
-    /**
-     * Returns the best local IPv4 address (prefers 192.168.x.x).
-     */
     public static String getLocalIp() {
         try {
             Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
@@ -30,7 +27,6 @@ public class Utils {
                     }
                 }
             }
-            // Pass 2: any non-loopback IPv4
             ifaces = NetworkInterface.getNetworkInterfaces();
             while (ifaces.hasMoreElements()) {
                 NetworkInterface iface = ifaces.nextElement();

@@ -17,22 +17,12 @@ import com.example.mini_projet.R;
 
 import java.util.ArrayList;
 import java.util.List;
-
-/**
- * Pass-and-play role reveal + night actions.
- *
- * When running as host (is_host=true in Intent extras):
- *   - After all night actions are done → resolves night → broadcasts
- *     NIGHT_RESULT to all clients so they navigate to their night result screen
- *   - Then broadcasts STATE:DAY so clients go to the day/voting screen
- */
 public class MafiaRoleRevealActivity extends AppCompatActivity {
 
     public static final String EXTRA_PLAYERS = "extra_players";
     public static final String EXTRA_ROUND   = "extra_round";
     public static final String EXTRA_IS_HOST = "is_host";
 
-    // ── Views: Lock screen ────────────────────────────────────────────────────
     private LinearLayout layout_lock;
     private TextView     tv_lock_name;
     private TextView     tv_lock_subtitle;
@@ -40,13 +30,11 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
     private TextView     btn_show_role;
     private TextView     btn_seen_role;
 
-    // ── Views: Role + Action screen ───────────────────────────────────────────
     private ScrollView   scroll_role_visible;
     private TextView     tv_role_emoji;
     private TextView     tv_role_name_label;
     private TextView     tv_role_description;
 
-    // ── Views: Action panel ───────────────────────────────────────────────────
     private LinearLayout layout_action_panel;
     private TextView     tv_action_title;
     private LinearLayout ll_action_player_list;
@@ -54,10 +42,8 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
     private TextView     tv_action_selected_name;
     private TextView     btn_confirm_action;
 
-    // ── Views: Civilian ───────────────────────────────────────────────────────
     private TextView btn_civilian_done;
 
-    // ── State ─────────────────────────────────────────────────────────────────
     private ArrayList<Player> players;
     private int     round        = 1;
     private int     currentIndex = 0;
@@ -82,7 +68,6 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         showLockScreen(0);
     }
 
-    // ── Bind views ────────────────────────────────────────────────────────────
     private void bindViews() {
         layout_lock           = findViewById(R.id.layout_lock);
         tv_lock_name          = findViewById(R.id.tv_lock_name);
@@ -110,7 +95,6 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         btn_civilian_done.setOnClickListener(v -> advanceToNextPlayer());
     }
 
-    // ── STEP 1: Lock screen ───────────────────────────────────────────────────
     private void showLockScreen(int index) {
         currentIndex    = index;
         actionSelection = null;
@@ -136,7 +120,6 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         fillRoleContent(p);
     }
 
-    // ── STEP 2: Hold-to-reveal ────────────────────────────────────────────────
     private void setupHoldToReveal() {
         btn_show_role.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
@@ -180,7 +163,6 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         });
     }
 
-    // ── Pre-fill role card ────────────────────────────────────────────────────
     private void fillRoleContent(Player p) {
         switch (p.getRole()) {
             case MAFIA:
@@ -206,12 +188,10 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         }
     }
 
-    // ── STEP 3: Unlock action panel ───────────────────────────────────────────
     private void unlockAction() {
         List<Player> alive = getAlivePlayers();
         Player p = alive.get(currentIndex);
 
-        // Civilian — skip the role screen entirely, advance straight away
         if (p.getRole() == Player.Role.CIVILIAN) {
             advanceToNextPlayer();
             return;
@@ -236,7 +216,6 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         }
     }
 
-    // ── Action panel ──────────────────────────────────────────────────────────
     private void showActionPanel(String title, Player actor) {
         tv_action_title.setText(title);
         layout_action_panel.setVisibility(View.VISIBLE);
@@ -248,7 +227,6 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         for (Player target : alive) {
             if (actor.getRole() == Player.Role.MAFIA
                     && target.getRole() == Player.Role.MAFIA) continue;
-            // Mafia and Detective cannot target themselves; Doctor can self-protect
             if (actor.getRole() != Player.Role.DOCTOR) {
                 if (target == actor) continue;
                 if (target.getId() == actor.getId()) continue;
@@ -261,13 +239,12 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
     }
 
     private LinearLayout buildActionRow(Player target, Player.Role actorRole) {
-        // Pick highlight color based on role
         int highlightColor;
         switch (actorRole) {
-            case MAFIA:      highlightColor = 0xFFCC0000; break; // blood red
-            case DOCTOR:     highlightColor = 0xFF2ECC71; break; // green
-            case DETECTIVE:  highlightColor = 0xFF3B9EFF; break; // blue
-            default:         highlightColor = 0xFFF0B429; break; // gold fallback
+            case MAFIA:      highlightColor = 0xFFCC0000; break;
+            case DOCTOR:     highlightColor = 0xFF2ECC71; break;
+            case DETECTIVE:  highlightColor = 0xFF3B9EFF; break;
+            default:         highlightColor = 0xFFF0B429; break;
         }
 
         LinearLayout row = new LinearLayout(this);
@@ -295,7 +272,6 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
             actionSelection = target;
             tv_action_selected_name.setText("Selected: " + target.getName());
             layout_action_selected.setVisibility(View.VISIBLE);
-            // Reset all rows back to default
             for (int i = 0; i < ll_action_player_list.getChildCount(); i++) {
                 LinearLayout r = (LinearLayout) ll_action_player_list.getChildAt(i);
                 r.setAlpha(1f);
@@ -307,7 +283,6 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
                 defaultBg.setCornerRadius(dp(12));
                 r.setBackground(defaultBg);
             }
-            // Paint selected row with role color
             android.graphics.drawable.GradientDrawable selectedBg =
                     new android.graphics.drawable.GradientDrawable();
             selectedBg.setColor(highlightColor);
@@ -318,7 +293,6 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         return row;
     }
 
-    // ── Confirm action ────────────────────────────────────────────────────────
     private void confirmAction() {
         if (actionSelection == null) {
             android.widget.Toast.makeText(this,
@@ -348,16 +322,13 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         }
     }
 
-    // ── Detective result — rich full-screen card ──────────────────────────────
     private void showDetectiveResult(String suspectName, boolean isMafia) {
-        // Build custom view
         android.widget.LinearLayout root = new android.widget.LinearLayout(this);
         root.setOrientation(android.widget.LinearLayout.VERTICAL);
         root.setGravity(android.view.Gravity.CENTER);
         root.setBackgroundColor(isMafia ? 0xFF1A0A0A : 0xFF0A1A0F);
         root.setPadding(dp(32), dp(48), dp(32), dp(40));
 
-        // Big result icon
         android.widget.TextView tvIcon = new android.widget.TextView(this);
         tvIcon.setText(isMafia ? "🧛" : "😇");
         tvIcon.setTextSize(72);
@@ -370,7 +341,6 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         tvIcon.setLayoutParams(iconLp);
         root.addView(tvIcon);
 
-        // Verdict label
         android.widget.TextView tvVerdict = new android.widget.TextView(this);
         tvVerdict.setText(isMafia ? "MAFIA MEMBER" : "INNOCENT");
         tvVerdict.setTextSize(26);
@@ -386,7 +356,6 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         tvVerdict.setLayoutParams(vLp);
         root.addView(tvVerdict);
 
-        // Suspect name
         android.widget.TextView tvName = new android.widget.TextView(this);
         tvName.setText(suspectName);
         tvName.setTextSize(20);
@@ -401,7 +370,6 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         tvName.setLayoutParams(nLp);
         root.addView(tvName);
 
-        // Description line
         android.widget.TextView tvDesc = new android.widget.TextView(this);
         tvDesc.setText(isMafia
                 ? suspectName + " is a member of the Mafia.\n\n⚠️  Keep this secret.\nDon't reveal it directly during the day."
@@ -418,7 +386,6 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         tvDesc.setLayoutParams(dLp);
         root.addView(tvDesc);
 
-        // Confirm button
         android.widget.TextView btnOk = new android.widget.TextView(this);
         btnOk.setText("🔒  HIDE SCREEN — PASS PHONE");
         btnOk.setTextSize(14);
@@ -444,7 +411,6 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    // ── Advance to next player ────────────────────────────────────────────────
     private void advanceToNextPlayer() {
         int next = currentIndex + 1;
         if (next < getAlivePlayers().size()) {
@@ -454,7 +420,6 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         }
     }
 
-    // ── Resolve night → go to day ─────────────────────────────────────────────
     private void resolveNightAndGoToDay() {
         boolean saved = (targetSave != null && targetKill != null
                 && targetSave.getId() == targetKill.getId());
@@ -469,15 +434,11 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
             result = targetKill.getName() + " was eliminated by the Mafia. 💀";
         }
 
-        // ── Broadcast to all clients if we are the host ───────────────────────
         if (isHost && MafiaServerHolder.isHosting()) {
             MafiaNetworkServer server = MafiaServerHolder.get();
             server.broadcastNightResult(result);
-            // STATE:DAY is broadcast from MafiadayActivity once the host
-            // taps "Continue" on the night result and reaches the day screen
         }
 
-        // Host device navigates to day
         Intent intent = new Intent(this, MafiadayActivity.class);
         intent.putExtra(MafiadayActivity.EXTRA_PLAYERS, new ArrayList<>(getAlivePlayers()));
         intent.putExtra(MafiadayActivity.EXTRA_ROUND, round);
@@ -487,7 +448,6 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         finish();
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
     private String buildMafiaTeamInfo(Player current) {
         StringBuilder sb = new StringBuilder("You are Mafia.\n\nYour team:\n");
         for (Player p : players) {

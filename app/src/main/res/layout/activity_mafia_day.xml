@@ -10,7 +10,6 @@
     android:paddingTop="48dp"
     android:paddingBottom="32dp">
 
-    <!-- ── Header row: round label + votes remaining ────────────────────── -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -28,7 +27,6 @@
             android:letterSpacing="0.35"
             android:textColor="@color/gold"/>
 
-        <!-- Live votes remaining counter -->
         <TextView
             android:id="@+id/tv_votes_remaining"
             android:layout_width="wrap_content"
@@ -40,7 +38,6 @@
 
     </LinearLayout>
 
-    <!-- ── Night result banner ───────────────────────────────────────────── -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -70,7 +67,6 @@
 
     </LinearLayout>
 
-    <!-- ── Section label ────────────────────────────────────────────────── -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -80,7 +76,6 @@
         android:textColor="@color/gold"
         android:layout_marginBottom="10dp"/>
 
-    <!-- ── Scrollable vote list ──────────────────────────────────────────── -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -88,7 +83,6 @@
         android:overScrollMode="never"
         android:layout_marginBottom="16dp">
 
-        <!-- ll_vote_list — populated dynamically in Java -->
         <LinearLayout
             android:id="@+id/ll_vote_list"
             android:layout_width="match_parent"
@@ -97,7 +91,6 @@
 
     </ScrollView>
 
-    <!-- ── Tally bar: shows who is leading the vote ─────────────────────── -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -115,7 +108,6 @@
             android:letterSpacing="0.3"
             android:textColor="@color/text_secondary"/>
 
-        <!-- tv_leading_name -->
         <TextView
             android:id="@+id/tv_leading_name"
             android:layout_width="0dp"
@@ -126,7 +118,6 @@
             android:textStyle="bold"
             android:textColor="@color/text_primary"/>
 
-        <!-- tv_leading_count -->
         <TextView
             android:id="@+id/tv_leading_count"
             android:layout_width="wrap_content"
@@ -138,7 +129,6 @@
 
     </LinearLayout>
 
-    <!-- ── ELIMINATE button — filled gold ───────────────────────────────── -->
     <TextView
         android:id="@+id/btn_eliminate"
         android:layout_width="match_parent"
@@ -154,7 +144,6 @@
         android:focusable="true"
         android:layout_marginBottom="10dp"/>
 
-    <!-- ── SKIP VOTE button — subtle text link ──────────────────────────── -->
     <TextView
         android:id="@+id/btn_skip_vote"
         android:layout_width="match_parent"

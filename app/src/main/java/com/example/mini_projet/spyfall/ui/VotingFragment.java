@@ -114,7 +114,6 @@ public class VotingFragment extends Fragment {
         return view;
     }
 
-    // ── Pass & Play: sequential voting ───────────────────────────────────────
     private void handlePassPlayVote() {
         Player currentVoter = players.get(currentVoterPos);
 
@@ -139,13 +138,11 @@ public class VotingFragment extends Fragment {
         }
     }
 
-    // ── Network: this device submits its vote ─────────────────────────────────
     private void handleNetworkVote() {
         btnConfirm.setEnabled(false);
         btnConfirm.setText("VOTE SUBMITTED — WAITING...");
 
         if (engine.getMode() == GameEngine.Mode.CLIENT) {
-            // Send player ID as the vote payload (not list position)
             engine.getClientConnection().send(new Message(
                     "VOTE",
                     String.valueOf(engine.getMyPlayerId()),

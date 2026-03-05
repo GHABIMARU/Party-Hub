@@ -31,28 +31,18 @@ public class HomeActivity extends AppCompatActivity {
         applyPressEffect(cardSpyfall);
         applyPressEffect(cardMafia);
 
-        // Spyfall — unchanged
         cardSpyfall.setOnClickListener(v ->
                 startActivity(new Intent(this, MainActivity.class)));
 
-        // Mafia — show mode picker: Pass & Play / Host / Join
         cardMafia.setOnClickListener(v -> showMafiaModeDialog());
     }
 
-    /**
-     * Shows a bottom-sheet-style dialog so the player can choose:
-     *   🃏  Pass & Play   — everyone shares one device (original flow)
-     *   📡  Host Game     — start a server, friends join via network
-     *   🔗  Join Game     — discover and connect to a host
-     */
     private void showMafiaModeDialog() {
-        // Build custom view
         LinearLayout container = new LinearLayout(this);
         container.setOrientation(LinearLayout.VERTICAL);
         container.setBackgroundColor(ContextCompat.getColor(this, R.color.bg_dark));
         container.setPadding(dp(24), dp(8), dp(24), dp(24));
 
-        // Title
         TextView tvTitle = new TextView(this);
         tvTitle.setText("CHOOSE MODE");
         tvTitle.setTextSize(11);
@@ -62,21 +52,18 @@ public class HomeActivity extends AppCompatActivity {
         tvTitle.setGravity(Gravity.CENTER);
         container.addView(tvTitle);
 
-        // Pass & Play button
         container.addView(modeButton("🃏  Pass & Play",
                 "One device, everyone takes turns",
                 v -> startActivity(new Intent(this, Mafiasetupactivity.class))));
 
         container.addView(modeDivider());
 
-        // Host button
         container.addView(modeButton("📡  Host Game",
                 "Start a server — friends join via WiFi",
                 v -> startActivity(new Intent(this, MafiaHostActivity.class))));
 
         container.addView(modeDivider());
 
-        // Join button
         container.addView(modeButton("🔗  Join Game",
                 "Find and join a host on the same network",
                 v -> startActivity(new Intent(this, MafiaJoinActivity.class))));
@@ -86,7 +73,6 @@ public class HomeActivity extends AppCompatActivity {
                 .setCancelable(true)
                 .create();
 
-        // Re-wire buttons so they also dismiss the dialog
         String[] modes = {"🃏  Pass & Play", "📡  Host Game", "🔗  Join Game"};
         Class<?>[] targets = {Mafiasetupactivity.class, MafiaHostActivity.class, MafiaJoinActivity.class};
         container.removeAllViews();
@@ -116,7 +102,6 @@ public class HomeActivity extends AppCompatActivity {
         row.setBackground(null);
         row.setOnClickListener(listener);
 
-        // Ripple on press
         row.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN)
                 row.setAlpha(0.6f);

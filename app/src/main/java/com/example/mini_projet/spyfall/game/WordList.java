@@ -921,7 +921,6 @@ public final class WordList {
             "Mutant","Nemesis","Ninja","Outbreak","Outlaw","Power Plant","Prototype"
     };
 
-    // ── Static lookup ──────────────────────────────────────────────────────────
     private static final java.util.Map<Theme, String[]> MAP = new java.util.EnumMap<>(Theme.class);
     static {
         MAP.put(Theme.OBJECTS, OBJECTS);
@@ -937,7 +936,6 @@ public final class WordList {
 
     private static final Random RANDOM = new Random();
 
-    /** Pick a random word from the selected themes. Falls back to ALL if none selected. */
     public static String getRandom(List<Theme> selectedThemes) {
         List<String> pool = new ArrayList<>();
         List<Theme> themes = (selectedThemes == null || selectedThemes.isEmpty())
@@ -950,7 +948,6 @@ public final class WordList {
         return pool.get(RANDOM.nextInt(pool.size()));
     }
 
-    /** Pick from ALL themes — used when no theme selection is stored. */
     public static String getRandom() {
         return getRandom(null);
     }

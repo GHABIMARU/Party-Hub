@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Root is a full-screen touchable FrameLayout.
-     The touch listener is set on this to capture global press/release. -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/touch_root"
@@ -9,11 +7,6 @@
     android:background="@color/bg_dark"
     android:clickable="true"
     android:focusable="true">
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         STATE 1 — INTRO  (visible by default, hidden during press)
-         Shows player name and hold instruction.
-    ════════════════════════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/layout_intro"
         android:layout_width="match_parent"
@@ -22,7 +15,6 @@
         android:gravity="center"
         android:padding="40dp">
 
-        <!-- Role label -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -32,7 +24,6 @@
             android:textColor="@color/text_secondary"
             android:layout_marginBottom="32dp"/>
 
-        <!-- Player name — large and prominent -->
         <TextView
             android:id="@+id/tv_player_name"
             android:layout_width="wrap_content"
@@ -44,7 +35,6 @@
             android:gravity="center"
             android:layout_marginBottom="48dp"/>
 
-        <!-- Finger icon + hold instruction -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -65,11 +55,6 @@
             android:lineSpacingMultiplier="1.5"/>
 
     </LinearLayout>
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         STATE 2 — REVEAL  (hidden by default, shown on ACTION_DOWN)
-         Shows the secret word / impostor message.
-    ════════════════════════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/layout_reveal"
         android:layout_width="match_parent"
@@ -88,7 +73,6 @@
             android:textColor="@color/text_secondary"
             android:layout_marginBottom="32dp"/>
 
-        <!-- The word / role — the hero of the reveal state -->
         <TextView
             android:id="@+id/role_text"
             android:layout_width="wrap_content"
@@ -111,10 +95,6 @@
             android:gravity="center"/>
 
     </LinearLayout>
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         CONTINUE BUTTON — anchored to bottom, hidden until first reveal
-    ════════════════════════════════════════════════════════════════ -->
     <Button
         android:id="@+id/next_btn"
         android:layout_width="match_parent"
@@ -132,7 +112,6 @@
         android:stateListAnimator="@null"
         android:visibility="gone"/>
 
-    <!-- Network waiting label — anchored to bottom -->
     <TextView
         android:id="@+id/tv_waiting"
         android:layout_width="wrap_content"

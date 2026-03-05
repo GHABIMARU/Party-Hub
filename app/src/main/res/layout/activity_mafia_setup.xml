@@ -15,7 +15,6 @@
         android:paddingTop="40dp"
         android:paddingBottom="32dp">
 
-        <!-- ── Header ─────────────────────────────────────────────────────── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -59,11 +58,6 @@
                 android:layout_marginTop="8dp"/>
 
         </LinearLayout>
-
-        <!-- ════════════════════════════════════════════════════════════
-             STEP 1 — Game settings (players, mafia count, roles)
-             Hidden once player confirms and moves to name entry
-        ════════════════════════════════════════════════════════════ -->
         <LinearLayout
             android:id="@+id/layout_step1"
             android:layout_width="match_parent"
@@ -71,7 +65,6 @@
             android:orientation="vertical"
             android:visibility="visible">
 
-            <!-- Players count card -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -141,7 +134,6 @@
 
             </LinearLayout>
 
-            <!-- Mafia count card -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -211,7 +203,6 @@
 
             </LinearLayout>
 
-            <!-- Special roles card -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -229,7 +220,6 @@
                     android:textColor="@color/text_secondary"
                     android:layout_marginBottom="16dp"/>
 
-                <!-- Doctor -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
@@ -282,7 +272,6 @@
                     android:alpha="0.15"
                     android:layout_marginBottom="12dp"/>
 
-                <!-- Detective -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
@@ -329,7 +318,6 @@
 
             </LinearLayout>
 
-            <!-- NEXT → Enter Names button -->
             <Button
                 android:id="@+id/btn_next_to_names"
                 android:layout_width="match_parent"
@@ -343,11 +331,6 @@
                 android:stateListAnimator="@null"/>
 
         </LinearLayout>
-
-        <!-- ════════════════════════════════════════════════════════════
-             STEP 2 — Player name inputs (one per player)
-             Shown after tapping NEXT, hidden in step 1
-        ════════════════════════════════════════════════════════════ -->
         <LinearLayout
             android:id="@+id/layout_step2"
             android:layout_width="match_parent"
@@ -355,7 +338,6 @@
             android:orientation="vertical"
             android:visibility="gone">
 
-            <!-- Step label -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -372,7 +354,6 @@
                     android:letterSpacing="0.3"
                     android:textColor="@color/gold"/>
 
-                <!-- Back to settings -->
                 <TextView
                     android:id="@+id/btn_back_to_settings"
                     android:layout_width="wrap_content"
@@ -385,7 +366,6 @@
 
             </LinearLayout>
 
-            <!-- Name inputs card — populated dynamically in Java -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -402,7 +382,6 @@
 
             </LinearLayout>
 
-            <!-- START GAME button -->
             <Button
                 android:id="@+id/btn_start_game"
                 android:layout_width="match_parent"

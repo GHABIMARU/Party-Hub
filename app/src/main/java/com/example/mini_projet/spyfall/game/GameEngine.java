@@ -21,7 +21,6 @@ public class GameEngine {
 
     private static final String TAG = "GameEngine";
 
-    // ── Singleton ─────────────────────────────────────────────────────────────
     private static volatile GameEngine instance;
     public static GameEngine getInstance() {
         if (instance == null) synchronized (GameEngine.class) {
@@ -31,7 +30,6 @@ public class GameEngine {
     }
     private GameEngine() {}
 
-    // ── Game state ────────────────────────────────────────────────────────────
     private final List<Player>          players                 = new ArrayList<>();
     private final List<Player>          originalPlayers         = new ArrayList<>();
     private final List<String>          eliminatedImpostorNames = new ArrayList<>();
@@ -47,7 +45,6 @@ public class GameEngine {
     private int                   impostorCount  = 1;
     private List<WordList.Theme>  selectedThemes = new ArrayList<>();
 
-    // ── Mode / network ────────────────────────────────────────────────────────
     public enum Mode { PASS_PLAY, HOST, CLIENT }
 
     private Mode             gameMode         = Mode.PASS_PLAY;
@@ -57,7 +54,6 @@ public class GameEngine {
     private ClientConnection clientConnection;
     private MainActivity     activity;
 
-    // ── Accessors ─────────────────────────────────────────────────────────────
     public void             setActivity(MainActivity a)             { this.activity = a; }
     public void             setHostServer(HostServer h)             { this.hostServer = h; }
     public HostServer       getHostServer()                         { return hostServer; }
@@ -85,7 +81,6 @@ public class GameEngine {
         return impostorIds.contains(playerId);
     }
 
-    // ── Players ───────────────────────────────────────────────────────────────
     public void addPlayer(String name) {
         if (name == null || name.trim().isEmpty()) return;
         synchronized (players) {
@@ -105,13 +100,11 @@ public class GameEngine {
         }
     }
 
-    // ── Game start ────────────────────────────────────────────────────────────
     public boolean startGame() {
         List<Player> snap;
         synchronized (players) { snap = new ArrayList<>(players); }
         if (snap.size() < MIN_PLAYERS) return false;
 
-        // Save full roster so Play Again can restore eliminated players
         synchronized (originalPlayers) {
             originalPlayers.clear();
             originalPlayers.addAll(snap);
@@ -142,7 +135,6 @@ public class GameEngine {
         return true;
     }
 
-    // ── Pass & Play reveal ────────────────────────────────────────────────────
     public Player getCurrentRevealPlayer() {
         synchronized (players) {
             if (revealIndex < 0 || revealIndex >= players.size()) return null;
@@ -157,12 +149,10 @@ public class GameEngine {
         }
     }
 
-    // ── State transitions ─────────────────────────────────────────────────────
     public void goToVoting()     { resetVotes(); gameState = GameState.VOTING; }
     public void goToDiscussion() { gameState = GameState.DISCUSSION; }
     public void goToResult()     { gameState = GameState.RESULT; }
 
-    // ── Votes ─────────────────────────────────────────────────────────────────
     public void resetVotes() {
         synchronized (votes) { votes.clear(); }
     }
@@ -198,7 +188,6 @@ public class GameEngine {
         Map<Integer, Integer> snap;
         synchronized (votes) { snap = new HashMap<>(votes); }
 
-        // No votes cast — impostors win by default
         if (snap.isEmpty()) {
             setResult("No votes cast — "
                     + buildImpostorNames()
@@ -208,7 +197,6 @@ public class GameEngine {
             return;
         }
 
-        // Find player ID(s) with the most votes
         int maxVotes = 0;
         List<Integer> top = new ArrayList<>();
         for (Map.Entry<Integer, Integer> e : snap.entrySet()) {
@@ -221,7 +209,6 @@ public class GameEngine {
             }
         }
 
-        // Tie — nobody eliminated, impostors survive = impostors win
         if (top.size() > 1) {
             List<String> tiedNames = new ArrayList<>();
             synchronized (players) {
@@ -235,7 +222,6 @@ public class GameEngine {
             return;
         }
 
-        // Clear winner — eliminate the voted player
         int eliminatedId = top.get(0);
         synchronized (players) {
             Player eliminated = null;
@@ -270,7 +256,6 @@ public class GameEngine {
         }
     }
 
-    // ── Ready system ──────────────────────────────────────────────────────────
     public void addReady(int playerId) {
         synchronized (readyPlayers) {
             if (!readyPlayers.contains(playerId)) readyPlayers.add(playerId);
@@ -288,7 +273,6 @@ public class GameEngine {
         }
     }
 
-    // ── Message handler ───────────────────────────────────────────────────────
     public void handleMessage(Message msg) {
         if (msg == null) return;
         Log.d(TAG, "handleMessage: " + msg.getType() + " | " + msg.getPayload());
@@ -333,7 +317,6 @@ public class GameEngine {
         }
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
     private String buildNameList(List<String> names) {
         if (names.isEmpty()) return "The impostor";
         if (names.size() == 1) return names.get(0);
@@ -355,7 +338,6 @@ public class GameEngine {
         return buildNameList(names);
     }
 
-    // ── Reset ─────────────────────────────────────────────────────────────────
     public void reset() {
         synchronized (players)         { players.clear(); }
         synchronized (originalPlayers) { originalPlayers.clear(); }
@@ -387,7 +369,6 @@ public class GameEngine {
         synchronized (readyPlayers) { readyPlayers.clear(); }
         impostorIds.clear();
         eliminatedImpostorNames.clear();
-        // Keep selectedThemes so Play Again uses the same theme selection
         gameState   = GameState.LOBBY;
         revealIndex = 0;
         secretWord  = null;

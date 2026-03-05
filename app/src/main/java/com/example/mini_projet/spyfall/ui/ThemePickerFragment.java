@@ -42,11 +42,10 @@ public class ThemePickerFragment extends Fragment {
         Button      btnAll     = view.findViewById(R.id.btn_select_all);
         Button      btnStart   = view.findViewById(R.id.btn_start);
 
-        // Build a tile for every theme
         WordList.Theme[] themes = WordList.Theme.values();
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
         int columns     = 3;
-        int tilePx      = (screenWidth - dpToPx(24)) / columns;  // 12dp padding each side
+        int tilePx      = (screenWidth - dpToPx(24)) / columns;
 
         for (WordList.Theme theme : themes) {
             View tile = inflater.inflate(R.layout.item_theme_card, grid, false);
@@ -81,10 +80,8 @@ public class ThemePickerFragment extends Fragment {
             grid.addView(tile);
         }
 
-        // Select All / Deselect All toggle
         btnAll.setOnClickListener(v -> {
             if (selected.size() == themes.length) {
-                // Deselect all
                 selected.clear();
                 for (int i = 0; i < tileViews.size(); i++) {
                     View tile = tileViews.get(i);
@@ -92,7 +89,6 @@ public class ThemePickerFragment extends Fragment {
                 }
                 btnAll.setText("ALL");
             } else {
-                // Select all
                 selected.clear();
                 for (int i = 0; i < themes.length; i++) {
                     selected.add(themes[i]);
@@ -110,10 +106,8 @@ public class ThemePickerFragment extends Fragment {
                         "Pick at least one theme!", Toast.LENGTH_SHORT).show();
                 return;
             }
-            // Pass selected themes to engine before starting
             engine.setSelectedThemes(new ArrayList<>(selected));
             if (engine.startGame()) {
-                // In HOST mode, broadcast roles to all connected clients
                 if (engine.getMode() == GameEngine.Mode.HOST
                         && engine.getHostServer() != null) {
                     engine.getHostServer().sendStartGame();

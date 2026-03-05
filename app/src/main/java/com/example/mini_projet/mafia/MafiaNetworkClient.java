@@ -26,7 +26,6 @@ public class MafiaNetworkClient {
     private volatile boolean connected = false;
     private final Object     writeLock = new Object();
 
-    // ── Callbacks to Join UI ──────────────────────────────────────────────────
     public interface ClientCallback {
         void onConnected();
         void onFailed();
@@ -35,7 +34,7 @@ public class MafiaNetworkClient {
         void onGameStart(int round);
         void onNightResult(String text);
         void onStateChange(String state);
-        void onEliminated(String playerName, String roleName);   // ← NEW
+        void onEliminated(String playerName, String roleName);
         void onGameOver(String title, String message);
     }
 
@@ -47,7 +46,6 @@ public class MafiaNetworkClient {
 
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
 
-    // ── Discover host via UDP, then TCP connect ───────────────────────────────
     public void discoverAndConnect() {
         new Thread(() -> {
             String hostIp = discoverHost();
@@ -69,12 +67,10 @@ public class MafiaNetworkClient {
             for (int i = 1; i <= DISCOVER_TRIES; i++) {
                 Log.d(TAG, "Discovery attempt " + i);
                 try {
-                    // Broadcast to 255.255.255.255
                     udp.send(new DatagramPacket(msg, msg.length,
                             InetAddress.getByName("255.255.255.255"),
                             MafiaNetworkServer.UDP_PORT));
 
-                    // Also broadcast to subnet (e.g. 192.168.x.255)
                     String localIp = MafiaNetworkServer.getLocalIp();
                     if (localIp != null) {
                         String subnet = subnetBroadcast(localIp);
@@ -123,7 +119,6 @@ public class MafiaNetworkClient {
         }
     }
 
-    // ── Listen loop ───────────────────────────────────────────────────────────
     private void listenLoop(BufferedReader in) {
         new Thread(() -> {
             try {
@@ -154,7 +149,6 @@ public class MafiaNetworkClient {
             }
 
             case "LOBBY": {
-                // "id:name;id:name;..."
                 List<Player> players = parseLobby(payload);
                 if (callback != null)
                     uiHandler.post(() -> callback.onLobbyUpdate(players));
@@ -162,7 +156,6 @@ public class MafiaNetworkClient {
             }
 
             case "YOUR_ROLE": {
-                // "MAFIA|2,5" or "DOCTOR" or "DETECTIVE" or "CIVILIAN"
                 Player.Role role = parseRole(payload);
                 List<Integer> mafiaIds = parseMafiaIds(payload);
                 if (callback != null)
@@ -186,7 +179,6 @@ public class MafiaNetworkClient {
             }
 
             case "ELIMINATED": {
-                // "PlayerName:ROLE"
                 String[] ep = payload.split(":", 2);
                 String pName = ep.length > 0 ? ep[0] : "Someone";
                 String rName = ep.length > 1 ? ep[1] : "";
@@ -202,7 +194,6 @@ public class MafiaNetworkClient {
             }
 
             case "GAME_OVER": {
-                // "title|message"
                 String[] gp = payload.split("\\|", 2);
                 String title   = gp.length > 0 ? gp[0] : "Game Over";
                 String message = gp.length > 1 ? gp[1] : "";
@@ -213,7 +204,6 @@ public class MafiaNetworkClient {
         }
     }
 
-    // ── Send helpers ──────────────────────────────────────────────────────────
     public void sendJoin(String name) {
         send("JOIN", "", name);
     }
@@ -235,9 +225,7 @@ public class MafiaNetworkClient {
 
     public boolean isConnected() { return connected; }
 
-    // ── Parsing helpers ───────────────────────────────────────────────────────
     private List<Player> parseLobby(String payload) {
-        // Format: "id:name:alive;id:name:alive;..."  (alive=1/0)
         List<Player> list = new ArrayList<>();
         for (String seg : payload.split(";")) {
             if (seg.isEmpty()) continue;

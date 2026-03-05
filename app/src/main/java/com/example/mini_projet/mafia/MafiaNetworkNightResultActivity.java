@@ -45,7 +45,6 @@ public class MafiaNetworkNightResultActivity extends AppCompatActivity
         root.setPadding(dp(28), dp(60), dp(28), dp(28));
         scroll.addView(root);
 
-        // Emoji
         TextView tvEmoji = new TextView(this);
         tvEmoji.setTextSize(56);
         tvEmoji.setGravity(Gravity.CENTER);
@@ -63,7 +62,6 @@ public class MafiaNetworkNightResultActivity extends AppCompatActivity
         tvEmoji.setLayoutParams(eLp);
         root.addView(tvEmoji);
 
-        // Result text
         TextView tvResult = new TextView(this);
         tvResult.setText(result);
         tvResult.setTextSize(18);
@@ -78,7 +76,6 @@ public class MafiaNetworkNightResultActivity extends AppCompatActivity
         tvResult.setLayoutParams(rLp);
         root.addView(tvResult);
 
-        // Waiting label
         TextView tvWait = new TextView(this);
         tvWait.setText("☀️  Day phase starting soon...\nWaiting for the host.");
         tvWait.setTextSize(13);
@@ -90,7 +87,6 @@ public class MafiaNetworkNightResultActivity extends AppCompatActivity
         setContentView(scroll);
     }
 
-    // ── EventBus ──────────────────────────────────────────────────────────────
     @Override
     public void onEvent(String type, String payload) {
         runOnUiThread(() -> {

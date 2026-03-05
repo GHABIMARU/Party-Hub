@@ -17,8 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MafianightActivity extends AppCompatActivity {
-
-    // ── Views ─────────────────────────────────────────────────────────────────
     private TextView     tv_night_round;
     private TextView     tv_acting_role_emoji;
     private TextView     tv_acting_role_label;
@@ -31,8 +29,6 @@ public class MafianightActivity extends AppCompatActivity {
     private TextView     tv_pass_phone_message;
     private TextView     btn_ready;
     private LinearLayout layout_night_content;
-
-    // ── State ─────────────────────────────────────────────────────────────────
     private ArrayList<Player> players;
     private int round = 2;
 
@@ -41,7 +37,6 @@ public class MafianightActivity extends AppCompatActivity {
     private Player targetInvestigate = null;
     private Player actionSelection   = null;
 
-    // 0=Mafia, 1=Doctor, 2=Detective
     private int currentPhase = 0;
     private boolean hasDoctor;
     private boolean hasDetective;
@@ -63,7 +58,6 @@ public class MafianightActivity extends AppCompatActivity {
         bindViews();
         tv_night_round.setText("ROUND " + round);
 
-        // Start with Mafia's private pass-phone screen
         showPassPhone(
                 "🌙  Night " + round,
                 "Everyone look away.\n\nMafia — tap when you're ready.",
@@ -88,7 +82,6 @@ public class MafianightActivity extends AppCompatActivity {
         btn_confirm_night_action.setOnClickListener(v -> confirmPhase());
     }
 
-    // ── Pass-phone lock screen ────────────────────────────────────────────────
     private Runnable onReadyAction;
 
     private void showPassPhone(String title, String message, Runnable onReady) {
@@ -104,7 +97,6 @@ public class MafianightActivity extends AppCompatActivity {
         });
     }
 
-    // ── Load phase ────────────────────────────────────────────────────────────
     private void loadPhase(int phase) {
         currentPhase  = phase;
         actionSelection = null;
@@ -145,11 +137,9 @@ public class MafianightActivity extends AppCompatActivity {
         return sb.toString();
     }
 
-    // ── Player list ───────────────────────────────────────────────────────────
     private void buildPlayerList() {
         ll_player_list_night.removeAllViews();
         for (Player p : getAlivePlayers()) {
-            // Phase 0 = Mafia choosing: exclude all Mafia members (can't kill teammates)
             if (currentPhase == 0 && p.getRole() == Player.Role.MAFIA) continue;
             ll_player_list_night.addView(buildRow(p));
         }
@@ -220,7 +210,6 @@ public class MafianightActivity extends AppCompatActivity {
         layout_selected_player.setVisibility(View.VISIBLE);
     }
 
-    // ── Confirm phase ─────────────────────────────────────────────────────────
     private void confirmPhase() {
         if (actionSelection == null) {
             Toast.makeText(this, "Select a player first", Toast.LENGTH_SHORT).show();
@@ -263,7 +252,6 @@ public class MafianightActivity extends AppCompatActivity {
         if (next == -1) {
             resolveAndGoToDay();
         } else {
-            // ✅ Must be final/effectively-final to use inside lambda
             final int finalNext = next;
             final String finalTitle = (next == 1) ? "🩺  Doctor's Turn"   : "🔎  Detective's Turn";
             final String finalMsg   = (next == 1) ? "Mafia, look away.\n\nDoctor — tap when ready."

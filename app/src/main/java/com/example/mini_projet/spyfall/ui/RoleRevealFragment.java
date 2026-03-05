@@ -24,7 +24,6 @@ public class RoleRevealFragment extends Fragment {
 
     private final GameEngine engine = GameEngine.getInstance();
 
-    // Views
     private View     touchRoot;
     private View     layoutIntro;
     private View     layoutReveal;
@@ -33,11 +32,9 @@ public class RoleRevealFragment extends Fragment {
     private Button   nextBtn;
     private TextView tvWaiting;
 
-    // State
     private RevealState state        = RevealState.INTRO;
-    private boolean     hasRevealed  = false;  // unlocks Continue button
+    private boolean     hasRevealed  = false;
 
-    // The role for the current player (set once in onCreateView)
     private String currentRole;
     private String currentPlayerName;
 
@@ -61,18 +58,13 @@ public class RoleRevealFragment extends Fragment {
         nextBtn      = view.findViewById(R.id.next_btn);
         tvWaiting    = view.findViewById(R.id.tv_waiting);
 
-        // Resolve who this screen is for and what their role is
         resolveCurrentPlayer();
 
-        // Show player name in INTRO state
         tvPlayerName.setText(currentPlayerName);
 
-        // Apply role text + color to REVEAL layout (but keep it hidden)
         applyRoleToRevealLayout();
 
-        // ── Global touch listener ──────────────────────────────────────────
         touchRoot.setOnTouchListener((v, event) -> {
-            // Don't intercept touches on the Continue button itself
             if (isTouchOnView(event, nextBtn) && nextBtn.getVisibility() == View.VISIBLE) {
                 return false;
             }
@@ -112,7 +104,6 @@ public class RoleRevealFragment extends Fragment {
                 currentRole = "ERROR";
             }
         } else {
-            // Network mode — single player on this device
             int myId = engine.getMyPlayerId();
             currentPlayerName = "AGENT " + myId;
             for (Player p : engine.getPlayers()) {

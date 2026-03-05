@@ -13,7 +13,6 @@ import androidx.core.content.ContextCompat;
 
 import com.example.mini_projet.R;
 
-/** Final screen for network clients — shows who won. */
 public class MafiaNetworkGameOverActivity extends AppCompatActivity {
 
     @Override
@@ -37,7 +36,6 @@ public class MafiaNetworkGameOverActivity extends AppCompatActivity {
         root.setPadding(dp(28), dp(80), dp(28), dp(28));
         scroll.addView(root);
 
-        // Emoji
         TextView tvEmoji = new TextView(this);
         tvEmoji.setTextSize(56);
         tvEmoji.setGravity(Gravity.CENTER);
@@ -49,7 +47,6 @@ public class MafiaNetworkGameOverActivity extends AppCompatActivity {
         tvEmoji.setLayoutParams(eLp);
         root.addView(tvEmoji);
 
-        // Title
         TextView tvTitle = new TextView(this);
         tvTitle.setText(title);
         tvTitle.setTextSize(24);
@@ -63,7 +60,6 @@ public class MafiaNetworkGameOverActivity extends AppCompatActivity {
         tvTitle.setLayoutParams(tLp);
         root.addView(tvTitle);
 
-        // Message
         TextView tvMsg = new TextView(this);
         tvMsg.setText(message);
         tvMsg.setTextSize(15);
@@ -77,7 +73,6 @@ public class MafiaNetworkGameOverActivity extends AppCompatActivity {
         tvMsg.setLayoutParams(mLp);
         root.addView(tvMsg);
 
-        // Main menu button
         TextView btnMenu = new TextView(this);
         btnMenu.setText("MAIN MENU");
         btnMenu.setTextSize(15);

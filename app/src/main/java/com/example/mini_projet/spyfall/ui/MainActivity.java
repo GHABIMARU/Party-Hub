@@ -41,13 +41,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Reset game state and return to the home screen (HomeActivity).
-     * Called by the "Main Menu" button in ResultFragment.
-     */
     public void navigateToHome() {
-        engine.reset(); // full wipe — player list not needed after leaving Spyfall
-        finish();       // pops back to HomeActivity
     }
 
     public void refreshLobbyIfVisible() {
@@ -64,10 +58,8 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         GameState state = engine.getGameState();
         if (state == GameState.LOBBY) {
-            engine.reset(); // full wipe when leaving via back button
             finish();
         }
-        // Block back press mid-game (during ROLE_REVEAL, DISCUSSION, VOTING, RESULT)
     }
 
     @Override

@@ -28,14 +28,11 @@ public class HostServer {
     private ServerSocket   serverSocket;
     private DatagramSocket udpSocket;
     private volatile boolean running = false;
-
-    // Single-thread executor for ALL outgoing writes — prevents concurrent write crashes
-    // and ensures all socket I/O is off the main thread
     private final ExecutorService sender = Executors.newSingleThreadExecutor();
 
     private final List<PrintWriter>         clients   = new ArrayList<>();
     private final Map<PrintWriter, Integer> clientIds = new HashMap<>();
-    private int nextClientId = 1; // 0 = host
+    private int nextClientId = 1;
 
     private final GameEngine engine = GameEngine.getInstance();
 
@@ -45,7 +42,6 @@ public class HostServer {
         startTcpAcceptor();
     }
 
-    // ── UDP discovery ─────────────────────────────────────────────────────────
     private void startUdpDiscovery() {
         new Thread(() -> {
             try {
@@ -73,7 +69,6 @@ public class HostServer {
         }, "Host-UDP").start();
     }
 
-    // ── TCP acceptor ──────────────────────────────────────────────────────────
     private void startTcpAcceptor() {
         new Thread(() -> {
             try {
@@ -155,13 +150,8 @@ public class HostServer {
         }
     }
 
-    /**
-     * Send each client their role + game-start navigation in ONE atomic message.
-     * Always runs on the sender executor — safe to call from ANY thread including UI thread.
-     */
     public void sendStartGame() {
         String word = engine.getSecretWord();
-        // Snapshot clientIds to avoid holding lock during I/O
         Map<PrintWriter, Integer> snapshot;
         synchronized (clientIds) {
             snapshot = new HashMap<>(clientIds);
@@ -177,10 +167,6 @@ public class HostServer {
         });
     }
 
-    /**
-     * Broadcast to all clients.
-     * Safe to call from ANY thread including UI thread.
-     */
     public void broadcast(Message message) {
         List<PrintWriter> snapshot;
         synchronized (clients) {
@@ -193,7 +179,6 @@ public class HostServer {
         });
     }
 
-    // Internal: must only be called from sender executor thread
     private void writeToOne(PrintWriter out, Message message) {
         try {
             String wire = message.toWire();
@@ -205,7 +190,6 @@ public class HostServer {
         }
     }
 
-    // sendToOne: submits to executor so it's always off main thread
     private void sendToOne(PrintWriter out, Message message) {
         sender.execute(() -> writeToOne(out, message));
     }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">mini-projet</string>
+    <string name="app_name">Party Hub</string>
     <string name="role_impostor">%1$s\nYou are the IMPOSTOR</string>
     <string name="role_word">%1$s\nWord: %2$s</string>
 

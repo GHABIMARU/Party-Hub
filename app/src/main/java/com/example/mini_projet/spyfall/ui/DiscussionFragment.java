@@ -52,7 +52,6 @@ public class DiscussionFragment extends Fragment {
                 if (tvTimer == null) return;
                 long secs = ms / 1000;
                 tvTimer.setText(String.valueOf(secs));
-                // Turn red in last 10 seconds
                 tvTimer.setTextColor(secs <= 10 ? 0xFFE53E3E : 0xFFF0B429);
             }
             @Override public void onFinish() {

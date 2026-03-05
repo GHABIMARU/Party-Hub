@@ -5,12 +5,6 @@
     android:layout_height="match_parent"
     android:background="@color/bg_dark">
 
-    <!-- ══════════════════════════════════════════════════════════════
-         LOCK SCREEN  (id: layout_lock)
-         Shown by default. Hidden only while finger holds btn_show_role.
-         After player lifts finger, lock reappears automatically.
-         Once they tap btn_seen_role → unlockAction() shows role+action.
-    ══════════════════════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/layout_lock"
         android:layout_width="match_parent"
@@ -22,7 +16,6 @@
         android:paddingEnd="40dp"
         android:visibility="visible">
 
-        <!-- Progress: "1 / 6" -->
         <TextView
             android:id="@+id/tv_progress"
             android:layout_width="match_parent"
@@ -34,7 +27,6 @@
             android:gravity="end"
             android:layout_marginBottom="24dp"/>
 
-        <!-- Lock icon -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -44,7 +36,6 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="20dp"/>
 
-        <!-- "Player X, it's your turn" -->
         <TextView
             android:id="@+id/tv_lock_name"
             android:layout_width="wrap_content"
@@ -57,7 +48,6 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="12dp"/>
 
-        <!-- Subtitle -->
         <TextView
             android:id="@+id/tv_lock_subtitle"
             android:layout_width="wrap_content"
@@ -70,12 +60,6 @@
             android:lineSpacingMultiplier="1.5"
             android:layout_marginBottom="48dp"/>
 
-        <!--
-            HOLD-TO-REVEAL button.
-            Player must PRESS AND HOLD → role appears.
-            Lift finger → role hides instantly.
-            Handled by setOnTouchListener in Java.
-        -->
         <TextView
             android:id="@+id/btn_show_role"
             android:layout_width="match_parent"
@@ -91,10 +75,6 @@
             android:focusable="true"
             android:layout_marginBottom="16dp"/>
 
-        <!--
-            "I've seen my role" — styled outlined button,
-            appears below HOLD button after first reveal.
-        -->
         <TextView
             android:id="@+id/btn_seen_role"
             android:layout_width="match_parent"
@@ -111,19 +91,6 @@
             android:visibility="gone"/>
 
     </LinearLayout>
-
-    <!-- ══════════════════════════════════════════════════════════════
-         ROLE + ACTION SCREEN  (id: scroll_role_visible)
-
-         ✅ FIX: The ScrollView itself has the ID that Java toggles.
-         Previously only the inner LinearLayout had an ID, so setting
-         its visibility had no effect because the ScrollView parent
-         stayed GONE → causing the black screen bug.
-
-         Shown: while finger holds btn_show_role (peek)
-                OR after btn_seen_role is tapped (permanent unlock)
-         Hidden: when lock screen is active
-    ══════════════════════════════════════════════════════════════ -->
     <ScrollView
         android:id="@+id/scroll_role_visible"
         android:layout_width="match_parent"
@@ -142,7 +109,6 @@
             android:paddingTop="48dp"
             android:paddingBottom="48dp">
 
-            <!-- ── Role card ─────────────────────────────────────── -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -152,7 +118,6 @@
                 android:padding="28dp"
                 android:layout_marginBottom="20dp">
 
-                <!-- Role emoji: 🔴 🩺 🔎 👤 -->
                 <TextView
                     android:id="@+id/tv_role_emoji"
                     android:layout_width="wrap_content"
@@ -162,7 +127,6 @@
                     android:gravity="center"
                     android:layout_marginBottom="10dp"/>
 
-                <!-- Role name: MAFIA / DOCTOR / DETECTIVE / CIVILIAN -->
                 <TextView
                     android:id="@+id/tv_role_name_label"
                     android:layout_width="wrap_content"
@@ -174,8 +138,6 @@
                     android:textColor="@color/gold"
                     android:gravity="center"
                     android:layout_marginBottom="14dp"/>
-
-                <!-- Role description + team info (for Mafia) -->
                 <TextView
                     android:id="@+id/tv_role_description"
                     android:layout_width="match_parent"
@@ -188,7 +150,6 @@
 
             </LinearLayout>
 
-            <!-- ── Action panel (Mafia / Doctor / Detective only) ── -->
             <LinearLayout
                 android:id="@+id/layout_action_panel"
                 android:layout_width="match_parent"
@@ -199,7 +160,6 @@
                 android:layout_marginBottom="16dp"
                 android:visibility="gone">
 
-                <!-- Title: "Choose a player to eliminate" etc. -->
                 <TextView
                     android:id="@+id/tv_action_title"
                     android:layout_width="wrap_content"
@@ -210,7 +170,6 @@
                     android:textColor="@color/gold"
                     android:layout_marginBottom="14dp"/>
 
-                <!-- Player list — built dynamically in Java -->
                 <LinearLayout
                     android:id="@+id/ll_action_player_list"
                     android:layout_width="match_parent"
@@ -218,7 +177,6 @@
                     android:orientation="vertical"
                     android:layout_marginBottom="12dp"/>
 
-                <!-- Selected player banner -->
                 <LinearLayout
                     android:id="@+id/layout_action_selected"
                     android:layout_width="match_parent"
@@ -259,7 +217,6 @@
 
             </LinearLayout>
 
-            <!-- ── Confirm button (Mafia / Doctor / Detective) ───── -->
             <TextView
                 android:id="@+id/btn_confirm_action"
                 android:layout_width="match_parent"
@@ -276,7 +233,6 @@
                 android:layout_marginBottom="12dp"
                 android:visibility="gone"/>
 
-            <!-- ── Civilian done button ───────────────────────────── -->
             <TextView
                 android:id="@+id/btn_civilian_done"
                 android:layout_width="match_parent"

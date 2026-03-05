@@ -43,13 +43,11 @@ public class MafiaNetworkServer {
 
     private int nextId = 0;
 
-    // ── Callbacks ─────────────────────────────────────────────────────────────
     public interface HostCallback {
         void onPlayerJoined(List<Player> currentPlayers);
         void onError(String message);
     }
 
-    /** Called on UI thread every time a client sends a VOTE message. */
     public interface VoteCallback {
         void onVoteReceived(int voterId, int targetId);
     }
@@ -61,7 +59,6 @@ public class MafiaNetworkServer {
     public void setCallback(HostCallback cb)     { this.callback     = cb; }
     public void setVoteCallback(VoteCallback cb) { this.voteCallback = cb; }
 
-    // ── Start / stop ──────────────────────────────────────────────────────────
     public void start() {
         running = true;
         startUdpDiscovery();
@@ -76,7 +73,6 @@ public class MafiaNetworkServer {
         try { if (udpSocket   != null) udpSocket.close();   } catch (Exception ignored) {}
     }
 
-    // ── UDP discovery ─────────────────────────────────────────────────────────
     private void startUdpDiscovery() {
         new Thread(() -> {
             try {
@@ -102,7 +98,6 @@ public class MafiaNetworkServer {
         }, "Mafia-Host-UDP").start();
     }
 
-    // ── TCP acceptor ──────────────────────────────────────────────────────────
     private void startTcpAcceptor() {
         new Thread(() -> {
             try {
@@ -140,13 +135,11 @@ public class MafiaNetworkServer {
         }, "Mafia-Client").start();
     }
 
-    // ── Incoming messages ─────────────────────────────────────────────────────
     private void handleMessage(String line, ClientHandle handle) {
         String[] parts = line.trim().split("§", -1);
         if (parts.length < 1) return;
         String type = parts[0];
 
-        // ── VOTE: parts[1]=voterId  parts[2]=targetId ──────────────────────────
         if ("VOTE".equals(type) && parts.length >= 3) {
             try {
                 int voterId  = parts[1].trim().isEmpty() ? -1
@@ -160,7 +153,6 @@ public class MafiaNetworkServer {
             return;
         }
 
-        // ── JOIN ───────────────────────────────────────────────────────────────
         if ("JOIN".equals(type) && parts.length >= 3) {
             String name = parts[2].trim();
             if (name.isEmpty()) return;
@@ -183,7 +175,6 @@ public class MafiaNetworkServer {
         }
     }
 
-    // ── Host adds themselves (player 0, no socket) ────────────────────────────
     public void addHostPlayer(String name) {
         synchronized (players) {
             players.add(0, new Player(nextId++, name, Player.Role.CIVILIAN));
@@ -191,7 +182,6 @@ public class MafiaNetworkServer {
         broadcastLobby();
     }
 
-    // ── Assign roles + send START to all clients ──────────────────────────────
     public void startGame(int mafiaCount, boolean includeDoctor, boolean includeDetective) {
         List<Player> snap;
         synchronized (players) { snap = new ArrayList<>(players); }
@@ -226,39 +216,25 @@ public class MafiaNetworkServer {
             }
         });
     }
-
-    // ── Broadcast methods — called by host game screens ───────────────────────
-
-    /** Night result text → all clients show MafiaNetworkNightResultActivity */
     public void broadcastNightResult(String text) {
         broadcast("NIGHT_RESULT", "", text);
     }
 
-    /**
-     * State change → clients navigate screens.
-     * state = "DAY"          → go to MafiaNetworkDayActivity
-     * state = "ROLE_REVEAL"  → go to MafiaNetworkRoleRevealActivity (next night)
-     */
     public void broadcastState(String state) {
         broadcast("STATE", "", state);
     }
 
-    /** Elimination: "PlayerName:ROLE" → clients show who was eliminated */
     public void broadcastEliminated(String playerName, String roleName) {
         broadcast("ELIMINATED", "", playerName + ":" + roleName);
     }
-
-    /** Updated alive player list after elimination */
     public void broadcastLobby() {
         broadcast("LOBBY", "", buildPlayerList());
     }
 
-    /** Game over */
     public void broadcastGameOver(String title, String message) {
         broadcast("GAME_OVER", "", title + "|" + message);
     }
 
-    // ── Internal broadcast / send ─────────────────────────────────────────────
     private void broadcast(String type, String senderId, String payload) {
         String wire = wire(type, senderId, payload);
         List<ClientHandle> snap;
@@ -279,7 +255,6 @@ public class MafiaNetworkServer {
         return type + "§" + senderId + "§" + payload + "\n";
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
     private String buildPlayerList() {
         StringBuilder sb = new StringBuilder();
         synchronized (players) {

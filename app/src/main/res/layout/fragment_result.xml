@@ -8,7 +8,6 @@
     android:gravity="center"
     android:padding="32dp">
 
-    <!-- Phase label -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -18,7 +17,6 @@
         android:textColor="@color/text_secondary"
         android:layout_marginBottom="32dp"/>
 
-    <!-- Result card -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -28,7 +26,6 @@
         android:padding="40dp"
         android:layout_marginBottom="40dp">
 
-        <!-- Result emoji -->
         <TextView
             android:id="@+id/tv_result_emoji"
             android:layout_width="wrap_content"
@@ -38,7 +35,6 @@
             android:gravity="center"
             android:layout_marginBottom="20dp"/>
 
-        <!-- Result text -->
         <TextView
             android:id="@+id/tv_result"
             android:layout_width="wrap_content"
@@ -52,7 +48,6 @@
 
     </LinearLayout>
 
-    <!-- Play again button -->
     <Button
         android:id="@+id/btn_restart"
         android:layout_width="match_parent"
@@ -65,7 +60,6 @@
         android:letterSpacing="0.12"
         android:stateListAnimator="@null"/>
 
-    <!-- Outline secondary button -->
     <Button
         android:id="@+id/btn_main_menu"
         android:layout_width="match_parent"

@@ -56,25 +56,8 @@ public class LobbyFragment extends Fragment {
         if (view == null) return null;
 
         uiHandler = new Handler(Looper.getMainLooper());
-
-        // The XML layout order is:
-        //   [0] header_block  (emoji + SPYFALL + tagline)
-        //   [1] input_card    (name input + add button)
-        //   [2] players_card  (agents list)
-        //   [3] start_game_btn
-        //
-        // We inject dynamic views so the final order becomes:
-        //   [0] header_block
-        //   [1] modeGroup       ← inserted at 1
-        //   [2] tvInfo          ← inserted at 2
-        //   [3] input_card
-        //   [4] players_card
-        //   [5] impostorCard    ← inserted at 5 (before start button)
-        //   [6] start_game_btn
-
         LinearLayout root = (LinearLayout) ((ScrollView) view).getChildAt(0);
 
-        // ── 2. MODE SELECTOR (inserted at position 1) ─────────────────────
         RadioGroup modeGroup = new RadioGroup(requireContext());
         modeGroup.setOrientation(RadioGroup.HORIZONTAL);
         LinearLayout.LayoutParams mgParams = new LinearLayout.LayoutParams(
@@ -89,9 +72,7 @@ public class LobbyFragment extends Fragment {
         modeGroup.addView(rbPassPlay);
         modeGroup.addView(rbHost);
         modeGroup.addView(rbJoin);
-        root.addView(modeGroup, 1);   // after header
-
-        // ── 3. INFO / STATUS LABEL (inserted at position 2) ──────────────
+        root.addView(modeGroup, 1);
         TextView tvInfo = new TextView(requireContext());
         tvInfo.setTextSize(13f);
         tvInfo.setTextColor(0xFF8A9BC4);
@@ -102,15 +83,10 @@ public class LobbyFragment extends Fragment {
         infoParams.bottomMargin = dp(12);
         tvInfo.setLayoutParams(infoParams);
         tvInfo.setVisibility(View.GONE);
-        root.addView(tvInfo, 2);      // after mode group
-
-        // ── 6. IMPOSTOR COUNTER card (inserted at 5, just before start btn) ──
+        root.addView(tvInfo, 2);
         impostorCard = buildImpostorCard();
-        // At this point root has: header(0) modeGroup(1) tvInfo(2) inputCard(3) playersCard(4) startBtn(5)
-        // We insert impostorCard at index 5, pushing startBtn to 6
         root.addView(impostorCard, 5);
 
-        // ── Wire up XML views ─────────────────────────────────────────────
         EditText nameInput = view.findViewById(R.id.name_input);
         Button   addBtn    = view.findViewById(R.id.add_player_btn);
         playersView  = view.findViewById(R.id.players_view);
@@ -119,7 +95,6 @@ public class LobbyFragment extends Fragment {
 
         modeGroup.check(rbPassPlay.getId());
 
-        // ── Mode change listener ──────────────────────────────────────────
         modeGroup.setOnCheckedChangeListener((group, checkedId) -> {
             tvInfo.setVisibility(View.GONE);
             if (checkedId == rbPassPlay.getId()) {
@@ -145,7 +120,6 @@ public class LobbyFragment extends Fragment {
             }
         });
 
-        // ── Add player ────────────────────────────────────────────────────
         addBtn.setOnClickListener(v -> {
             String name = nameInput.getText().toString().trim();
             if (name.isEmpty()) {
@@ -161,7 +135,6 @@ public class LobbyFragment extends Fragment {
             updateImpostorPickerMax();
         });
 
-        // ── Start button ──────────────────────────────────────────────────
         startBtn.setOnClickListener(v -> {
             String name = nameInput.getText().toString().trim();
             if (name.isEmpty() && selectedMode != GameEngine.Mode.PASS_PLAY) {
@@ -184,7 +157,6 @@ public class LobbyFragment extends Fragment {
         return view;
     }
 
-    // ── Impostor counter card ─────────────────────────────────────────────────
     private LinearLayout buildImpostorCard() {
         LinearLayout card = new LinearLayout(requireContext());
         card.setOrientation(LinearLayout.HORIZONTAL);
@@ -199,7 +171,6 @@ public class LobbyFragment extends Fragment {
         cardParams.bottomMargin = dp(16);
         card.setLayoutParams(cardParams);
 
-        // Left: label column
         LinearLayout leftCol = new LinearLayout(requireContext());
         leftCol.setOrientation(LinearLayout.VERTICAL);
         leftCol.setLayoutParams(new LinearLayout.LayoutParams(0,
@@ -221,14 +192,12 @@ public class LobbyFragment extends Fragment {
         leftCol.addView(tvImpostorLabel);
         card.addView(leftCol);
 
-        // Right: NumberPicker
         impostorPicker = new NumberPicker(requireContext());
         impostorPicker.setMinValue(1);
         impostorPicker.setMaxValue(1);
         impostorPicker.setValue(1);
         impostorPicker.setWrapSelectorWheel(false);
 
-        // Tint picker text gold via reflection
         try {
             java.lang.reflect.Field f = NumberPicker.class.getDeclaredField("mInputText");
             f.setAccessible(true);
@@ -259,14 +228,12 @@ public class LobbyFragment extends Fragment {
             tvImpostorLabel.setText(count + (count == 1 ? " impostor" : " impostors"));
     }
 
-    // ── Game modes ────────────────────────────────────────────────────────────
     private void startPassPlay() {
         if (engine.getPlayers().size() < GameEngine.MIN_PLAYERS) {
             Toast.makeText(requireContext(),
                     "Need at least " + GameEngine.MIN_PLAYERS + " players", Toast.LENGTH_SHORT).show();
             return;
         }
-        // Go to theme picker — it will call startGame() after theme selection
         ((MainActivity) requireActivity()).navigateTo(GameState.THEME_PICKER);
     }
 
@@ -304,8 +271,6 @@ public class LobbyFragment extends Fragment {
                         "Need at least " + GameEngine.MIN_PLAYERS + " agents", Toast.LENGTH_SHORT).show();
                 return;
             }
-            // Go to theme picker — ThemePickerFragment handles startGame()
-            // and sendStartGame() for host mode
             ((MainActivity) requireActivity()).navigateTo(GameState.THEME_PICKER);
         });
 
@@ -345,7 +310,6 @@ public class LobbyFragment extends Fragment {
         );
     }
 
-    // ── Polling ───────────────────────────────────────────────────────────────
     private void startPolling() {
         stopPolling();
         pollRunnable = new Runnable() {
@@ -383,7 +347,6 @@ public class LobbyFragment extends Fragment {
             rowParams.bottomMargin = dp(6);
             row.setLayoutParams(rowParams);
 
-            // Bullet + name
             TextView tvName = new TextView(requireContext());
             tvName.setText("⬡  " + p.getName());
             tvName.setTextColor(0xFF8A9BC4);
@@ -391,7 +354,6 @@ public class LobbyFragment extends Fragment {
             tvName.setLayoutParams(new LinearLayout.LayoutParams(
                     0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
 
-            // X button
             TextView btnDelete = new TextView(requireContext());
             btnDelete.setText("✕");
             btnDelete.setTextColor(0xFF3D4F72);
@@ -405,7 +367,6 @@ public class LobbyFragment extends Fragment {
                 refreshPlayersList();
                 updateImpostorPickerMax();
             });
-            // Highlight on press
             btnDelete.setOnTouchListener((v, event) -> {
                 if (event.getAction() == android.view.MotionEvent.ACTION_DOWN)
                     btnDelete.setTextColor(0xFFE53E3E);
@@ -422,7 +383,6 @@ public class LobbyFragment extends Fragment {
         updateImpostorPickerMax();
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
     private RadioButton makeRadioBtn(String label) {
         RadioButton rb = new RadioButton(requireContext());
         rb.setId(View.generateViewId());
