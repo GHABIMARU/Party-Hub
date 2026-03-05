@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_dark"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="48dp"
+    android:paddingBottom="32dp">
+
+    <!-- ── Header row: round label + votes remaining ────────────────────── -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:id="@+id/tv_day_round"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ROUND 1"
+            android:textSize="11sp"
+            android:letterSpacing="0.35"
+            android:textColor="@color/gold"/>
+
+        <!-- Live votes remaining counter -->
+        <TextView
+            android:id="@+id/tv_votes_remaining"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="6 votes remaining"
+            android:textSize="11sp"
+            android:letterSpacing="0.1"
+            android:textColor="@color/text_secondary"/>
+
+    </LinearLayout>
+
+    <!-- ── Night result banner ───────────────────────────────────────────── -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_card"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="16dp"
+        android:layout_marginBottom="20dp">
+
+        <TextView
+            android:id="@+id/tv_night_result_emoji"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🌙"
+            android:textSize="28sp"
+            android:layout_marginEnd="14dp"/>
+
+        <TextView
+            android:id="@+id/tv_night_result_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Night result here"
+            android:textSize="13sp"
+            android:textColor="@color/text_primary"
+            android:lineSpacingMultiplier="1.4"/>
+
+    </LinearLayout>
+
+    <!-- ── Section label ────────────────────────────────────────────────── -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="VOTE TO ELIMINATE"
+        android:textSize="10sp"
+        android:letterSpacing="0.35"
+        android:textColor="@color/gold"
+        android:layout_marginBottom="10dp"/>
+
+    <!-- ── Scrollable vote list ──────────────────────────────────────────── -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:overScrollMode="never"
+        android:layout_marginBottom="16dp">
+
+        <!-- ll_vote_list — populated dynamically in Java -->
+        <LinearLayout
+            android:id="@+id/ll_vote_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"/>
+
+    </ScrollView>
+
+    <!-- ── Tally bar: shows who is leading the vote ─────────────────────── -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_card"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="14dp"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LEADING  "
+            android:textSize="10sp"
+            android:letterSpacing="0.3"
+            android:textColor="@color/text_secondary"/>
+
+        <!-- tv_leading_name -->
+        <TextView
+            android:id="@+id/tv_leading_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="—"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"/>
+
+        <!-- tv_leading_count -->
+        <TextView
+            android:id="@+id/tv_leading_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 votes"
+            android:textSize="13sp"
+            android:textColor="@color/gold"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+
+    <!-- ── ELIMINATE button — filled gold ───────────────────────────────── -->
+    <TextView
+        android:id="@+id/btn_eliminate"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="CONFIRM"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.2"
+        android:textColor="@color/bg_dark"
+        android:gravity="center"
+        android:background="@drawable/bg_button_gold"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginBottom="10dp"/>
+
+    <!-- ── SKIP VOTE button — subtle text link ──────────────────────────── -->
+    <TextView
+        android:id="@+id/btn_skip_vote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SKIP — BEGIN NIGHT"
+        android:textSize="12sp"
+        android:letterSpacing="0.15"
+        android:textColor="@color/text_secondary"
+        android:gravity="center"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:clickable="true"
+        android:focusable="true"/>
+
+</LinearLayout>

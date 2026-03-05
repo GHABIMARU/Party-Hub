@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.mini_projet">
+
+    <!-- Network permissions for local WiFi/hotspot multiplayer -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Miniprojet"
+        android:usesCleartextTraffic="true"
+        tools:targetApi="31">
+
+        <!-- ── HOME SCREEN ──────────────────────────────────────────────────── -->
+        <activity
+            android:name=".HomeActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- ── SPYFALL ──────────────────────────────────────────────────────── -->
+        <activity
+            android:name=".spyfall.ui.MainActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- ── MAFIA — Pass & Play (original flow) ─────────────────────────── -->
+        <activity
+            android:name=".mafia.Mafiasetupactivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".mafia.MafiaRoleRevealActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".mafia.MafianightActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".mafia.MafiadayActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- ── MAFIA — Network: Host ────────────────────────────────────────── -->
+        <activity
+            android:name=".mafia.MafiaHostActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- ── MAFIA — Network: Join (client) ──────────────────────────────── -->
+        <activity
+            android:name=".mafia.MafiaJoinActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- ── MAFIA — Network: per-device role reveal ──────────────────────── -->
+        <activity
+            android:name=".mafia.MafiaNetworkRoleRevealActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- ── MAFIA — Network: night result banner ─────────────────────────── -->
+        <activity
+            android:name=".mafia.MafiaNetworkNightResultActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- ── MAFIA — Network: day / voting ────────────────────────────────── -->
+        <activity
+            android:name=".mafia.MafiaNetworkDayActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- ── MAFIA — Network: game over ───────────────────────────────────── -->
+        <activity
+            android:name=".mafia.MafiaNetworkGameOverActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+    </application>
+
+</manifest>

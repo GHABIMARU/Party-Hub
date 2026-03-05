@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark">
+
+    <!-- ══════════════════════════════════════════════════════════════
+         layout_pass_phone — Lock / pass-phone overlay
+         Shown:  between role turns + at night start + at dawn
+         Hidden: when a role is actively choosing their target
+    ══════════════════════════════════════════════════════════════ -->
+    <LinearLayout
+        android:id="@+id/layout_pass_phone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="@color/bg_dark"
+        android:paddingStart="40dp"
+        android:paddingEnd="40dp"
+        android:visibility="visible">
+
+        <!-- Icon -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔒"
+            android:textSize="52sp"
+            android:gravity="center"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- Dynamic message set in Java via tv_pass_phone_message -->
+        <TextView
+            android:id="@+id/tv_pass_phone_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🌙  Night Begins"
+            android:textSize="18sp"
+            android:textColor="@color/text_primary"
+            android:gravity="center"
+            android:lineSpacingMultiplier="1.6"
+            android:layout_marginBottom="52dp"/>
+
+        <!-- Ready button -->
+        <TextView
+            android:id="@+id/btn_ready"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="I'M READY  →"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.2"
+            android:textColor="@color/bg_dark"
+            android:gravity="center"
+            android:background="@drawable/bg_button_gold"
+            android:clickable="true"
+            android:focusable="true"/>
+
+    </LinearLayout>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         layout_night_content — Active role action screen
+         Shown:  when a role (Mafia / Doctor / Detective) is choosing
+         Hidden: during pass-phone overlay
+    ══════════════════════════════════════════════════════════════ -->
+    <LinearLayout
+        android:id="@+id/layout_night_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp"
+        android:paddingTop="48dp"
+        android:paddingBottom="48dp"
+        android:visibility="gone">
+
+        <!-- Round label — tv_night_round -->
+        <TextView
+            android:id="@+id/tv_night_round"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ROUND 2"
+            android:textSize="11sp"
+            android:letterSpacing="0.35"
+            android:textColor="@color/text_secondary"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="28dp"/>
+
+        <!-- Role card — emoji + label + instruction -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:gravity="center"
+            android:layout_marginBottom="16dp">
+
+            <!-- tv_acting_role_emoji -->
+            <TextView
+                android:id="@+id/tv_acting_role_emoji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔴"
+                android:textSize="38sp"
+                android:gravity="center"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- tv_acting_role_label -->
+            <TextView
+                android:id="@+id/tv_acting_role_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MAFIA"
+                android:textSize="11sp"
+                android:letterSpacing="0.3"
+                android:textColor="@color/gold"
+                android:gravity="center"
+                android:layout_marginBottom="10dp"/>
+
+            <!-- tv_acting_instruction -->
+            <TextView
+                android:id="@+id/tv_acting_instruction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Select a player to eliminate:"
+                android:textSize="13sp"
+                android:textColor="@color/text_secondary"
+                android:gravity="center"
+                android:lineSpacingMultiplier="1.5"/>
+
+        </LinearLayout>
+
+        <!-- Player list card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ALIVE PLAYERS"
+                android:textSize="10sp"
+                android:letterSpacing="0.3"
+                android:textColor="@color/gold"
+                android:layout_marginBottom="12dp"
+                android:layout_marginStart="8dp"/>
+
+            <!-- Scrollable list — ll_player_list_night populated in Java -->
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:overScrollMode="never">
+
+                <LinearLayout
+                    android:id="@+id/ll_player_list_night"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"/>
+
+            </ScrollView>
+
+        </LinearLayout>
+
+        <!-- Selected player banner — layout_selected_player -->
+        <LinearLayout
+            android:id="@+id/layout_selected_player"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="20dp"
+            android:visibility="invisible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TARGET  "
+                android:textSize="10sp"
+                android:letterSpacing="0.3"
+                android:textColor="@color/gold"/>
+
+            <!-- tv_selected_player_name -->
+            <TextView
+                android:id="@+id/tv_selected_player_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="—"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✓"
+                android:textSize="18sp"
+                android:textColor="@color/gold"/>
+
+        </LinearLayout>
+
+        <!-- Spacer pushes button to bottom -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <!-- Confirm button — btn_confirm_night_action -->
+        <TextView
+            android:id="@+id/btn_confirm_night_action"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="CONFIRM"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.2"
+            android:textColor="@color/bg_dark"
+            android:gravity="center"
+            android:background="@drawable/bg_button_gold"
+            android:clickable="true"
+            android:focusable="true"/>
+
+    </LinearLayout>
+
+</FrameLayout>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp">
+
+    <!-- Phase label -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="MISSION COMPLETE"
+        android:textSize="11sp"
+        android:letterSpacing="0.3"
+        android:textColor="@color/text_secondary"
+        android:layout_marginBottom="32dp"/>
+
+    <!-- Result card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_card"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="40dp"
+        android:layout_marginBottom="40dp">
+
+        <!-- Result emoji -->
+        <TextView
+            android:id="@+id/tv_result_emoji"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🎉"
+            android:textSize="56sp"
+            android:gravity="center"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- Result text -->
+        <TextView
+            android:id="@+id/tv_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Game Over"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:gravity="center"
+            android:lineSpacingMultiplier="1.3"/>
+
+    </LinearLayout>
+
+    <!-- Play again button -->
+    <Button
+        android:id="@+id/btn_restart"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@drawable/bg_gold_button"
+        android:text="PLAY AGAIN"
+        android:textColor="@color/bg_dark"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.12"
+        android:stateListAnimator="@null"/>
+
+    <!-- Outline secondary button -->
+    <Button
+        android:id="@+id/btn_main_menu"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_outline_button"
+        android:text="MAIN MENU"
+        android:textColor="@color/gold"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.12"
+        android:stateListAnimator="@null"/>
+
+</LinearLayout>
