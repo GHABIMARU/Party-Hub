@@ -18,7 +18,14 @@ import com.example.mini_projet.R;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Pass-and-play role reveal + night actions.
+ *
+ * When running as host (is_host=true in Intent extras):
+ *   - After all night actions are done → resolves night → broadcasts
+ *     NIGHT_RESULT to all clients so they navigate to their night result screen
+ *   - Then broadcasts STATE:DAY so clients go to the day/voting screen
+ */
 public class MafiaRoleRevealActivity extends AppCompatActivity {
 
     public static final String EXTRA_PLAYERS = "extra_players";
@@ -250,10 +257,10 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
         // Pick highlight color based on role
         int highlightColor;
         switch (actorRole) {
-            case MAFIA:      highlightColor = 0xFFCC0000; break; // blood red
-            case DOCTOR:     highlightColor = 0xFF2ECC71; break; // green
-            case DETECTIVE:  highlightColor = 0xFF3B9EFF; break; // blue
-            default:         highlightColor = 0xFFF0B429; break; // gold fallback
+            case MAFIA:      highlightColor = 0xFFCC0000; break;
+            case DOCTOR:     highlightColor = 0xFF2ECC71; break;
+            case DETECTIVE:  highlightColor = 0xFF3B9EFF; break;
+            default:         highlightColor = 0xFFF0B429; break;
         }
 
         LinearLayout row = new LinearLayout(this);
@@ -345,7 +352,7 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
 
         // Big result icon
         android.widget.TextView tvIcon = new android.widget.TextView(this);
-        tvIcon.setText(isMafia ? "🧛‍♀️" : "😇");
+        tvIcon.setText(isMafia ? "🔴" : "✅");
         tvIcon.setTextSize(72);
         tvIcon.setGravity(android.view.Gravity.CENTER);
         android.widget.LinearLayout.LayoutParams iconLp =
