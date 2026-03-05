@@ -198,7 +198,7 @@ public class MafiaNetworkDayActivity extends AppCompatActivity
 
     private String roleEmoji(String role) {
         switch (role) {
-            case "MAFIA":     return "🔴";
+            case "MAFIA":     return "🧛";
             case "DOCTOR":    return "🩺";
             case "DETECTIVE": return "🔎";
             default:          return "👤";

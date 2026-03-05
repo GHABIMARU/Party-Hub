@@ -155,7 +155,7 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
                         if (currentIndex < alive.size()) {
                             switch (alive.get(currentIndex).getRole()) {
                                 case MAFIA:
-                                    btn_seen_role.setText("🔴  Who do you want to kill?");
+                                    btn_seen_role.setText("🧛  Who do you want to kill?");
                                     break;
                                 case DOCTOR:
                                     btn_seen_role.setText("🩺  Who do you want to protect?");
@@ -184,7 +184,7 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
     private void fillRoleContent(Player p) {
         switch (p.getRole()) {
             case MAFIA:
-                tv_role_emoji.setText("🔴");
+                tv_role_emoji.setText("🧛");
                 tv_role_name_label.setText("MAFIA");
                 tv_role_description.setText(buildMafiaTeamInfo(p));
                 break;
@@ -225,7 +225,7 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
 
         switch (p.getRole()) {
             case MAFIA:
-                showActionPanel("🔴  Choose a player to eliminate tonight:", p);
+                showActionPanel("🧛  Choose a player to eliminate tonight:", p);
                 break;
             case DOCTOR:
                 showActionPanel("🩺  Choose a player to protect tonight:", p);
@@ -359,7 +359,7 @@ public class MafiaRoleRevealActivity extends AppCompatActivity {
 
         // Big result icon
         android.widget.TextView tvIcon = new android.widget.TextView(this);
-        tvIcon.setText(isMafia ? "🔴" : "✅");
+        tvIcon.setText(isMafia ? "🧛" : "😇");
         tvIcon.setTextSize(72);
         tvIcon.setGravity(android.view.Gravity.CENTER);
         android.widget.LinearLayout.LayoutParams iconLp =

@@ -112,7 +112,7 @@ public class MafianightActivity extends AppCompatActivity {
 
         switch (phase) {
             case 0:
-                tv_acting_role_emoji.setText("🔴");
+                tv_acting_role_emoji.setText("🧛");
                 tv_acting_role_label.setText("MAFIA");
                 tv_acting_instruction.setText(buildMafiaInfo() + "\n\nSelect a player to eliminate:");
                 break;
@@ -240,7 +240,7 @@ public class MafianightActivity extends AppCompatActivity {
                 targetInvestigate = actionSelection;
                 boolean isMafia = actionSelection.getRole() == Player.Role.MAFIA;
                 new AlertDialog.Builder(this)
-                        .setTitle(isMafia ? "🔴 MAFIA CONFIRMED" : "✅ NOT MAFIA")
+                        .setTitle(isMafia ? "🧛 MAFIA CONFIRMED" : "✅ NOT MAFIA")
                         .setMessage(actionSelection.getName() + " is "
                                 + (isMafia ? "a Mafia member." : "NOT Mafia.")
                                 + "\n\nRemember this for the day discussion.")

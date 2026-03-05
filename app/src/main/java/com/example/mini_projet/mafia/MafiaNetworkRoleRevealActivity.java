@@ -114,7 +114,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
                         if (me != null) {
                             switch (me.getRole()) {
                                 case MAFIA:
-                                    btnSeenRole.setText("🔴  Who do you want to kill?");
+                                    btnSeenRole.setText("🧛  Who do you want to kill?");
                                     break;
                                 case DOCTOR:
                                     btnSeenRole.setText("🩺  Who do you want to protect?");
@@ -150,7 +150,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
         if (me == null) return;
         switch (me.getRole()) {
             case MAFIA:
-                tvRoleEmoji.setText("🔴");
+                tvRoleEmoji.setText("🧛");
                 tvRoleName.setText("MAFIA");
                 tvRoleDesc.setText(buildMafiaInfo());
                 break;
@@ -194,7 +194,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
 
         switch (me.getRole()) {
             case MAFIA:
-                tvActionTitle.setText("🔴  Choose a player to eliminate:");
+                tvActionTitle.setText("🧛  Choose a player to eliminate:");
                 buildActionList();
                 btnConfirm.setText("CONFIRM KILL");
                 btnConfirm.setVisibility(View.VISIBLE);
@@ -264,7 +264,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
         if (me.getRole() == Player.Role.DETECTIVE) {
             boolean isMafia = actionTarget.getRole() == Player.Role.MAFIA;
             Toast.makeText(this,
-                    isMafia ? "🔴 " + actionTarget.getName() + " IS Mafia!"
+                    isMafia ? "🧛 " + actionTarget.getName() + " IS Mafia!"
                             : "✅ " + actionTarget.getName() + " is NOT Mafia",
                     Toast.LENGTH_LONG).show();
         }

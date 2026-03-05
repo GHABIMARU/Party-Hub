@@ -382,7 +382,7 @@ public class MafiadayActivity extends AppCompatActivity
             case MAFIA:
                 bgColor     = 0xFF1A0A0A;
                 accentColor = 0xFFFF4444;
-                emoji       = "🔴";
+                emoji       = "🧛";
                 verdict     = "MAFIA MEMBER";
                 flavour     = "The town has rooted out a Mafia member!\nThe town grows safer.";
                 break;
@@ -519,7 +519,7 @@ public class MafiadayActivity extends AppCompatActivity
             return true;
         }
         if (mafiaAlive >= townAlive) {
-            String title = "🔴  MAFIA WINS";
+            String title = "🧛  MAFIA WINS";
             String msg   = "The Mafia controls the town.\n\n" + buildMafiaReveal();
             if (isHost && MafiaServerHolder.isHosting())
                 MafiaServerHolder.get().broadcastGameOver(title, msg);
@@ -638,7 +638,7 @@ public class MafiadayActivity extends AppCompatActivity
 
     private String getRoleEmoji(Player.Role role) {
         switch (role) {
-            case MAFIA:     return "🔴";
+            case MAFIA:     return "🧛";
             case DOCTOR:    return "🩺";
             case DETECTIVE: return "🔎";
             default:        return "👤";
