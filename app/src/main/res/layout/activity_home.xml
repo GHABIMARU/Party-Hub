@@ -14,19 +14,20 @@
         android:paddingEnd="32dp"
         android:paddingBottom="48dp">
 
-        <!-- App brand -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🎮"
-            android:textSize="56sp"
-            android:gravity="center"
-            android:layout_marginBottom="12dp"/>
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/app_logo"
+            android:scaleType="fitCenter"
+            android:layout_gravity="center"
+            android:layout_marginBottom="12dp"
+            android:contentDescription="Mix Party"/>
 
+        <!-- Always "Mix Party" regardless of language -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="PARTY HUB"
+            android:text="Mix Party"
             android:textSize="34sp"
             android:textStyle="bold"
             android:letterSpacing="0.2"
@@ -36,13 +37,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="CHOOSE YOUR GAME"
+            android:text="CHOSSE YOUR GAME
+"
             android:textSize="11sp"
             android:letterSpacing="0.35"
             android:textColor="@color/text_secondary"
             android:gravity="center"
             android:layout_marginTop="6dp"
-            android:layout_marginBottom="52dp"/>
+            android:layout_marginBottom="40dp"/>
 
         <!-- Spyfall card -->
         <LinearLayout
@@ -53,7 +55,7 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:padding="24dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="14dp"
             android:clickable="true"
             android:focusable="true">
 
@@ -81,7 +83,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Find the impostor before\nthey figure out the location"
+                    android:text="@string/home_spyfall_desc"
                     android:textSize="12sp"
                     android:textColor="@color/text_secondary"
                     android:lineSpacingMultiplier="1.4"
@@ -106,6 +108,7 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:padding="24dp"
+            android:layout_marginBottom="20dp"
             android:clickable="true"
             android:focusable="true">
 
@@ -133,7 +136,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Citizens vs the mob —\neliminate the mafia at dawn"
+                    android:text="@string/home_mafia_desc"
                     android:textSize="12sp"
                     android:textColor="@color/text_secondary"
                     android:lineSpacingMultiplier="1.4"
@@ -148,6 +151,21 @@
                 android:textColor="@color/gold"
                 android:layout_marginStart="8dp"/>
         </LinearLayout>
+
+        <!-- Language button -->
+        <TextView
+            android:id="@+id/btn_change_language"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Languages 🌐"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.05"
+            android:gravity="center"
+            android:textColor="@color/gold"
+            android:background="@drawable/bg_button_outline"
+            android:clickable="true"
+            android:focusable="true"/>
 
     </LinearLayout>
 </FrameLayout>

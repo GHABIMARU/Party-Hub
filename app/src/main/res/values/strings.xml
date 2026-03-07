@@ -1,6 +1,7 @@
 <resources>
-    <string name="app_name">Party Hub</string>
+    <string name="app_name">Mix Party</string>
     <string name="role_impostor">%1$s\nYou are the IMPOSTOR</string>
     <string name="role_word">%1$s\nWord: %2$s</string>
-
+    <string name="home_spyfall_desc">Find the spy before\nthey figure out the location</string>
+    <string name="home_mafia_desc">Citizens vs the mob —\neliminate the mafia at dawn</string>
 </resources>

@@ -2,9 +2,12 @@ package com.example.mini_projet.spyfall.ui;
 
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import android.content.Intent;
+import com.example.mini_projet.HomeActivity;
 import com.example.mini_projet.R;
 import com.example.mini_projet.spyfall.game.GameEngine;
 import com.example.mini_projet.spyfall.game.GameState;
@@ -18,6 +21,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         engine.setActivity(this);
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (engine.getGameState() == GameState.LOBBY) {
+                    engine.reset();
+                    finish();
+                }
+                // Block back press mid-game
+            }
+        });
+
         if (savedInstanceState == null) {
             navigateTo(GameState.LOBBY);
         }
@@ -28,11 +43,11 @@ public class MainActivity extends AppCompatActivity {
             Fragment fragment;
             switch (state) {
                 case THEME_PICKER: fragment = new ThemePickerFragment(); break;
-                case ROLE_REVEAL: fragment = new RoleRevealFragment(); break;
-                case DISCUSSION:  fragment = new DiscussionFragment();  break;
-                case VOTING:      fragment = new VotingFragment();      break;
-                case RESULT:      fragment = new ResultFragment();      break;
-                default:          fragment = new LobbyFragment();       break;
+                case ROLE_REVEAL:  fragment = new RoleRevealFragment();  break;
+                case DISCUSSION:   fragment = new DiscussionFragment();  break;
+                case VOTING:       fragment = new VotingFragment();      break;
+                case RESULT:       fragment = new ResultFragment();      break;
+                default:           fragment = new LobbyFragment();       break;
             }
             getSupportFragmentManager()
                     .beginTransaction()
@@ -42,6 +57,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void navigateToHome() {
+        engine.reset();
+        Intent intent = new Intent(this, HomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        finish();
     }
 
     public void refreshLobbyIfVisible() {
@@ -52,14 +72,6 @@ public class MainActivity extends AppCompatActivity {
     public void refreshRoleRevealIfVisible() {
         Fragment f = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
         if (f instanceof RoleRevealFragment) ((RoleRevealFragment) f).refreshRole();
-    }
-
-    @Override
-    public void onBackPressed() {
-        GameState state = engine.getGameState();
-        if (state == GameState.LOBBY) {
-            finish();
-        }
     }
 
     @Override
