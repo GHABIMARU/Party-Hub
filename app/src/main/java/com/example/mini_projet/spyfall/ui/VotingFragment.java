@@ -109,7 +109,7 @@ public class VotingFragment extends Fragment {
 
             if (engine.getMode() != GameEngine.Mode.PASS_PLAY
                     && tapped.getId() == engine.getMyPlayerId()) {
-                Toast.makeText(requireContext(), "Can't vote for yourself", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), R.string.voting_no_self_vote, Toast.LENGTH_SHORT).show();
                 listPlayers.setItemChecked(position, false);
                 selectedListPos = -1;
                 selectedPlayerId = -1;
@@ -138,7 +138,7 @@ public class VotingFragment extends Fragment {
                         0, -14, 14, -10, 10, -5, 5, 0);
                 shake.setDuration(350);
                 shake.start();
-                Toast.makeText(requireContext(), "Select a player first", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), R.string.voting_select_first, Toast.LENGTH_SHORT).show();
                 return;
             }
             btnConfirm.animate().scaleX(0.95f).scaleY(0.95f).setDuration(80)
@@ -159,7 +159,7 @@ public class VotingFragment extends Fragment {
     private void handlePassPlayVote() {
         Player currentVoter = players.get(currentVoterPos);
         if (selectedPlayerId == currentVoter.getId()) {
-            Toast.makeText(requireContext(), "Can't vote for yourself", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), R.string.voting_no_self_vote, Toast.LENGTH_SHORT).show();
             return;
         }
         engine.addVote(selectedPlayerId);
@@ -179,7 +179,7 @@ public class VotingFragment extends Fragment {
 
     private void handleNetworkVote() {
         btnConfirm.setEnabled(false);
-        btnConfirm.setText("VOTE SUBMITTED — WAITING...");
+        btnConfirm.setText(R.string.voting_submitted_waiting);
         if (engine.getMode() == GameEngine.Mode.CLIENT) {
             engine.getClientConnection().send(new Message(
                     "VOTE",
@@ -194,7 +194,7 @@ public class VotingFragment extends Fragment {
         if (engine.getMode() == GameEngine.Mode.PASS_PLAY
                 && currentVoterPos < players.size()) {
             String name = players.get(currentVoterPos).getName();
-            tvTurn.setText("🎯  " + name + "'s vote");
+            tvTurn.setText(getString(R.string.voting_turn_label, name));
 
             // Animate label change
             tvTurn.setAlpha(0f);

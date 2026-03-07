@@ -71,8 +71,8 @@ public class ThemePickerFragment extends Fragment {
             TextView tvCheck = tile.findViewById(R.id.tv_check);
 
             tvEmoji.setText(theme.emoji);
-            tvName.setText(theme.label);
-            tvWc.setText(WordList.getWordsForTheme(theme).length + " words");
+            tvName.setText(theme.labelRes);
+            tvWc.setText(getString(R.string.theme_word_count, WordList.getWordCountForTheme(requireContext(), theme)));
 
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(tilePx, tilePx);
             lp.setMargins(MARGIN, MARGIN, MARGIN, MARGIN);
@@ -110,7 +110,7 @@ public class ThemePickerFragment extends Fragment {
                 selected.clear();
                 for (View tile : tileViews)
                     setTileSelected(tile, tile.findViewById(R.id.tv_check), false);
-                btnAll.setText("ALL");
+                btnAll.setText(R.string.theme_picker_all);
             } else {
                 selected.clear();
                 for (int i = 0; i < themes.length; i++) {
@@ -118,7 +118,7 @@ public class ThemePickerFragment extends Fragment {
                     setTileSelected(tileViews.get(i),
                             tileViews.get(i).findViewById(R.id.tv_check), true);
                 }
-                btnAll.setText("NONE");
+                btnAll.setText(R.string.theme_picker_none);
             }
             updateCountLabel(tvCount);
         });
@@ -126,7 +126,7 @@ public class ThemePickerFragment extends Fragment {
         btnStart.setOnClickListener(v -> {
             if (selected.isEmpty()) {
                 Toast.makeText(requireContext(),
-                        "Pick at least one theme!", Toast.LENGTH_SHORT).show();
+                        R.string.theme_picker_select_error, Toast.LENGTH_SHORT).show();
                 return;
             }
             engine.setSelectedThemes(new ArrayList<>(selected));
@@ -155,16 +155,17 @@ public class ThemePickerFragment extends Fragment {
     private void updateCountLabel(TextView tvCount) {
         int n = selected.size();
         if (n == 0) {
-            tvCount.setText("Select at least one theme");
+            tvCount.setText(R.string.theme_picker_instruction);
             tvCount.setTextColor(0xFFE53E3E);
         } else if (n == WordList.Theme.values().length) {
-            tvCount.setText("All themes selected \u2014 " + WordList.totalWords() + " words");
+            tvCount.setText(getString(R.string.theme_picker_all_selected, WordList.getTotalWordCount(requireContext())));
             tvCount.setTextColor(0xFF38B2AC);
         } else {
             int wordCount = 0;
             for (WordList.Theme t : selected)
-                wordCount += WordList.getWordsForTheme(t).length;
-            tvCount.setText(n + " theme" + (n > 1 ? "s" : "") + " \u2014 " + wordCount + " words");
+                wordCount += WordList.getWordCountForTheme(requireContext(), t);
+            String pluralS = n > 1 ? "s" : "";
+            tvCount.setText(getString(R.string.theme_picker_selected_info, n, pluralS, wordCount));
             tvCount.setTextColor(0xFFF0B429);
         }
     }

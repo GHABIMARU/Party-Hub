@@ -61,12 +61,12 @@ public class MafianightActivity extends AppCompatActivity {
         hasDetective = hasRole(Player.Role.DETECTIVE);
 
         bindViews();
-        tv_night_round.setText("ROUND " + round);
+        tv_night_round.setText(getString(R.string.mafia_round, round));
 
         // Start with Mafia's private pass-phone screen
         showPassPhone(
-                "🌙  Night " + round,
-                "Everyone look away.\n\nMafia — tap when you're ready.",
+                getString(R.string.mafia_night_round_title, round),
+                getString(R.string.mafia_night_ready_mafia),
                 () -> loadPhase(0)
         );
     }
@@ -113,18 +113,18 @@ public class MafianightActivity extends AppCompatActivity {
         switch (phase) {
             case 0:
                 tv_acting_role_emoji.setText("🧛");
-                tv_acting_role_label.setText("MAFIA");
-                tv_acting_instruction.setText(buildMafiaInfo() + "\n\nSelect a player to eliminate:");
+                tv_acting_role_label.setText(R.string.mafia_role_mafia);
+                tv_acting_instruction.setText(buildMafiaInfo() + "\n\n" + getString(R.string.mafia_night_instruction_default));
                 break;
             case 1:
                 tv_acting_role_emoji.setText("🧑‍⚕️");
-                tv_acting_role_label.setText("DOCTOR");
-                tv_acting_instruction.setText("Choose one player to protect tonight.\nIf the Mafia targets them, they survive.");
+                tv_acting_role_label.setText(R.string.mafia_role_doctor_name);
+                tv_acting_instruction.setText(R.string.mafia_role_doctor_full_desc);
                 break;
             case 2:
                 tv_acting_role_emoji.setText("🔎");
-                tv_acting_role_label.setText("DETECTIVE");
-                tv_acting_instruction.setText("Investigate one player.\nYou will instantly learn if they are Mafia.");
+                tv_acting_role_label.setText(R.string.mafia_role_detective_name);
+                tv_acting_instruction.setText(R.string.mafia_role_detective_full_desc);
                 break;
         }
 
@@ -132,7 +132,7 @@ public class MafianightActivity extends AppCompatActivity {
     }
 
     private String buildMafiaInfo() {
-        StringBuilder sb = new StringBuilder("Mafia team: ");
+        StringBuilder sb = new StringBuilder(getString(R.string.mafia_team_label) + " ");
         boolean first = true;
         for (Player p : players) {
             if (p.getRole() == Player.Role.MAFIA && p.isAlive()) {
@@ -141,7 +141,7 @@ public class MafianightActivity extends AppCompatActivity {
                 first = false;
             }
         }
-        sb.append("\n\nChoose a town player to eliminate.\nYou cannot target Mafia teammates.");
+        sb.append("\n\n").append(getString(R.string.mafia_team_instruction));
         return sb.toString();
     }
 
@@ -149,7 +149,6 @@ public class MafianightActivity extends AppCompatActivity {
     private void buildPlayerList() {
         ll_player_list_night.removeAllViews();
         for (Player p : getAlivePlayers()) {
-            // Phase 0 = Mafia choosing: exclude all Mafia members (can't kill teammates)
             if (currentPhase == 0 && p.getRole() == Player.Role.MAFIA) continue;
             ll_player_list_night.addView(buildRow(p));
         }
@@ -223,7 +222,7 @@ public class MafianightActivity extends AppCompatActivity {
     // ── Confirm phase ─────────────────────────────────────────────────────────
     private void confirmPhase() {
         if (actionSelection == null) {
-            Toast.makeText(this, "Select a player first", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.mafia_night_select_first, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -240,11 +239,9 @@ public class MafianightActivity extends AppCompatActivity {
                 targetInvestigate = actionSelection;
                 boolean isMafia = actionSelection.getRole() == Player.Role.MAFIA;
                 new AlertDialog.Builder(this)
-                        .setTitle(isMafia ? "🧛 MAFIA CONFIRMED" : "✅ NOT MAFIA")
-                        .setMessage(actionSelection.getName() + " is "
-                                + (isMafia ? "a Mafia member." : "NOT Mafia.")
-                                + "\n\nRemember this for the day discussion.")
-                        .setPositiveButton("GOT IT — HIDE SCREEN", (d, w) -> advancePhase())
+                        .setTitle(isMafia ? R.string.mafia_det_verdict_found : R.string.mafia_det_verdict_innocent)
+                        .setMessage(getString(isMafia ? R.string.mafia_det_dialog_mafia : R.string.mafia_det_dialog_innocent, actionSelection.getName()))
+                        .setPositiveButton(R.string.mafia_det_hide_screen, (d, w) -> advancePhase())
                         .setCancelable(false)
                         .show();
                 break;
@@ -263,11 +260,10 @@ public class MafianightActivity extends AppCompatActivity {
         if (next == -1) {
             resolveAndGoToDay();
         } else {
-            // ✅ Must be final/effectively-final to use inside lambda
             final int finalNext = next;
-            final String finalTitle = (next == 1) ? "🧑‍⚕️  Doctor's Turn"   : "🔎  Detective's Turn";
-            final String finalMsg   = (next == 1) ? "Mafia, look away.\n\nDoctor — tap when ready."
-                    : "Look away.\n\nDetective — tap when ready.";
+            final String finalTitle = (next == 1) ? getString(R.string.mafia_doctor_turn)   : getString(R.string.mafia_detective_turn);
+            final String finalMsg   = (next == 1) ? getString(R.string.mafia_doctor_ready_msg)
+                    : getString(R.string.mafia_detective_ready_msg);
             showPassPhone(finalTitle, finalMsg, () -> loadPhase(finalNext));
         }
     }
@@ -278,17 +274,17 @@ public class MafianightActivity extends AppCompatActivity {
                 && targetSave.getId() == targetKill.getId());
 
         if (targetKill == null) {
-            result = "The Mafia did not strike tonight. 🌙";
+            result = getString(R.string.mafia_day_no_strike);
         } else if (saved) {
-            result = targetKill.getName() + " was targeted but saved by the Doctor! 🧑‍⚕️";
+            result = getString(R.string.mafia_day_saved, targetKill.getName());
         } else {
             targetKill.setAlive(false);
-            result = targetKill.getName() + " was eliminated by the Mafia. 💀";
+            result = getString(R.string.mafia_day_eliminated, targetKill.getName());
         }
 
         showPassPhone(
-                "☀️  Dawn Breaks",
-                "Everyone open your eyes.\n\nThe town will learn what happened tonight.",
+                getString(R.string.mafia_dawn_breaks),
+                getString(R.string.mafia_dawn_msg),
                 () -> {
                     Intent intent = new Intent(this, MafiadayActivity.class);
                     intent.putExtra(MafiadayActivity.EXTRA_PLAYERS, players);

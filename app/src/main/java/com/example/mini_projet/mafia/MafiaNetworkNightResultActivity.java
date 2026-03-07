@@ -32,7 +32,7 @@ public class MafiaNetworkNightResultActivity extends AppCompatActivity
         round   = getIntent().getIntExtra("round", 1);
 
         MafiaEventBus.register(this);
-        buildUi(result != null ? result : "The night passes quietly...");
+        buildUi(result != null ? result : getString(R.string.mafia_night_passes_quietly));
     }
 
     private void buildUi(String result) {
@@ -80,7 +80,7 @@ public class MafiaNetworkNightResultActivity extends AppCompatActivity
 
         // Waiting label
         TextView tvWait = new TextView(this);
-        tvWait.setText("☀️  Day phase starting soon...\nWaiting for the host.");
+        tvWait.setText(R.string.mafia_net_day_starting_msg);
         tvWait.setTextSize(13);
         tvWait.setTextColor(0xFF8A9BC4);
         tvWait.setGravity(Gravity.CENTER);
@@ -108,7 +108,7 @@ public class MafiaNetworkNightResultActivity extends AppCompatActivity
                 case MafiaEventBus.EVENT_GAME_OVER: {
                     String[] p = payload.split("\\|", 2);
                     Intent i = new Intent(this, MafiaNetworkGameOverActivity.class);
-                    i.putExtra("title",   p.length > 0 ? p[0] : "Game Over");
+                    i.putExtra("title",   p.length > 0 ? p[0] : getString(R.string.result_default));
                     i.putExtra("message", p.length > 1 ? p[1] : "");
                     startActivity(i);
                     finish();

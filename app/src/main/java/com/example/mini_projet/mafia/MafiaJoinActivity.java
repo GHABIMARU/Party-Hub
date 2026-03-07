@@ -46,11 +46,10 @@ public class MafiaJoinActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MafiaEventBus.register(this);   // relay SEND_VOTE to server
+        MafiaEventBus.register(this);
         buildUi();
     }
 
-    // ── UI ────────────────────────────────────────────────────────────────────
     private void buildUi() {
         ScrollView scroll = new ScrollView(this);
         scroll.setBackgroundColor(ContextCompat.getColor(this, R.color.bg_dark));
@@ -60,28 +59,26 @@ public class MafiaJoinActivity extends AppCompatActivity
         root.setPadding(dp(20), dp(40), dp(20), dp(20));
         scroll.addView(root);
 
-        // Header
-        TextView tvHeader = label("JOIN GAME", 22, true, 0xFFF0F4FF);
+        TextView tvHeader = label(getString(R.string.mafia_join_title), 22, true, 0xFFF0F4FF);
         tvHeader.setPadding(0, 0, 0, dp(4));
         root.addView(tvHeader);
 
-        TextView tvSub = label("Connect to a host on the same WiFi or hotspot", 13, false, 0xFF8A9BC4);
+        TextView tvSub = label(getString(R.string.mafia_join_subtitle), 13, false, 0xFF8A9BC4);
         marginBottom(tvSub, dp(28));
         root.addView(tvSub);
 
-        // ── STEP 1: name + find ───────────────────────────────────────────────
         stepName = new LinearLayout(this);
         stepName.setOrientation(LinearLayout.VERTICAL);
         root.addView(stepName);
 
-        stepName.addView(sectionLabel("YOUR NAME"));
+        stepName.addView(sectionLabel(getString(R.string.mafia_host_your_name)));
 
         LinearLayout nameCard = card();
         marginBottom(nameCard, dp(20));
         stepName.addView(nameCard);
 
         etName = new EditText(this);
-        etName.setHint("Enter your name");
+        etName.setHint(R.string.mafia_host_name_hint);
         etName.setHintTextColor(ContextCompat.getColor(this, R.color.text_secondary));
         etName.setTextColor(ContextCompat.getColor(this, R.color.text_primary));
         etName.setTextSize(16);
@@ -91,7 +88,7 @@ public class MafiaJoinActivity extends AppCompatActivity
         etName.setPadding(0, dp(14), 0, dp(14));
         nameCard.addView(etName);
 
-        btnFind = goldButton("FIND & JOIN");
+        btnFind = goldButton(getString(R.string.mafia_join_find_join));
         btnFind.setOnClickListener(v -> onFindClicked());
         stepName.addView(btnFind);
 
@@ -102,7 +99,6 @@ public class MafiaJoinActivity extends AppCompatActivity
         tvStatus.setVisibility(View.GONE);
         stepName.addView(tvStatus);
 
-        // ── STEP 2: waiting room ──────────────────────────────────────────────
         stepWaiting = new LinearLayout(this);
         stepWaiting.setOrientation(LinearLayout.VERTICAL);
         stepWaiting.setVisibility(View.GONE);
@@ -112,11 +108,11 @@ public class MafiaJoinActivity extends AppCompatActivity
         marginBottom(statusCard, dp(24));
         stepWaiting.addView(statusCard);
 
-        tvWaitStatus = label("Connected! Waiting for host to start...", 14, true, 0xFF38B2AC);
+        tvWaitStatus = label(getString(R.string.mafia_join_connected_waiting), 14, true, 0xFF38B2AC);
         tvWaitStatus.setLineSpacing(0, 1.4f);
         statusCard.addView(tvWaitStatus);
 
-        tvPlayerCount = sectionLabel("PLAYERS IN LOBBY");
+        tvPlayerCount = sectionLabel(getString(R.string.mafia_join_players_in_lobby));
         marginBottom(tvPlayerCount, dp(10));
         stepWaiting.addView(tvPlayerCount);
 
@@ -127,16 +123,15 @@ public class MafiaJoinActivity extends AppCompatActivity
         setContentView(scroll);
     }
 
-    // ── Find / connect ────────────────────────────────────────────────────────
     private void onFindClicked() {
         myName = etName.getText().toString().trim();
         if (myName.isEmpty()) {
-            Toast.makeText(this, "Enter your name first", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.mafia_enter_name_first, Toast.LENGTH_SHORT).show();
             return;
         }
         btnFind.setEnabled(false);
-        btnFind.setText("SEARCHING...");
-        tvStatus.setText("Broadcasting to find host...");
+        btnFind.setText(R.string.mafia_net_searching_btn);
+        tvStatus.setText(R.string.mafia_net_searching);
         tvStatus.setTextColor(0xFF8A9BC4);
         tvStatus.setVisibility(View.VISIBLE);
 
@@ -145,21 +140,19 @@ public class MafiaJoinActivity extends AppCompatActivity
         client.discoverAndConnect();
     }
 
-    // ── ClientCallback ────────────────────────────────────────────────────────
-
     @Override
     public void onConnected() {
-        tvStatus.setText("Found host! Joining...");
+        tvStatus.setText(R.string.mafia_net_found_host);
         tvStatus.setTextColor(0xFF38B2AC);
         client.sendJoin(myName);
     }
 
     @Override
     public void onFailed() {
-        tvStatus.setText("Host not found.\n\nMake sure you're on the same WiFi or hotspot as the host, then try again.");
+        tvStatus.setText(R.string.mafia_join_failed_msg);
         tvStatus.setTextColor(0xFFE53E3E);
         btnFind.setEnabled(true);
-        btnFind.setText("TRY AGAIN");
+        btnFind.setText(R.string.mafia_net_try_again);
     }
 
     @Override
@@ -171,7 +164,7 @@ public class MafiaJoinActivity extends AppCompatActivity
             stepWaiting.setVisibility(View.VISIBLE);
         }
 
-        tvPlayerCount.setText("PLAYERS IN LOBBY (" + players.size() + ")");
+        tvPlayerCount.setText(getString(R.string.mafia_join_players_in_lobby_count, players.size()));
         llPlayers.removeAllViews();
         for (Player p : players) {
             TextView chip = label("    " + p.getName(), 15, false, 0xFF8A9BC4);
@@ -184,7 +177,7 @@ public class MafiaJoinActivity extends AppCompatActivity
     public void onRoleAssigned(Player.Role role, List<Integer> mafiaTeamIds) {
         this.myRole       = role;
         this.mafiaTeamIds = mafiaTeamIds;
-        tvWaitStatus.setText("Role assigned! Get ready...");
+        tvWaitStatus.setText(R.string.mafia_net_role_assigned);
         tvWaitStatus.setTextColor(0xFFF0B429);
     }
 
@@ -192,7 +185,6 @@ public class MafiaJoinActivity extends AppCompatActivity
     public void onGameStart(int round) {
         int myId = client.getMyId();
 
-        // Apply roles we know about to our local player list
         for (Player p : lobbyPlayers) {
             if (p.getId() == myId) {
                 p.setRole(myRole);
@@ -207,7 +199,6 @@ public class MafiaJoinActivity extends AppCompatActivity
         intent.putExtra(MafiaNetworkRoleRevealActivity.EXTRA_MY_ID,   myId);
         intent.putExtra(MafiaNetworkRoleRevealActivity.EXTRA_ROUND,   round);
         startActivity(intent);
-        // Do NOT call finish() — we stay alive as the TCP relay
     }
 
     @Override
@@ -230,21 +221,16 @@ public class MafiaJoinActivity extends AppCompatActivity
         MafiaEventBus.post(MafiaEventBus.EVENT_GAME_OVER, title + "|" + message);
     }
 
-    // ── EventBus — relay SEND_VOTE from game screens to host via TCP ──────────
     @Override
     public void onEvent(String type, String payload) {
         if ("SEND_VOTE".equals(type) && client != null && client.isConnected()) {
-            // payload = "myId:targetId"  sent by MafiaNetworkDayActivity
             String[] parts = payload.split(":", 2);
             if (parts.length == 2) {
                 client.send("VOTE", parts[0].trim(), parts[1].trim());
             }
         }
-        // All other event types (STATE, NIGHT_RESULT, GAME_OVER) are forwarded
-        // in the ClientCallback methods above — no double-post needed here
     }
 
-    // ── View helpers ──────────────────────────────────────────────────────────
     private TextView label(String t, float size, boolean bold, int color) {
         TextView tv = new TextView(this);
         tv.setText(t); tv.setTextSize(size); tv.setTextColor(color);

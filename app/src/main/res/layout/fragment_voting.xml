@@ -28,8 +28,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="— VOTE —"
-                android:textSize="10sp"
+                android:text="@string/voting_label"
+                android:textSize="11sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.25"
                 android:textColor="#7BE53E3E"/>
@@ -37,7 +37,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="WHO IS THE IMPOSTOR?"
+                android:text="@string/voting_question"
                 android:textSize="22sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.1"
@@ -68,7 +68,7 @@
             android:id="@+id/btn_confirm_vote"
             android:layout_width="match_parent"
             android:layout_height="54dp"
-            android:text="CONFIRM VOTE"
+            android:text="@string/voting_confirm"
             android:textSize="14sp"
             android:textStyle="bold"
             android:letterSpacing="0.12"

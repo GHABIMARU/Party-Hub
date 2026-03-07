@@ -22,13 +22,11 @@ import java.util.Map;
 public class MafiadayActivity extends AppCompatActivity
         implements MafiaNetworkServer.VoteCallback {
 
-    // ── Intent keys ───────────────────────────────────────────────────────────
     public static final String EXTRA_PLAYERS      = "extra_players";
     public static final String EXTRA_ROUND        = "extra_round";
     public static final String EXTRA_NIGHT_RESULT = "extra_night_result";
     public static final String EXTRA_IS_HOST      = "is_host";
 
-    // ── Views ─────────────────────────────────────────────────────────────────
     private TextView     tv_day_round;
     private TextView     tv_night_result_emoji;
     private TextView     tv_night_result_text;
@@ -39,7 +37,6 @@ public class MafiadayActivity extends AppCompatActivity
     private TextView     btn_eliminate;
     private TextView     btn_skip_vote;
 
-    // ── State ─────────────────────────────────────────────────────────────────
     private ArrayList<Player> players;
     private int    round;
     private String nightResultText;
@@ -49,14 +46,12 @@ public class MafiadayActivity extends AppCompatActivity
     private final Map<Integer, TextView> voteBadges = new HashMap<>();
     private int totalVotes  = 0;
     private int totalVoters = 0;
-    private int currentVoterIndex = 0;   // index in alive list — whose turn to vote
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mafia_day);
 
-        // Day sky — drawn behind all UI via decorView index 0
         android.widget.FrameLayout dayRoot =
                 (android.widget.FrameLayout) getWindow().getDecorView();
         DaySkyView daySky = new DaySkyView(this);
@@ -70,10 +65,8 @@ public class MafiadayActivity extends AppCompatActivity
         nightResultText = getIntent().getStringExtra(EXTRA_NIGHT_RESULT);
         isHost          = getIntent().getBooleanExtra(EXTRA_IS_HOST, false);
 
-        // Register as vote receiver so client votes come in via VoteCallback
         if (isHost && MafiaServerHolder.isHosting()) {
             MafiaServerHolder.get().setVoteCallback(this);
-            // Tell all clients to navigate to the day voting screen
             MafiaServerHolder.get().broadcastState("DAY");
         }
 
@@ -82,24 +75,21 @@ public class MafiadayActivity extends AppCompatActivity
         buildVoteList();
         checkWinCondition();
 
-        // Post cinematic AFTER window is fully laid out
         if (nightResultText != null) {
             getWindow().getDecorView().post(() -> showNightResultCinematic());
         }
     }
 
-    // ── Night result cinematic overlay ────────────────────────────────────────
     private void showNightResultCinematic() {
         boolean killed  = nightResultText.contains("eliminated");
         boolean saved   = nightResultText.contains("saved");
-        // quiet night = neither
 
         int bgColor     = killed ? 0xFF0D0000 : saved ? 0xFF001A08 : 0xFF020818;
         int accentColor = killed ? 0xFFFF1111 : saved ? 0xFF2ECC71 : 0xFF8AB4FF;
         String bigEmoji = killed ? "💀"        : saved ? "🧑‍⚕️"        : "🌙";
-        String headline = killed ? "SOMEONE FELL TONIGHT"
-                : saved  ? "THE DOCTOR SAVED SOMEONE"
-                : "A QUIET NIGHT...";
+        String headline = killed ? getString(R.string.mafia_day_someone_fell)
+                : saved  ? getString(R.string.mafia_day_doctor_saved)
+                : getString(R.string.mafia_day_quiet_night);
 
         android.widget.FrameLayout overlay = new android.widget.FrameLayout(this);
         overlay.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
@@ -108,13 +98,11 @@ public class MafiadayActivity extends AppCompatActivity
         overlay.setBackgroundColor(bgColor);
         overlay.setElevation(dpToPx(200));
 
-        // Particle layer
         NightResultParticleView particles = new NightResultParticleView(this, killed, saved);
         overlay.addView(particles, new android.widget.FrameLayout.LayoutParams(
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
 
-        // Center content
         LinearLayout center = new LinearLayout(this);
         center.setOrientation(LinearLayout.VERTICAL);
         center.setGravity(Gravity.CENTER);
@@ -123,7 +111,6 @@ public class MafiadayActivity extends AppCompatActivity
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
 
-        // Big icon
         TextView tvIcon = new TextView(this);
         tvIcon.setText(bigEmoji);
         tvIcon.setTextSize(88);
@@ -135,7 +122,6 @@ public class MafiadayActivity extends AppCompatActivity
         tvIcon.setLayoutParams(iLp);
         center.addView(tvIcon);
 
-        // Headline
         TextView tvHeadline = new TextView(this);
         tvHeadline.setText(headline);
         tvHeadline.setTextSize(22);
@@ -151,7 +137,6 @@ public class MafiadayActivity extends AppCompatActivity
         tvHeadline.setLayoutParams(hLp);
         center.addView(tvHeadline);
 
-        // Result detail text
         TextView tvDetail = new TextView(this);
         tvDetail.setText(nightResultText);
         tvDetail.setTextSize(14);
@@ -165,9 +150,8 @@ public class MafiadayActivity extends AppCompatActivity
         tvDetail.setLayoutParams(dLp);
         center.addView(tvDetail);
 
-        // "GO TO VOTE" button
         TextView btnVote = new TextView(this);
-        btnVote.setText("⚖️  GO TO VOTE");
+        btnVote.setText(R.string.mafia_day_go_to_vote);
         btnVote.setTextSize(15);
         btnVote.setTypeface(null, android.graphics.Typeface.BOLD);
         btnVote.setGravity(Gravity.CENTER);
@@ -182,9 +166,6 @@ public class MafiadayActivity extends AppCompatActivity
         android.view.ViewGroup root = (android.view.ViewGroup) getWindow().getDecorView();
         root.addView(overlay);
 
-        // ── Sequence ──────────────────────────────────────────────────────────
-
-        // Flash bg (0ms)
         android.animation.ObjectAnimator flash = android.animation.ObjectAnimator
                 .ofArgb(overlay, "backgroundColor",
                         bgColor,
@@ -193,7 +174,6 @@ public class MafiadayActivity extends AppCompatActivity
         flash.setDuration(500);
         flash.start();
 
-        // Icon bursts in (100ms)
         tvIcon.postDelayed(() ->
                 tvIcon.animate().scaleX(1.3f).scaleY(1.3f).alpha(1f)
                         .setDuration(400)
@@ -202,7 +182,6 @@ public class MafiadayActivity extends AppCompatActivity
                                 .scaleX(1f).scaleY(1f).setDuration(200).start())
                         .start(), 100);
 
-        // If kill → icon shakes (600ms)
         if (killed) {
             tvIcon.postDelayed(() -> {
                 android.animation.ObjectAnimator shake = android.animation.ObjectAnimator
@@ -213,32 +192,27 @@ public class MafiadayActivity extends AppCompatActivity
             }, 600);
         }
 
-        // Headline slides up (500ms)
         tvHeadline.postDelayed(() ->
                 tvHeadline.animate().alpha(1f).translationY(0f)
                         .setDuration(400)
                         .setInterpolator(new android.view.animation.DecelerateInterpolator())
                         .start(), 500);
 
-        // Detail fades in (900ms)
         tvDetail.postDelayed(() ->
                 tvDetail.animate().alpha(1f).setDuration(400).start(), 900);
 
-        // Button slides in (1400ms)
         btnVote.postDelayed(() ->
                 btnVote.animate().alpha(1f)
                         .setDuration(350)
                         .setInterpolator(new android.view.animation.OvershootInterpolator(2f))
                         .start(), 1400);
 
-        // Button dismisses overlay
         btnVote.setOnClickListener(vv ->
                 overlay.animate().alpha(0f).setDuration(350)
                         .withEndAction(() -> root.removeView(overlay))
                         .start());
     }
 
-    // ── Night result particles ────────────────────────────────────────────────
     private class NightResultParticleView extends android.view.View {
         private final java.util.Random rnd = new java.util.Random();
         private final android.graphics.Paint paint =
@@ -273,7 +247,6 @@ public class MafiadayActivity extends AppCompatActivity
             int w = getWidth(), h = getHeight();
             for (float[] p : pts) {
                 if (killed) {
-                    // Blood drops falling
                     paint.setColor(0xFFAA0000);
                     paint.setAlpha((int)(p[4] * 255));
                     paint.setStyle(android.graphics.Paint.Style.FILL);
@@ -287,7 +260,6 @@ public class MafiadayActivity extends AppCompatActivity
                     p[1] += p[2]; p[0] += p[5];
                     if (p[1] > h+p[3]) { p[1] = -p[3]; p[0] = rnd.nextFloat()*w; }
                 } else if (saved) {
-                    // Green plus signs floating up
                     paint.setColor(0xFF2ECC71);
                     paint.setAlpha((int)(p[4] * 255));
                     paint.setStyle(android.graphics.Paint.Style.FILL);
@@ -297,7 +269,6 @@ public class MafiadayActivity extends AppCompatActivity
                     p[1] -= p[2]; p[0] += p[5];
                     if (p[1] < -p[3]) { p[1] = h+p[3]; p[0] = rnd.nextFloat()*w; }
                 } else {
-                    // Quiet night — soft twinkling stars
                     float twinkle = 0.3f + 0.7f * (float)(Math.sin(p[5] + p[2]) * 0.5 + 0.5);
                     paint.setColor(0xFF8AB4FF);
                     paint.setAlpha((int)(twinkle * p[4] * 200));
@@ -306,7 +277,7 @@ public class MafiadayActivity extends AppCompatActivity
                     paint.setAlpha((int)(twinkle * p[4] * 80));
                     canvas.drawLine(p[0]-p[3], p[1], p[0]+p[3], p[1], paint);
                     canvas.drawLine(p[0], p[1]-p[3], p[0], p[1]+p[3], paint);
-                    p[5] += 0.02f; // advance twinkle phase
+                    p[5] += 0.02f;
                 }
                 if (p[0] < 0 || p[0] > w) p[5] = -p[5];
             }
@@ -314,7 +285,6 @@ public class MafiadayActivity extends AppCompatActivity
         }
     }
 
-    // ── Bind views ────────────────────────────────────────────────────────────
     private void bindViews() {
         tv_day_round          = findViewById(R.id.tv_day_round);
         tv_night_result_emoji = findViewById(R.id.tv_night_result_emoji);
@@ -326,12 +296,11 @@ public class MafiadayActivity extends AppCompatActivity
         btn_eliminate         = findViewById(R.id.btn_eliminate);
         btn_skip_vote         = findViewById(R.id.btn_skip_vote);
 
-        tv_day_round.setText("ROUND " + round);
+        tv_day_round.setText(getString(R.string.mafia_round, round));
         btn_eliminate.setOnClickListener(v -> confirmElimination());
         btn_skip_vote.setOnClickListener(v -> confirmSkip());
     }
 
-    // ── Night result banner ───────────────────────────────────────────────────
     private void setupNightResult() {
         if (nightResultText == null) return;
         if (nightResultText.contains("saved")) {
@@ -341,15 +310,13 @@ public class MafiadayActivity extends AppCompatActivity
             int mafiaAlive = 0;
             for (Player p : players)
                 if (p.isAlive() && p.getRole() == Player.Role.MAFIA) mafiaAlive++;
-            nightResultText += "\n" + mafiaAlive + " Mafia member"
-                    + (mafiaAlive == 1 ? "" : "s") + " still hiding.";
+            nightResultText += (mafiaAlive == 1 ? getString(R.string.mafia_day_mafia_hiding_one) : getString(R.string.mafia_day_mafia_hiding_plural, mafiaAlive));
         } else {
             tv_night_result_emoji.setText("🌙");
         }
         tv_night_result_text.setText(nightResultText);
     }
 
-    // ── Vote list ─────────────────────────────────────────────────────────────
     private void buildVoteList() {
         ll_vote_list.removeAllViews();
         voteMap.clear();
@@ -426,16 +393,14 @@ public class MafiadayActivity extends AppCompatActivity
         return btn;
     }
 
-    // ── Vote logic ────────────────────────────────────────────────────────────
     private void addVote(int playerId) {
         if (totalVotes >= totalVoters) {
-            Toast.makeText(this, "All votes already cast", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.mafia_day_all_votes_cast, Toast.LENGTH_SHORT).show();
             return;
         }
         int current = voteMap.getOrDefault(playerId, 0);
         if (current >= totalVoters - 1) {
-            Toast.makeText(this, "A player cannot vote for themselves — max "
-                    + (totalVoters - 1) + " votes", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.mafia_day_no_self_vote, (totalVoters - 1)), Toast.LENGTH_SHORT).show();
             return;
         }
         voteMap.put(playerId, current + 1);
@@ -453,15 +418,10 @@ public class MafiadayActivity extends AppCompatActivity
         refreshVotesRemaining();
     }
 
-    // ── VoteCallback — called when a network client submits a vote ────────────
     @Override
     public void onVoteReceived(int voterId, int targetId) {
-        // Count each client's vote (one vote per player)
         runOnUiThread(() -> {
-            // Remove any previous vote from this voter
-            // (simple approach: just add the vote to the target's count)
             addVote(targetId);
-            // Auto-eliminate when all network players have voted
             if (isHost && totalVotes >= totalVoters) {
                 confirmElimination();
             }
@@ -483,30 +443,26 @@ public class MafiadayActivity extends AppCompatActivity
         } else {
             int votes = voteMap.getOrDefault(leader.getId(), 0);
             tv_leading_name.setText(leader.getName());
-            tv_leading_count.setText(votes + (votes == 1 ? " vote" : " votes"));
+            tv_leading_count.setText(getString(R.string.mafia_leading_count, votes));
         }
     }
 
     private void refreshVotesRemaining() {
         int remaining = totalVoters - totalVotes;
         tv_votes_remaining.setText(remaining == 0
-                ? "All votes cast ✓"
-                : remaining + (remaining == 1 ? " vote remaining" : " votes remaining"));
+                ? getString(R.string.mafia_day_all_votes_cast)
+                : getString(R.string.mafia_votes_remaining, remaining));
     }
 
-    // ── Eliminate leader ──────────────────────────────────────────────────────
-    // ── Eliminate leader ──────────────────────────────────────────────────────
     private void confirmElimination() {
         if (voteMap.isEmpty() || totalVotes == 0) {
-            Toast.makeText(this, "No votes cast yet", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.mafia_day_no_votes_cast, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Find max votes
         int maxVotes = 0;
         for (int v : voteMap.values()) if (v > maxVotes) maxVotes = v;
 
-        // Count how many players share the max — draw if more than one
         List<Player> tied = new ArrayList<>();
         for (Player p : getAlivePlayers()) {
             if (voteMap.getOrDefault(p.getId(), 0) == maxVotes) tied.add(p);
@@ -528,7 +484,6 @@ public class MafiadayActivity extends AppCompatActivity
         showEliminationDialog(leader);
     }
 
-    // ── Draw → go straight to night, no elimination ───────────────────────────
     private void showDrawDialog(List<Player> tied) {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -536,7 +491,6 @@ public class MafiadayActivity extends AppCompatActivity
         root.setBackgroundColor(0xFF12141F);
         root.setPadding(dpToPx(32), dpToPx(40), dpToPx(32), dpToPx(32));
 
-        // Icon
         TextView tvIcon = new TextView(this);
         tvIcon.setText("⚖️");
         tvIcon.setTextSize(64);
@@ -547,9 +501,8 @@ public class MafiadayActivity extends AppCompatActivity
         tvIcon.setLayoutParams(iLp);
         root.addView(tvIcon);
 
-        // Title
         TextView tvTitle = new TextView(this);
-        tvTitle.setText("IT'S A DRAW");
+        tvTitle.setText(R.string.mafia_day_draw_title);
         tvTitle.setTextSize(24);
         tvTitle.setTypeface(null, android.graphics.Typeface.BOLD);
         tvTitle.setLetterSpacing(0.2f);
@@ -561,7 +514,6 @@ public class MafiadayActivity extends AppCompatActivity
         tvTitle.setLayoutParams(tLp);
         root.addView(tvTitle);
 
-        // Tied player names
         StringBuilder names = new StringBuilder();
         for (Player p : tied) names.append("• ").append(p.getName()).append("\n");
         TextView tvTied = new TextView(this);
@@ -576,9 +528,8 @@ public class MafiadayActivity extends AppCompatActivity
         tvTied.setLayoutParams(nLp);
         root.addView(tvTied);
 
-        // Subtitle
         TextView tvSub = new TextView(this);
-        tvSub.setText("No one is eliminated.\nThe night begins.");
+        tvSub.setText(R.string.mafia_day_draw_msg);
         tvSub.setTextSize(13);
         tvSub.setGravity(Gravity.CENTER);
         tvSub.setTextColor(0xFF8A9BC4);
@@ -589,9 +540,8 @@ public class MafiadayActivity extends AppCompatActivity
         tvSub.setLayoutParams(sLp);
         root.addView(tvSub);
 
-        // Continue to night button
         TextView btnContinue = new TextView(this);
-        btnContinue.setText("🌙  BEGIN NIGHT");
+        btnContinue.setText(R.string.mafia_day_begin_night);
         btnContinue.setTextSize(14);
         btnContinue.setTypeface(null, android.graphics.Typeface.BOLD);
         btnContinue.setGravity(Gravity.CENTER);
@@ -615,7 +565,6 @@ public class MafiadayActivity extends AppCompatActivity
     }
 
     private void showEliminationDialog(Player victim) {
-        // Colors by role
         int bgColor, accentColor;
         String emoji, verdict, flavour;
         switch (victim.getRole()) {
@@ -623,29 +572,29 @@ public class MafiadayActivity extends AppCompatActivity
                 bgColor     = 0xFF1A0A0A;
                 accentColor = 0xFFFF4444;
                 emoji       = "🧛";
-                verdict     = "MAFIA MEMBER";
-                flavour     = "The town has rooted out a Mafia member!\nThe town grows safer.";
+                verdict     = getString(R.string.mafia_elim_title_mafia);
+                flavour     = getString(R.string.mafia_elim_desc_mafia);
                 break;
             case DOCTOR:
                 bgColor     = 0xFF0A1A0F;
                 accentColor = 0xFF2ECC71;
                 emoji       = "🧑‍⚕️";
-                verdict     = "DOCTOR";
-                flavour     = "The town has lost its healer.\nThe Mafia grows stronger.";
+                verdict     = getString(R.string.mafia_elim_title_doctor);
+                flavour     = getString(R.string.mafia_elim_desc_doctor);
                 break;
             case DETECTIVE:
                 bgColor     = 0xFF0A0F1A;
                 accentColor = 0xFF3B9EFF;
                 emoji       = "🕵️‍♀️";
-                verdict     = "DETECTIVE";
-                flavour     = "The town has lost its investigator.\nThe Mafia's secrets are safer.";
+                verdict     = getString(R.string.mafia_elim_title_detective);
+                flavour     = getString(R.string.mafia_elim_desc_detective);
                 break;
             default:
                 bgColor     = 0xFF0F0F1A;
                 accentColor = 0xFF8A9BC4;
                 emoji       = "👤";
-                verdict     = "CIVILIAN";
-                flavour     = "An innocent civilian has been eliminated.\nThe Mafia hides among the rest.";
+                verdict     = getString(R.string.mafia_elim_title_civilian);
+                flavour     = getString(R.string.mafia_elim_desc_civilian);
                 break;
         }
 
@@ -655,7 +604,6 @@ public class MafiadayActivity extends AppCompatActivity
         root.setBackgroundColor(bgColor);
         root.setPadding(dpToPx(32), dpToPx(40), dpToPx(32), dpToPx(32));
 
-        // Big role emoji
         TextView tvEmoji = new TextView(this);
         tvEmoji.setText(emoji);
         tvEmoji.setTextSize(64);
@@ -666,7 +614,6 @@ public class MafiadayActivity extends AppCompatActivity
         tvEmoji.setLayoutParams(eLp);
         root.addView(tvEmoji);
 
-        // Role verdict (e.g. "MAFIA MEMBER")
         TextView tvVerdict = new TextView(this);
         tvVerdict.setText(verdict);
         tvVerdict.setTextSize(24);
@@ -680,7 +627,6 @@ public class MafiadayActivity extends AppCompatActivity
         tvVerdict.setLayoutParams(vLp);
         root.addView(tvVerdict);
 
-        // Victim name
         TextView tvName = new TextView(this);
         tvName.setText(victim.getName());
         tvName.setTextSize(22);
@@ -693,7 +639,6 @@ public class MafiadayActivity extends AppCompatActivity
         tvName.setLayoutParams(nLp);
         root.addView(tvName);
 
-        // Flavour description
         TextView tvDesc = new TextView(this);
         tvDesc.setText(flavour);
         tvDesc.setTextSize(13);
@@ -706,9 +651,8 @@ public class MafiadayActivity extends AppCompatActivity
         tvDesc.setLayoutParams(dLp);
         root.addView(tvDesc);
 
-        // Continue button
         TextView btnContinue = new TextView(this);
-        btnContinue.setText("CONTINUE  →");
+        btnContinue.setText(R.string.mafia_elim_continue);
         btnContinue.setTextSize(14);
         btnContinue.setTypeface(null, android.graphics.Typeface.BOLD);
         btnContinue.setGravity(Gravity.CENTER);
@@ -731,7 +675,6 @@ public class MafiadayActivity extends AppCompatActivity
         dialog.show();
     }
 
-    // ── Skip voting ───────────────────────────────────────────────────────────
     private void confirmSkip() {
         android.widget.FrameLayout root =
                 (android.widget.FrameLayout) getWindow().getDecorView();
@@ -743,13 +686,11 @@ public class MafiadayActivity extends AppCompatActivity
         overlay.setBackgroundColor(0xEE030A18);
         overlay.setElevation(dpToPx(150));
 
-        // Flash particle layer
         SkipFlashView flash = new SkipFlashView(this);
         overlay.addView(flash, new android.widget.FrameLayout.LayoutParams(
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
 
-        // Center content
         android.widget.LinearLayout center = new android.widget.LinearLayout(this);
         center.setOrientation(android.widget.LinearLayout.VERTICAL);
         center.setGravity(android.view.Gravity.CENTER);
@@ -757,9 +698,8 @@ public class MafiadayActivity extends AppCompatActivity
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
 
-        // Moon emoji
         android.widget.TextView tvMoon = new android.widget.TextView(this);
-        tvMoon.setText("\uD83C\uDF19");
+        tvMoon.setText("🌙");
         tvMoon.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 80);
         tvMoon.setGravity(android.view.Gravity.CENTER);
         tvMoon.setScaleX(0f);
@@ -767,9 +707,8 @@ public class MafiadayActivity extends AppCompatActivity
         tvMoon.setAlpha(0f);
         center.addView(tvMoon);
 
-        // Headline
         android.widget.TextView tvTitle = new android.widget.TextView(this);
-        tvTitle.setText("SKIPPING VOTE");
+        tvTitle.setText(R.string.mafia_day_skipping_vote);
         tvTitle.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 24);
         tvTitle.setTypeface(null, android.graphics.Typeface.BOLD);
         tvTitle.setLetterSpacing(0.2f);
@@ -784,9 +723,8 @@ public class MafiadayActivity extends AppCompatActivity
         tvTitle.setLayoutParams(titleLp);
         center.addView(tvTitle);
 
-        // Subtitle
         android.widget.TextView tvSub = new android.widget.TextView(this);
-        tvSub.setText("No one eliminated \uD83D\uDE4F\nNight begins...");
+        tvSub.setText(R.string.mafia_day_skip_msg);
         tvSub.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 14);
         tvSub.setTextColor(0xFF7A9BC4);
         tvSub.setGravity(android.view.Gravity.CENTER);
@@ -800,9 +738,8 @@ public class MafiadayActivity extends AppCompatActivity
         tvSub.setLayoutParams(subLp);
         center.addView(tvSub);
 
-        // Tap hint
         android.widget.TextView tvTap = new android.widget.TextView(this);
-        tvTap.setText("tap to continue");
+        tvTap.setText(R.string.mafia_day_tap_continue);
         tvTap.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 11);
         tvTap.setTextColor(0x66B0C8FF);
         tvTap.setGravity(android.view.Gravity.CENTER);
@@ -817,7 +754,6 @@ public class MafiadayActivity extends AppCompatActivity
 
         root.addView(overlay);
 
-        // Moon bounces in with overshoot
         tvMoon.animate()
                 .scaleX(1f).scaleY(1f).alpha(1f)
                 .setDuration(450)
@@ -839,12 +775,10 @@ public class MafiadayActivity extends AppCompatActivity
         tvTap.animate().alpha(1f)
                 .setStartDelay(900).setDuration(500).start();
 
-        // Auto-proceed after 2.2s
         Runnable proceed = () -> overlay.animate().alpha(0f).setDuration(380)
                 .withEndAction(() -> { root.removeView(overlay); goToNightPhase(); }).start();
         overlay.postDelayed(proceed, 2200);
 
-        // Tap to skip wait
         overlay.setOnClickListener(vv -> {
             overlay.removeCallbacks(proceed);
             overlay.animate().alpha(0f).setDuration(280)
@@ -852,10 +786,9 @@ public class MafiadayActivity extends AppCompatActivity
         });
     }
     private static class SkipFlashView extends android.view.View {
-        private final java.util.Random rnd = new java.util.Random();
+        private final java.util.Random rnd = new java.util.Random(55443L);
         private final android.graphics.Paint p =
                 new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
-        // [x, y, vx, vy, size, alpha, type(0=8pt star, 1=circle, 2=cross)]
         private final float[][] pts = new float[45][7];
         private boolean ready = false;
         private float time = 0f;
@@ -924,7 +857,6 @@ public class MafiadayActivity extends AppCompatActivity
         }
     }
 
-    // ── Win condition ─────────────────────────────────────────────────────────
     private boolean checkWinCondition() {
         int mafiaAlive = 0, townAlive = 0;
         for (Player p : players) {
@@ -934,16 +866,16 @@ public class MafiadayActivity extends AppCompatActivity
         }
 
         if (mafiaAlive == 0) {
-            String title = "🏘️  TOWN WINS";
-            String msg   = "The Mafia has been eliminated.\nThe town is safe!";
+            String title = getString(R.string.mafia_day_town_wins_title);
+            String msg   = getString(R.string.mafia_day_town_wins_msg);
             if (isHost && MafiaServerHolder.isHosting())
                 MafiaServerHolder.get().broadcastGameOver(title, msg);
             showGameOver(title, msg);
             return true;
         }
         if (mafiaAlive >= townAlive) {
-            String title = "🧛  MAFIA WINS";
-            String msg   = "The Mafia controls the town.\n\n" + buildMafiaReveal();
+            String title = getString(R.string.mafia_day_mafia_wins_title);
+            String msg   = getString(R.string.mafia_day_mafia_wins_msg) + buildMafiaReveal();
             if (isHost && MafiaServerHolder.isHosting())
                 MafiaServerHolder.get().broadcastGameOver(title, msg);
             showGameOver(title, msg);
@@ -953,14 +885,13 @@ public class MafiadayActivity extends AppCompatActivity
     }
 
     private String buildMafiaReveal() {
-        StringBuilder sb = new StringBuilder("Mafia members were:\n");
+        StringBuilder sb = new StringBuilder(getString(R.string.mafia_day_mafia_reveal));
         for (Player p : players)
             if (p.getRole() == Player.Role.MAFIA)
                 sb.append("• ").append(p.getName()).append("\n");
         return sb.toString().trim();
     }
 
-    // ── Game over — full cinematic animated screen ────────────────────────────
     private void showGameOver(String title, String message) {
         btn_eliminate.setClickable(false);
         btn_skip_vote.setClickable(false);
@@ -974,13 +905,11 @@ public class MafiadayActivity extends AppCompatActivity
         overlay.setBackgroundColor(mafiaWins ? 0xFF0D0000 : 0xFF00050F);
         overlay.setElevation(dpToPx(100));
 
-        // Particle layer
         GameOverParticleView particles = new GameOverParticleView(this, mafiaWins);
         overlay.addView(particles, new android.widget.FrameLayout.LayoutParams(
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
 
-        // Center content
         LinearLayout center = new LinearLayout(this);
         center.setOrientation(LinearLayout.VERTICAL);
         center.setGravity(Gravity.CENTER);
@@ -989,7 +918,6 @@ public class MafiadayActivity extends AppCompatActivity
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
                 android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
 
-        // Big icon
         TextView tvIcon = new TextView(this);
         tvIcon.setText(mafiaWins ? "🧛" : "🏆");
         tvIcon.setTextSize(88);
@@ -1001,9 +929,8 @@ public class MafiadayActivity extends AppCompatActivity
         tvIcon.setLayoutParams(iLp);
         center.addView(tvIcon);
 
-        // Win title
         TextView tvTitle = new TextView(this);
-        tvTitle.setText(mafiaWins ? "MAFIA WINS" : "TOWN WINS");
+        tvTitle.setText(title);
         tvTitle.setTextSize(34);
         tvTitle.setTypeface(null, Typeface.BOLD);
         tvTitle.setLetterSpacing(0.25f);
@@ -1016,7 +943,6 @@ public class MafiadayActivity extends AppCompatActivity
         tvTitle.setLayoutParams(tLp);
         center.addView(tvTitle);
 
-        // Message
         TextView tvMsg = new TextView(this);
         tvMsg.setText(message);
         tvMsg.setTextSize(14);
@@ -1030,9 +956,8 @@ public class MafiadayActivity extends AppCompatActivity
         tvMsg.setLayoutParams(mLp);
         center.addView(tvMsg);
 
-        // Play Again button
         TextView btnPlayAgain = new TextView(this);
-        btnPlayAgain.setText("🔁  PLAY AGAIN");
+        btnPlayAgain.setText(R.string.mafia_day_play_again);
         btnPlayAgain.setTextSize(14);
         btnPlayAgain.setTypeface(null, Typeface.BOLD);
         btnPlayAgain.setGravity(Gravity.CENTER);
@@ -1045,9 +970,8 @@ public class MafiadayActivity extends AppCompatActivity
         btnPlayAgain.setLayoutParams(bLp);
         center.addView(btnPlayAgain);
 
-        // Main Menu button
         TextView btnMainMenu = new TextView(this);
-        btnMainMenu.setText("🏠  MAIN MENU");
+        btnMainMenu.setText(R.string.mafia_day_main_menu);
         btnMainMenu.setTextSize(14);
         btnMainMenu.setTypeface(null, Typeface.BOLD);
         btnMainMenu.setGravity(Gravity.CENTER);
@@ -1061,9 +985,6 @@ public class MafiadayActivity extends AppCompatActivity
         android.view.ViewGroup root = (android.view.ViewGroup) getWindow().getDecorView();
         root.addView(overlay);
 
-        // ── Animation sequence ────────────────────────────────────────────────
-
-        // 1. Background flash (0ms)
         android.animation.ObjectAnimator flash = android.animation.ObjectAnimator
                 .ofArgb(overlay, "backgroundColor",
                         mafiaWins ? 0xFF0D0000 : 0xFF00050F,
@@ -1072,7 +993,6 @@ public class MafiadayActivity extends AppCompatActivity
         flash.setDuration(600);
         flash.start();
 
-        // 2. Icon bursts in (100ms)
         tvIcon.postDelayed(() ->
                 tvIcon.animate().scaleX(1.3f).scaleY(1.3f).alpha(1f)
                         .setDuration(400)
@@ -1081,24 +1001,20 @@ public class MafiadayActivity extends AppCompatActivity
                                 .scaleX(1f).scaleY(1f).setDuration(200).start())
                         .start(), 100);
 
-        // 3. Title slides up (500ms)
         tvTitle.postDelayed(() ->
                 tvTitle.animate().alpha(1f).translationY(0f)
                         .setDuration(400)
                         .setInterpolator(new android.view.animation.DecelerateInterpolator())
                         .start(), 500);
 
-        // 4. Message fades in (900ms)
         tvMsg.postDelayed(() ->
                 tvMsg.animate().alpha(1f).setDuration(400).start(), 900);
 
-        // 5. Buttons appear (1300ms)
         btnPlayAgain.postDelayed(() -> {
             btnPlayAgain.animate().alpha(1f).setDuration(300).start();
             btnMainMenu.animate().alpha(1f).setDuration(300).setStartDelay(100).start();
         }, 1300);
 
-        // Pulse title repeatedly
         overlay.postDelayed(() -> {
             android.animation.ObjectAnimator pulse = android.animation.ObjectAnimator
                     .ofFloat(tvTitle, "scaleX", 1f, 1.06f, 1f);
@@ -1125,19 +1041,16 @@ public class MafiadayActivity extends AppCompatActivity
         });
     }
 
-    // ── Game over particle view ───────────────────────────────────────────────
     private class GameOverParticleView extends android.view.View {
         private final java.util.Random rnd = new java.util.Random();
         private final android.graphics.Paint paint =
                 new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
         private final boolean mafiaWins;
 
-        // Mafia: blood drops.  Town: fireworks rockets + burst particles
-        private final float[][] drops  = new float[40][6]; // blood drops
-        private final float[][] rockets = new float[8][7]; // x,y,vx,vy,r,alpha,burst
+        private final float[][] drops  = new float[40][6];
+        private final float[][] rockets = new float[8][7];
         private final java.util.List<float[]> sparks = new java.util.ArrayList<>();
         private boolean initialized = false;
-        // Firework colors
         private final int[] fwColors = {
                 0xFFFFC107, 0xFFFF5722, 0xFF4CAF50, 0xFF2196F3,
                 0xFFE91E63, 0xFFFFEB3B, 0xFF00BCD4, 0xFFFF9800
@@ -1155,13 +1068,12 @@ public class MafiadayActivity extends AppCompatActivity
                     for (float[] d : drops) {
                         d[0] = rnd.nextFloat() * w;
                         d[1] = rnd.nextFloat() * h;
-                        d[2] = 4f + rnd.nextFloat() * 7f;   // speed
-                        d[3] = 7f + rnd.nextFloat() * 13f;  // size
-                        d[4] = 0.5f + rnd.nextFloat() * 0.5f; // alpha
-                        d[5] = -1.5f + rnd.nextFloat() * 3f; // drift
+                        d[2] = 4f + rnd.nextFloat() * 7f;
+                        d[3] = 7f + rnd.nextFloat() * 13f;
+                        d[4] = 0.5f + rnd.nextFloat() * 0.5f;
+                        d[5] = -1.5f + rnd.nextFloat() * 3f;
                     }
                 } else {
-                    // Town: launch rockets from bottom
                     for (int i = 0; i < rockets.length; i++) {
                         resetRocket(rockets[i], w, h, i);
                     }
@@ -1173,11 +1085,11 @@ public class MafiadayActivity extends AppCompatActivity
         private void resetRocket(float[] r, int w, int h, int i) {
             r[0] = (w / (rockets.length + 1f)) * (i + 1) + rnd.nextFloat() * 60 - 30;
             r[1] = h + 10;
-            r[2] = -1f + rnd.nextFloat() * 2f;  // vx
-            r[3] = -(12f + rnd.nextFloat() * 8f); // vy upward
-            r[4] = 4f;   // radius
-            r[5] = 1f;   // alpha
-            r[6] = 0;    // burst=0 rising, 1=exploded
+            r[2] = -1f + rnd.nextFloat() * 2f;
+            r[3] = -(12f + rnd.nextFloat() * 8f);
+            r[4] = 4f;
+            r[5] = 1f;
+            r[6] = 0;
         }
 
         private void burst(float x, float y, int color) {
@@ -1188,8 +1100,8 @@ public class MafiadayActivity extends AppCompatActivity
                         x, y,
                         (float)(Math.cos(angle) * speed),
                         (float)(Math.sin(angle) * speed),
-                        5f + rnd.nextFloat() * 5f, // size
-                        1f,  // alpha
+                        5f + rnd.nextFloat() * 5f,
+                        1f,
                         color
                 });
             }
@@ -1201,7 +1113,6 @@ public class MafiadayActivity extends AppCompatActivity
             if (!initialized) { postInvalidateDelayed(16); return; }
 
             if (mafiaWins) {
-                // ── Blood rain ────────────────────────────────────────────────
                 for (float[] d : drops) {
                     paint.setColor(0xFFCC0000);
                     paint.setAlpha((int)(d[4] * 255));
@@ -1221,34 +1132,28 @@ public class MafiadayActivity extends AppCompatActivity
                     if (d[0] < 0 || d[0] > w) d[5] = -d[5];
                 }
             } else {
-                // ── Fireworks ─────────────────────────────────────────────────
                 for (int i = 0; i < rockets.length; i++) {
                     float[] r = rockets[i];
                     if (r[6] == 0) {
-                        // Rising rocket trail
                         paint.setColor(0xFFFFFFFF);
                         paint.setAlpha(180);
                         paint.setStyle(android.graphics.Paint.Style.FILL);
                         canvas.drawCircle(r[0], r[1], r[4], paint);
-                        // trail
                         for (int t = 1; t <= 5; t++) {
                             paint.setAlpha(40 * (6 - t));
                             canvas.drawCircle(r[0] - r[2]*t, r[1] + t*6, r[4]*0.6f, paint);
                         }
                         r[0] += r[2]; r[1] += r[3];
-                        r[3] += 0.3f; // gravity
-                        // Explode when slowing near peak
+                        r[3] += 0.3f;
                         if (r[3] >= -2f) {
                             r[6] = 1;
                             burst(r[0], r[1], fwColors[i % fwColors.length]);
-                            // relaunch after delay
                             postDelayed(() -> resetRocket(r, w, h, (int)(rnd.nextFloat()*8)),
                                     (long)(800 + rnd.nextFloat() * 1200));
                         }
                     }
                 }
 
-                // Spark particles
                 java.util.Iterator<float[]> it = sparks.iterator();
                 while (it.hasNext()) {
                     float[] sp = it.next();
@@ -1257,9 +1162,9 @@ public class MafiadayActivity extends AppCompatActivity
                     paint.setStyle(android.graphics.Paint.Style.FILL);
                     canvas.drawCircle(sp[0], sp[1], sp[4] * sp[5], paint);
                     sp[0] += sp[2]; sp[1] += sp[3];
-                    sp[3] += 0.15f; // gravity
-                    sp[5] -= 0.018f; // fade
-                    sp[2] *= 0.97f; sp[3] *= 0.97f; // drag
+                    sp[3] += 0.15f;
+                    sp[5] -= 0.018f;
+                    sp[2] *= 0.97f; sp[3] *= 0.97f;
                     if (sp[5] <= 0) it.remove();
                 }
             }
@@ -1267,9 +1172,7 @@ public class MafiadayActivity extends AppCompatActivity
         }
     }
 
-    // ── Go to next night ──────────────────────────────────────────────────────
     private void goToNightPhase() {
-        // Broadcast ROLE_REVEAL so clients navigate to next night screen
         if (isHost && MafiaServerHolder.isHosting()) {
             MafiaServerHolder.get().broadcastState("ROLE_REVEAL");
         }
@@ -1282,7 +1185,6 @@ public class MafiadayActivity extends AppCompatActivity
         finish();
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
     private Player getLeader() {
         int maxVotes = 0;
         for (int v : voteMap.values()) if (v > maxVotes) maxVotes = v;
@@ -1292,7 +1194,7 @@ public class MafiadayActivity extends AppCompatActivity
         for (Player p : getAlivePlayers()) {
             if (voteMap.getOrDefault(p.getId(), 0) == maxVotes) { leader = p; count++; }
         }
-        return count == 1 ? leader : null; // null = draw
+        return count == 1 ? leader : null;
     }
 
     private List<Player> getAlivePlayers() {
@@ -1301,21 +1203,10 @@ public class MafiadayActivity extends AppCompatActivity
         return alive;
     }
 
-    private String getRoleEmoji(Player.Role role) {
-        switch (role) {
-            case MAFIA:     return "🧛";
-            case DOCTOR:    return "🧑‍⚕️";
-            case DETECTIVE: return "🕵️‍♀️";
-            default:        return "👤";
-        }
-    }
-
     private int dpToPx(int dp) {
         return Math.round(dp * getResources().getDisplayMetrics().density);
     }
-    // =========================================================================
-    //  DaySkyView: animated day sky with sun+rays, layered clouds, flying birds
-    // =========================================================================
+
     private static class DaySkyView extends android.view.View {
         private final java.util.Random rnd = new java.util.Random(55443L);
         private final android.graphics.Paint p =
@@ -1351,32 +1242,27 @@ public class MafiadayActivity extends AppCompatActivity
         @Override protected void onDraw(android.graphics.Canvas canvas){
             if(!ready){postInvalidateDelayed(30);return;} time+=0.018f;
 
-            // Sky gradient
             android.graphics.LinearGradient sky=new android.graphics.LinearGradient(
                     0,0,0,H,new int[]{0xFF083870,0xFF1468B8,0xFF2E94E0,0xFF78C8F0,0xFFBEE8F8,0xFFE4F5FF},
                     new float[]{0f,0.18f,0.42f,0.65f,0.84f,1f},android.graphics.Shader.TileMode.CLAMP);
             p.setShader(sky); canvas.drawRect(0,0,W,H,p); p.setShader(null);
 
-            // Horizon glow
             android.graphics.LinearGradient horiz=new android.graphics.LinearGradient(
                     0,H*0.68f,0,H,new int[]{0x00FFE0A0,0x28FFD080,0x14FFBB60},
                     null,android.graphics.Shader.TileMode.CLAMP);
             p.setShader(horiz); canvas.drawRect(0,H*0.68f,W,H,p); p.setShader(null);
 
-            // Sun far pulsing halo
             float br=1f+0.04f*(float)Math.sin(time*0.7f);
             for(int g=10;g>=1;g--){
                 p.setColor((int)(255*0.015f*(11-g)/10f)<<24|0x00FFE080);
                 canvas.drawCircle(sX,sY,sR*br+dp(g*10),p);
             }
 
-            // Sun atmospheric halo
             android.graphics.RadialGradient sa=new android.graphics.RadialGradient(
                     sX,sY,sR*2.8f,new int[]{0x40FFE890,0x20FFD060,0x00000000},
                     new float[]{0f,0.45f,1f},android.graphics.Shader.TileMode.CLAMP);
             p.setShader(sa); canvas.drawCircle(sX,sY,sR*2.8f,p); p.setShader(null);
 
-            // Sun rays
             float rot=time*0.18f;
             p.setStyle(android.graphics.Paint.Style.STROKE);
             for(int i=0;i<16;i++){
@@ -1390,7 +1276,6 @@ public class MafiadayActivity extends AppCompatActivity
             }
             p.setStyle(android.graphics.Paint.Style.FILL);
 
-            // Sun body
             android.graphics.RadialGradient sb=new android.graphics.RadialGradient(
                     sX-sR*0.25f,sY-sR*0.25f,sR*1.1f,
                     new int[]{0xFFFFFFF0,0xFFFFF880,0xFFFFE040,0xFFFFBB00},
@@ -1401,16 +1286,13 @@ public class MafiadayActivity extends AppCompatActivity
                     null,android.graphics.Shader.TileMode.CLAMP);
             p.setShader(ss); canvas.drawCircle(sX,sY,sR,p); p.setShader(null);
 
-            // Clouds (far then near)
             drawClouds(canvas,0); drawClouds(canvas,1);
 
-            // Birds
             for(float[]b:birds){
                 b[0]+=b[2]; if(b[0]>W+dp(40))b[0]=-dp(40);
                 b[3]+=b[4];
                 drawBird(canvas,b[0],b[1],b[5],(float)(Math.sin(b[3])*Math.PI*0.45f));
             }
-            // Scroll clouds
             for(float[]c:clouds){c[0]+=c[4]; if(c[0]>W+c[2]*1.5f)c[0]=-c[2]*1.5f;}
             postInvalidateDelayed(30);
         }
@@ -1443,5 +1325,4 @@ public class MafiadayActivity extends AppCompatActivity
             p.setStyle(android.graphics.Paint.Style.FILL);
         }
     }
-
 }

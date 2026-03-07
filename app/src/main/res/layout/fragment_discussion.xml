@@ -18,7 +18,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="— INTERROGATION —"
+            android:text="@string/discussion_interrogation"
             android:textSize="10sp"
             android:textStyle="bold"
             android:letterSpacing="0.25"
@@ -27,7 +27,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="DISCUSSION"
+            android:text="@string/discussion_title"
             android:textSize="26sp"
             android:textStyle="bold"
             android:letterSpacing="0.15"
@@ -61,7 +61,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Find the impostor among you"
+            android:text="@string/discussion_tagline"
             android:textSize="13sp"
             android:textColor="@color/text_secondary"
             android:gravity="center"
@@ -71,7 +71,7 @@
             android:id="@+id/btn_go_to_vote"
             android:layout_width="match_parent"
             android:layout_height="54dp"
-            android:text="🗳  GO TO VOTE"
+            android:text="@string/discussion_go_to_vote"
             android:textSize="14sp"
             android:textStyle="bold"
             android:letterSpacing="0.1"

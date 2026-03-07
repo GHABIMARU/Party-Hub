@@ -52,16 +52,15 @@ public class MafiaNetworkDayActivity extends AppCompatActivity
         root.setPadding(dp(20), dp(40), dp(20), dp(20));
         scroll.addView(root);
 
-        // Header
-        tvTitle = label("☀️  DAY  •  Round " + round, 22, true, 0xFFF0F4FF);
+        tvTitle = label(getString(R.string.mafia_day_title_round, round), 22, true, 0xFFF0F4FF);
         marginBottom(tvTitle, dp(6));
         root.addView(tvTitle);
 
-        TextView tvSub = label("Discuss and vote to eliminate a suspect", 13, false, 0xFF8A9BC4);
+        TextView tvSub = label(getString(R.string.mafia_day_subtitle), 13, false, 0xFF8A9BC4);
         marginBottom(tvSub, dp(28));
         root.addView(tvSub);
 
-        root.addView(sectionLabel("ALIVE PLAYERS — tap to vote"));
+        root.addView(sectionLabel(getString(R.string.mafia_day_tap_to_vote)));
 
         llPlayers = new LinearLayout(this);
         llPlayers.setOrientation(LinearLayout.VERTICAL);
@@ -69,16 +68,14 @@ public class MafiaNetworkDayActivity extends AppCompatActivity
         root.addView(llPlayers);
         buildPlayerList();
 
-        // Status
         tvStatus = label("", 13, false, 0xFF8A9BC4);
         tvStatus.setGravity(Gravity.CENTER);
         marginBottom(tvStatus, dp(16));
         tvStatus.setVisibility(View.GONE);
         root.addView(tvStatus);
 
-        // Vote button
         btnVote = new TextView(this);
-        btnVote.setText("SUBMIT VOTE");
+        btnVote.setText(R.string.mafia_net_submit_vote);
         btnVote.setTextSize(15);
         btnVote.setTypeface(null, Typeface.BOLD);
         btnVote.setTextColor(ContextCompat.getColor(this, R.color.bg_dark));
@@ -118,7 +115,7 @@ public class MafiaNetworkDayActivity extends AppCompatActivity
                     for (int i = 0; i < llPlayers.getChildCount(); i++)
                         llPlayers.getChildAt(i).setAlpha(0.45f);
                     row.setAlpha(1f);
-                    tvStatus.setText("Voting for: " + p.getName());
+                    tvStatus.setText(getString(R.string.mafia_net_voting_for, p.getName()));
                     tvStatus.setTextColor(0xFFF0B429);
                     tvStatus.setVisibility(View.VISIBLE);
                 });
@@ -130,40 +127,35 @@ public class MafiaNetworkDayActivity extends AppCompatActivity
     private void onVoteSubmit() {
         if (voted) return;
         if (selectedTarget == null) {
-            Toast.makeText(this, "Tap a player to vote for them first", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.mafia_day_vote_select_error, Toast.LENGTH_SHORT).show();
             return;
         }
         voted = true;
         btnVote.setEnabled(false);
-        btnVote.setText("VOTE SUBMITTED ✓");
-        tvStatus.setText("Waiting for all players to vote...");
+        btnVote.setText(R.string.mafia_net_vote_submitted);
+        tvStatus.setText(R.string.mafia_net_waiting_votes);
         tvStatus.setTextColor(0xFF8A9BC4);
         tvStatus.setVisibility(View.VISIBLE);
 
-        // Send vote to host via MafiaJoinActivity relay
         MafiaEventBus.post("SEND_VOTE", myId + ":" + selectedTarget.getId());
     }
 
-    // ── EventBus ──────────────────────────────────────────────────────────────
     @Override
     public void onEvent(String type, String payload) {
         runOnUiThread(() -> {
             switch (type) {
 
                 case MafiaEventBus.EVENT_ELIMINATED: {
-                    // "PlayerName:ROLE"
                     String[] parts = payload.split(":", 2);
                     String name = parts.length > 0 ? parts[0] : "Someone";
                     String role = parts.length > 1 ? parts[1] : "CIVILIAN";
                     String emoji = roleEmoji(role);
-                    // Mark that player as dead in local list
                     for (Player p : players) {
                         if (p.getName().equals(name)) { p.setAlive(false); break; }
                     }
-                    // Show dialog
                     new AlertDialog.Builder(this)
-                            .setTitle("☀️  Eliminated")
-                            .setMessage(name + " has been eliminated.\n\nTheir role was: " + emoji + "  " + role)
+                            .setTitle(R.string.mafia_day_eliminated_title)
+                            .setMessage(getString(R.string.mafia_day_eliminated_msg, name, emoji, role))
                             .setPositiveButton("OK", null)
                             .setCancelable(false)
                             .show();
@@ -172,7 +164,6 @@ public class MafiaNetworkDayActivity extends AppCompatActivity
 
                 case MafiaEventBus.EVENT_STATE: {
                     if ("ROLE_REVEAL".equals(payload)) {
-                        // Next night — go back to role reveal
                         Intent i = new Intent(this, MafiaNetworkRoleRevealActivity.class);
                         i.putExtra(MafiaNetworkRoleRevealActivity.EXTRA_PLAYERS, players);
                         i.putExtra(MafiaNetworkRoleRevealActivity.EXTRA_MY_ID,   myId);
@@ -186,7 +177,7 @@ public class MafiaNetworkDayActivity extends AppCompatActivity
                 case MafiaEventBus.EVENT_GAME_OVER: {
                     String[] p = payload.split("\\|", 2);
                     Intent i = new Intent(this, MafiaNetworkGameOverActivity.class);
-                    i.putExtra("title",   p.length > 0 ? p[0] : "Game Over");
+                    i.putExtra("title",   p.length > 0 ? p[0] : getString(R.string.result_default));
                     i.putExtra("message", p.length > 1 ? p[1] : "");
                     startActivity(i);
                     finish();
@@ -205,7 +196,6 @@ public class MafiaNetworkDayActivity extends AppCompatActivity
         }
     }
 
-    // ── View helpers ──────────────────────────────────────────────────────────
     private TextView label(String t, float size, boolean bold, int color) {
         TextView tv = new TextView(this);
         tv.setText(t); tv.setTextSize(size); tv.setTextColor(color);

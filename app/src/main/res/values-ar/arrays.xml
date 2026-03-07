@@ -1,0 +1,64 @@
+<resources>
+    <string-array name="theme_objects_words">
+        <item>هاتف</item><item>شاحن</item><item>حقيبة ظهر</item><item>دفتر</item><item>قلم</item>
+        <item>قلم رصاص</item><item>ممحاة</item><item>قلم تحديد</item><item>سماعات</item><item>ساعة</item>
+        <item>محفظة</item><item>مفاتيح</item><item>مرآة</item><item>نظارات</item><item>زجاجة</item>
+        <item>كوب</item><item>طبق</item><item>ملعقة</item><item>شوكة</item><item>سكين</item>
+        <item>وسادة</item><item>بطانية</item><item>باب</item><item>نافذة</item><item>كرسي</item>
+        <item>طاولة</item><item>مصباح</item><item>جهاز تحكم</item><item>تلفاز</item><item>حاسوب محمول</item>
+    </string-array>
+
+    <string-array name="theme_places_words">
+        <item>مدرسة</item><item>مسجد</item><item>شاطئ</item><item>صحراء</item><item>جبل</item>
+        <item>ملعب</item><item>مقهى</item><item>مطعم</item><item>مركز تسوق</item><item>سوق</item>
+        <item>مطار</item><item>مستشفى</item><item>صيدلية</item><item>نادي رياضي</item><item>سينما</item>
+        <item>حديقة</item><item>فندق</item><item>منزل</item><item>شقة</item><item>مرآب</item>
+        <item>مكتبة</item><item>متحف</item><item>حديقة حيوان</item><item>حوض أسماك</item><item>مدينة ملاهي</item>
+    </string-array>
+
+    <string-array name="theme_food_words">
+        <item>بيتزا</item><item>برجر</item><item>تاكو</item><item>شطيرة</item><item>بطاطس مقلية</item>
+        <item>دجاج</item><item>كباب</item><item>كسكس</item><item>طاجين</item><item>حريرة</item>
+        <item>تمر</item><item>برتقال</item><item>موز</item><item>تفاح</item><item>بطيخ</item>
+        <item>قهوة</item><item>شاي بالنعناع</item><item>عصير</item><item>صودا</item><item>حليب</item>
+        <item>شوكولاتة</item><item>كعكة</item><item>مثلجات</item><item>كرواسون</item><item>بانكيك</item>
+    </string-array>
+
+    <string-array name="theme_tech_words">
+        <item>إنستغرام</item><item>تيك توك</item><item>يوتيوب</item><item>واتساب</item><item>سناب شات</item>
+        <item>فيسبوك</item><item>واي فاي</item><item>كلمة مرور</item><item>تطبيق</item><item>لعبة فيديو</item>
+        <item>بلاي ستيشن</item><item>إكس بوكس</item><item>نتفليكس</item><item>سبوتيفاي</item><item>جوجل</item>
+        <item>بريد إلكتروني</item><item>موقع ويب</item><item>لقطة شاشة</item><item>إيموجي</item><item>ميم</item>
+    </string-array>
+
+    <string-array name="theme_animals_words">
+        <item>قطة</item><item>كلب</item><item>أسد</item><item>نمر</item><item>حصان</item>
+        <item>بقرة</item><item>جمل</item><item>خروف</item><item>ماعز</item><item>قرد</item>
+        <item>فيل</item><item>ثعبان</item><item>نسر</item><item>صقر</item><item>قرش</item>
+        <item>سمكة</item><item>دجاجة</item><item>حمار</item><item>أرنب</item><item>ذئب</item>
+    </string-array>
+
+    <string-array name="theme_jobs_words">
+        <item>طبيب</item><item>ممرض</item><item>معلم</item><item>مهندس</item><item>مهندس معماري</item>
+        <item>شرطي</item><item>جندي</item><item>طباخ</item><item>سائق</item><item>طيار</item>
+        <item>مبرمج</item><item>مصمم</item><item>مصور</item><item>ميكانيكي</item><item>كهربائي</item>
+    </string-array>
+
+    <string-array name="theme_sports_words">
+        <item>كرة القدم</item><item>كرة السلة</item><item>تنس</item><item>كرة الطائرة</item><item>سباحة</item>
+        <item>ملاكمة</item><item>كاراتيه</item><item>جري</item><item>ركوب الدراجات</item><item>ركوب الأمواج</item>
+        <item>جمباز</item><item>هدف</item><item>ركلة جزاء</item><item>كأس العالم</item><item>الأولمبياد</item>
+    </string-array>
+
+    <string-array name="theme_school_words">
+        <item>امتحان</item><item>واجب منزلي</item><item>معلم</item><item>فصل دراسي</item><item>مشروع</item>
+        <item>عرض تقديمي</item><item>درجة</item><item>دبلوم</item><item>جامعة</item><item>مكتبة</item>
+        <item>منحة دراسية</item><item>آلة حاسبة</item><item>تاريخ</item><item>رياضيات</item><item>فيزياء</item>
+    </string-array>
+
+    <string-array name="theme_fun_words">
+        <item>سر</item><item>ظل</item><item>نار</item><item>جليد</item><item>عاصفة</item>
+        <item>ريح</item><item>شمس</item><item>قمر</item><item>نجمة</item><item>سحابة</item>
+        <item>مطر</item><item>رعد</item><item>حلم</item><item>مال</item><item>قوة</item>
+    </string-array>
+</resources>

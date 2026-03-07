@@ -90,7 +90,7 @@ public class Mafiasetupactivity extends AppCompatActivity {
                 }
                 updatePlayerCountUI();
             } else {
-                Toast.makeText(this, "Minimum " + MIN_PLAYERS + " players", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.mafia_setup_min_players, MIN_PLAYERS), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -99,7 +99,7 @@ public class Mafiasetupactivity extends AppCompatActivity {
                 playerCount++;
                 updatePlayerCountUI();
             } else {
-                Toast.makeText(this, "Maximum " + MAX_PLAYERS + " players", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.mafia_setup_max_players, MAX_PLAYERS), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -108,7 +108,7 @@ public class Mafiasetupactivity extends AppCompatActivity {
                 mafiaCount--;
                 updateMafiaCountUI();
             } else {
-                Toast.makeText(this, "Need at least 1 Mafia", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.mafia_setup_min_mafia, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -117,7 +117,7 @@ public class Mafiasetupactivity extends AppCompatActivity {
                 mafiaCount++;
                 updateMafiaCountUI();
             } else {
-                Toast.makeText(this, "Too many Mafia for player count", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.mafia_setup_too_many_mafia, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -132,7 +132,7 @@ public class Mafiasetupactivity extends AppCompatActivity {
 
             if (specialRoles >= playerCount) {
                 Toast.makeText(this,
-                        "Not enough civilians — reduce roles or add players",
+                        R.string.mafia_setup_not_enough_civilians,
                         Toast.LENGTH_LONG).show();
                 return;
             }
@@ -193,7 +193,7 @@ public class Mafiasetupactivity extends AppCompatActivity {
             EditText etName = new EditText(this);
             etName.setId(View.generateViewId());
             etName.setTag("name_input_" + i);
-            etName.setHint("Player " + (i + 1));
+            etName.setHint(getString(R.string.mafia_setup_player_default_name, (i + 1)));
             etName.setHintTextColor(ContextCompat.getColor(this, R.color.text_secondary));
             etName.setTextColor(ContextCompat.getColor(this, R.color.text_primary));
             etName.setTextSize(15);
@@ -234,12 +234,12 @@ public class Mafiasetupactivity extends AppCompatActivity {
             EditText et = ll_name_inputs.findViewWithTag("name_input_" + i);
             String name = (et != null && et.getText().length() > 0)
                     ? et.getText().toString().trim()
-                    : "Player " + (i + 1);   // fallback if left blank
+                    : getString(R.string.mafia_setup_player_default_name, (i + 1));   // fallback if left blank
 
             // Check for duplicates
             if (names.contains(name)) {
                 Toast.makeText(this,
-                        "\"" + name + "\" is already used — each player needs a unique name",
+                        getString(R.string.mafia_setup_duplicate_name_error, name),
                         Toast.LENGTH_LONG).show();
                 return;
             }

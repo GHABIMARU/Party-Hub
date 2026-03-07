@@ -1,0 +1,318 @@
+<resources>
+    <string name="app_name">Mix Party</string>
+    <string name="role_impostor">%1$s\nEres el IMPOSTOR</string>
+    <string name="role_word">%1$s\nPalabra: %2$s</string>
+    <string name="home_spyfall_desc">Encuentra al espía antes de\nque descubra la ubicación</string>
+    <string name="home_mafia_desc">Ciudadanos vs la mafia —\nelimina a la mafia al amanecer</string>
+
+    <!-- Home Activity -->
+    <string name="home_choose_game">ELIGE TU JUEGO</string>
+    <string name="game_spyfall">Spyfall</string>
+    <string name="game_mafia">Mafia</string>
+    <string name="home_languages">Idiomas 🌐</string>
+    <string name="mafia_mode_choose">ELEGIR MODO</string>
+    <string name="mafia_mode_pass_play">🃏  Pasar y Jugar</string>
+    <string name="mafia_mode_pass_play_desc">Un dispositivo, todos toman turnos</string>
+    <string name="mafia_mode_host">📡  Anfitrión</string>
+    <string name="mafia_mode_host_desc">Iniciar servidor — amigos se unen vía WiFi</string>
+    <string name="mafia_mode_join">🔗  Unirse</string>
+    <string name="mafia_mode_join_desc">Buscar y unirse a un anfitrión en la red</string>
+
+    <!-- Lobby Fragment -->
+    <string name="lobby_tagline">encuentra al impostor</string>
+    <string name="lobby_name_hint">Nombre en clave del agente&#8230;</string>
+    <string name="lobby_agents_label">AGENTES</string>
+    <string name="lobby_no_players">No hay agentes todavía. Añade al menos 3.</string>
+    <string name="lobby_start_mission">INICIAR MISIÓN</string>
+    <string name="lobby_find_join">BUSCAR Y UNIRSE</string>
+    <string name="lobby_start_hosting">INICIAR ANFITRIÓN</string>
+    <string name="lobby_network_info">Asegúrate de estar en el punto de acceso o WiFi del anfitrión.</string>
+    <string name="lobby_mode_pass_play">🃏  Pasar y Jugar</string>
+    <string name="lobby_mode_host">📡  Anfitrión</string>
+    <string name="lobby_mode_join">🔗  Unirse</string>
+    <string name="lobby_hint_host">Tu nombre en clave (anfitrión)</string>
+    <string name="lobby_hint_join">Tu nombre en clave</string>
+    <string name="lobby_enter_name">Introduce un nombre</string>
+    <string name="lobby_enter_your_name">Introduce tu nombre primero</string>
+    <string name="lobby_impostors_label">IMPOSTORES</string>
+    <string name="lobby_impostor_count_one">1 impostor</string>
+    <string name="lobby_impostor_count_plural">%1$d impostores</string>
+    <string name="lobby_min_players_error">Se necesitan al menos %1$d jugadores</string>
+    <string name="lobby_min_agents_error">Se necesitan al menos %1$d agentes</string>
+    <string name="lobby_hosting_status">✅  Hospedando  •  IP: %1$s\nLos agentes te descubren automáticamente en la misma red.</string>
+    <string name="lobby_scanning">ESCANEANDO&#8230;</string>
+    <string name="lobby_broadcasting">🔍  Transmitiendo para encontrar anfitrión&#8230;</string>
+    <string name="lobby_waiting_for_host">ESPERANDO AL ANFITRIÓN&#8230;</string>
+    <string name="lobby_connected_waiting">✅  ¡Conectado! Esperando a que el anfitrión comience.</string>
+    <string name="lobby_host_not_found">❌  Anfitrión no encontrado. Comprueba la red e inténtalo de nuevo.</string>
+
+    <!-- Theme Picker -->
+    <string name="theme_picker_title">ELEGIR TEMAS</string>
+    <string name="theme_picker_instruction">Selecciona al menos un tema</string>
+    <string name="theme_picker_all">TODOS</string>
+    <string name="theme_picker_none">NINGUNO</string>
+    <string name="theme_picker_start">INICIAR JUEGO</string>
+    <string name="theme_word_count">%1$d palabras</string>
+    <string name="theme_picker_all_selected">Todos los temas seleccionados — %1$d palabras</string>
+    <string name="theme_picker_selected_info">%1$d tema%2$s — %3$d palabras</string>
+    <string name="theme_picker_select_error">¡Elige al menos un tema!</string>
+
+    <!-- Role Reveal Fragment -->
+    <string name="reveal_agent_default">AGENTE</string>
+    <string name="reveal_hold_instruction">MANTÉN PRESIONADO PARA REVELAR EL ROL</string>
+    <string name="reveal_continue">CONTINUAR  ›</string>
+    <string name="reveal_waiting">Esperando a otros agentes&#8230;</string>
+    <string name="reveal_role_label">ROL</string>
+    <string name="reveal_impostor_text">🕵️\nERES\nEL IMPOSTOR</string>
+    <string name="reveal_error">Error — por favor reinicia</string>
+    <string name="reveal_world_role">🌍\n%1$s</string>
+    <string name="reveal_unknown_player">DESCONOCIDO</string>
+
+    <!-- Discussion Fragment -->
+    <string name="discussion_interrogation">— INTERROGATORIO —</string>
+    <string name="discussion_title">DISCUSIÓN</string>
+    <string name="discussion_tagline">Encuentra al impostor entre vosotros</string>
+    <string name="discussion_go_to_vote">🗳  IR A VOTAR</string>
+
+    <!-- Voting Fragment -->
+    <string name="voting_label">— VOTO —</string>
+    <string name="voting_question">¿QUIÉN ES EL IMPOSTOR?</string>
+    <string name="voting_confirm">CONFIRMAR VOTO</string>
+    <string name="voting_turn_label">🎯  Voto de %1$s</string>
+    <string name="voting_submitted_waiting">VOTO ENVIADO — ESPERANDO&#8230;</string>
+    <string name="voting_no_self_vote">No puedes votarte a ti mismo</string>
+    <string name="voting_select_first">Selecciona un jugador primero</string>
+
+    <!-- Result Fragment -->
+    <string name="result_play_again">▶  JUGAR DE NUEVO</string>
+    <string name="result_main_menu">MENÚ PRINCIPAL</string>
+    <string name="result_default">Fin del Juego</string>
+    <string name="result_tie_prefix">EMPATE:</string>
+    <string name="result_crewmates_keyword">Tripulantes</string>
+    <string name="result_impostor_keyword">Impostor</string>
+    <string name="result_win_keyword">ganan</string>
+
+    <!-- Spyfall Results -->
+    <string name="spy_result_no_votes">No se emitieron votos — ¡%1$s %2$s por defecto! 😈</string>
+    <string name="spy_result_tie">EMPATE: %1$s — ¡%2$s sobreviven! ¡Los impostores ganan! 😈</string>
+    <string name="spy_result_crew_win">¡%1$s %2$s el impostor%3$s! ¡Los tripulantes ganan! 🎉</string>
+    <string name="spy_result_impostor_win_innocent">%1$s era inocente. ¡%2$s %3$s! 😈</string>
+    <string name="spy_result_impostor_win_generic">¡%1$s %2$s! 😈</string>
+    <string name="verb_win">ganan</string>
+    <string name="verb_wins">gana</string>
+    <string name="verb_was">era</string>
+    <string name="verb_were">eran</string>
+    <string name="impostor_label">impostor</string>
+    <string name="impostors_label">impostores</string>
+
+    <!-- Mafia Setup -->
+    <string name="mafia_setup_tagline">ENCUENTRA AL ASESINO ENTRE VOSOTROS</string>
+    <string name="mafia_setup_players">JUGADORES</string>
+    <string name="mafia_setup_players_range">4 mínimo · 12 máximo</string>
+    <string name="mafia_setup_mafia_members">MIEMBROS DE LA MAFIA</string>
+    <string name="mafia_setup_mafia_limit">Máx ⅓ del total de jugadores</string>
+    <string name="mafia_setup_special_roles">ROLES ESPECIALES</string>
+    <string name="mafia_role_doctor">Doctor</string>
+    <string name="mafia_role_doctor_desc">Protege a un jugador cada noche</string>
+    <string name="mafia_role_detective">Detective</string>
+    <string name="mafia_role_detective_desc">Investiga a un jugador cada noche</string>
+    <string name="mafia_setup_next">SIGUIENTE  →  INTRODUCIR NOMBRES</string>
+    <string name="mafia_setup_player_names">NOMBRES DE JUGADORES</string>
+    <string name="mafia_setup_back">← ATRÁS</string>
+    <string name="mafia_setup_start">INICIAR JUEGO</string>
+    <string name="mafia_setup_min_players">Mínimo %1$d jugadores</string>
+    <string name="mafia_setup_max_players">Máximo %1$d jugadores</string>
+    <string name="mafia_setup_min_mafia">Se necesita al menos 1 Mafia</string>
+    <string name="mafia_setup_too_many_mafia">Demasiados Mafia para el número de jugadores</string>
+    <string name="mafia_setup_not_enough_civilians">No hay suficientes civiles — reduce los roles o añade jugadores</string>
+    <string name="mafia_setup_player_default_name">Jugador %1$d</string>
+    <string name="mafia_setup_duplicate_name_error">\"%1$s\" ya está en uso — cada jugador necesita un nombre único</string>
+    <string name="mafia_setup_min_players_error">Se requieren al menos 4 jugadores</string>
+
+    <!-- Mafia Day -->
+    <string name="mafia_round">RONDA %1$d</string>
+    <string name="mafia_votes_remaining">%1$d votos restantes</string>
+    <string name="mafia_vote_to_eliminate">VOTAR PARA ELIMINAR</string>
+    <string name="mafia_leading">LIDERANDO  </string>
+    <string name="mafia_leading_count">%1$d votos</string>
+    <string name="mafia_confirm">CONFIRMAR</string>
+    <string name="mafia_skip_vote">SALTAR — COMENZAR NOCHE</string>
+    <string name="mafia_day_go_to_vote">⚖️  IR A VOTAR</string>
+    <string name="mafia_day_no_strike">La Mafia no ha atacado esta noche. 🌙</string>
+    <string name="mafia_day_saved">¡%1$s fue el objetivo pero el Doctor lo salvó! 🧑&#8205;&#9877;&#65039;</string>
+    <string name="mafia_day_eliminated">%1$s fue eliminado por la Mafia. 💀</string>
+    <string name="mafia_day_someone_fell">ALGUIEN CAYÓ ESTA NOCHE</string>
+    <string name="mafia_day_doctor_saved">EL DOCTOR SALVÓ A ALGUIEN</string>
+    <string name="mafia_day_quiet_night">UNA NOCHE TRANQUILA&#8230;</string>
+    <string name="mafia_day_mafia_hiding_one">\n1 miembro de la Mafia sigue escondido.</string>
+    <string name="mafia_day_mafia_hiding_plural">\n%1$d miembros de la Mafia siguen escondidos.</string>
+    <string name="mafia_day_all_votes_cast">Todos los votos emitidos ✓</string>
+    <string name="mafia_day_no_votes_cast">No se han emitido votos todavía</string>
+    <string name="mafia_day_no_self_vote">Un jugador no puede votarse a sí mismo — máx %1$d votos</string>
+    <string name="mafia_day_draw_title">ES UN EMPATE</string>
+    <string name="mafia_day_draw_msg">Nadie ha sido eliminado.\nComienza la noche.</string>
+    <string name="mafia_day_begin_night">🌙  COMENZAR NOCHE</string>
+    <string name="mafia_day_town_wins_title">🏘️  EL PUEBLO GANA</string>
+    <string name="mafia_day_town_wins_msg">La Mafia ha sido eliminada.\n¡El pueblo está a salvo!</string>
+    <string name="mafia_day_mafia_wins_title">🧛  LA MAFIA GANA</string>
+    <string name="mafia_day_mafia_wins_msg">La Mafia controla el pueblo.\n\n</string>
+    <string name="mafia_day_mafia_reveal">Los miembros de la Mafia eran:\n</string>
+    <string name="mafia_day_skipping_vote">SALTANDO VOTACIÓN</string>
+    <string name="mafia_day_skip_msg">Nadie eliminado 🙏\nComienza la noche&#8230;</string>
+    <string name="mafia_day_tap_continue">toca para continuar</string>
+    <string name="mafia_day_play_again">🔁  JUGAR DE NUEVO</string>
+    <string name="mafia_day_main_menu">🏠  MENÚ PRINCIPAL</string>
+    <string name="mafia_day_title_round">☀️  DÍA  •  Ronda %1$d</string>
+    <string name="mafia_day_subtitle">Discutid et votad para eliminar a un sospechoso</string>
+    <string name="mafia_day_tap_to_vote">JUGADORES VIVOS — toca para votar</string>
+    <string name="mafia_day_vote_select_error">Toca un jugador para votarlo primero</string>
+    <string name="mafia_day_eliminated_title">☀️  Eliminado</string>
+    <string name="mafia_day_eliminated_msg">%1$s ha sido eliminado.\n\nSu rol era: %2$s  %3$s</string>
+    <string name="mafia_day_vote_select_first">Toca un jugador para votarlo primero</string>
+
+    <!-- Mafia Night / Role Reveal -->
+    <string name="mafia_night_begins">🌙  Comienza la Noche</string>
+    <string name="mafia_ready">ESTOY LISTO  →</string>
+    <string name="mafia_night_instruction_default">Selecciona un jugador para eliminar:</string>
+    <string name="mafia_night_alive_players">JUGADORES VIVOS</string>
+    <string name="mafia_night_target">OBJETIVO  </string>
+    <string name="mafia_night_phase_label">🌙  FASE NOCTURNA</string>
+    <string name="mafia_night_progress">%1$d / %2$d</string>
+    <string name="mafia_night_player_turn">%1$s, es tu turno</string>
+    <string name="mafia_night_pass_phone_instruction">Pasa el teléfono a %1$s.\nNadie más debe mirar la pantalla.</string>
+    <string name="mafia_night_hold_to_see_role">👁  MANTÉN PRESIONADO PARA VER TU ROL</string>
+    <string name="mafia_night_seen_role">✅  HE VISTO MI ROL</string>
+    <string name="mafia_night_choose_player">Elige un jugador:</string>
+    <string name="mafia_night_selected">SELECCIONADO  </string>
+    <string name="mafia_night_confirm_pass">CONFIRMAR — PASAR TELÉFONO  →</string>
+    <string name="mafia_night_got_it_pass">ENTENDIDO — PASAR TELÉFONO  →</string>
+    <string name="mafia_night_hide_pass">🔒  OCULTAR PANTALLA — PASAR TELÉFONO</string>
+    <string name="mafia_night_hold_recheck">👁  MANTÉN PRESIONADO OTRA VEZ PARA REVISAR</string>
+    <string name="mafia_night_who_to_kill">🧛  ¿A quién quieres matar?</string>
+    <string name="mafia_night_who_to_protect">🧑&#8205;&#9877;&#65039;  ¿A quién quieres proteger?</string>
+    <string name="mafia_night_who_to_suspect">🕵️&#8205;&#9792;&#65039;  ¿De quién sospechas?</string>
+    <string name="mafia_night_pass_start_day">📱  Pasa el teléfono — Comenzar Día ☀️</string>
+    <string name="mafia_night_pass_next">📱  Pasa el teléfono a la siguiente persona →</string>
+    <string name="mafia_night_confirm_start_day">CONFIRMAR — COMENZAR DÍA  ☀️</string>
+    <string name="mafia_night_confirm_next">CONFIRM — PASAR TELÉFONO  →</string>
+    <string name="mafia_night_round_title">🌙  Noche %1$d</string>
+    <string name="mafia_night_ready_mafia">Todos miren hacia otro lado.\n\nMafia — toquen cuando estén listos.</string>
+    <string name="mafia_team_label">Equipo de la Mafia:</string>
+    <string name="mafia_team_instruction">Elige un jugador del pueblo para eliminar.\nNo puedes elegir a tus compañeros de la Mafia.</string>
+    <string name="mafia_det_dialog_mafia">%1$s es un miembro de la Mafia.\n\nRecuerda esto para la discusión del día.</string>
+    <string name="mafia_det_dialog_innocent">%1$s NO es de la Mafia.\n\nRecuerda esto para la discusión del día.</string>
+    <string name="mafia_det_hide_screen">ENTENDIDO — OCULTAR PANTALLA</string>
+    <string name="mafia_doctor_turn">🧑&#8205;&#9877;&#65039;  Turno del Doctor</string>
+    <string name="mafia_detective_turn">🕵️&#8205;&#9792;&#65039;  Turno del Detective</string>
+    <string name="mafia_doctor_ready_msg">Mafia, miren hacia otro lado.\n\nDoctor — toca cuando estés listo.</string>
+    <string name="mafia_detective_ready_msg">Miren hacia otro lado.\n\nDetective — toca cuando estés listo.</string>
+    <string name="mafia_dawn_breaks">☀️  Amanece</string>
+    <string name="mafia_dawn_msg">Todos abran los ojos.\n\nEl pueblo sabrá lo que pasó anoche.</string>
+    <string name="mafia_night_passes_quietly">La noche transcurre tranquilamente&#8230;</string>
+
+    <string name="mafia_reveal_title_mafia">ERES MAFIA</string>
+    <string name="mafia_reveal_title_doctor">ERES EL DOCTOR</string>
+    <string name="mafia_reveal_title_detective">ERES EL DETECTIVE</string>
+    <string name="mafia_reveal_title_civilian">ERES UN CIVIL</string>
+
+    <string name="mafia_role_mafia_team_info">Eres Mafia.\n\nTu equipo:\n%1$s\nElige a un jugador del pueblo para eliminarlo esta noche.\nNo puedes atacar a tus propios compañeros de la Mafia.\nSi hay varios Mafia, el último en confirmar establece el objetivo final.</string>
+    <string name="mafia_role_doctor_full_desc_long">Cada noche, elige a un jugador para protegerlo.\nSi la Mafia lo ataca, sobrevivirá.\n\nPuedes protegerte a ti mismo.</string>
+    <string name="mafia_role_detective_full_desc_long">Cada noche, investiga a un jugador.\nSabrás si es Mafia o no.\n\nUsa este conocimiento sabiamente en la fase diurna.</string>
+    <string name="mafia_role_civilian_desc_long">No tienes ningún poder nocturno especial.\nEscucha atentamente durante la fase diurna\ny ayuda a identificar a la Mafia.</string>
+
+    <string name="mafia_night_action_kill">🧛  Elige un jugador para eliminar esta noche:</string>
+    <string name="mafia_night_action_protect">🧑&#8205;&#9877;&#65039;  Elige un jugador para proteger esta noche:</string>
+    <string name="mafia_night_action_investigate">🕵️&#8205;&#9792;&#65039;  Elige un jugador para investigar:</string>
+    <string name="mafia_night_selected_prefix">Seleccionado: %1$s</string>
+    <string name="mafia_night_select_first">Selecciona un jugador primero</string>
+
+    <string name="mafia_det_verdict_found">¡MAFIA ENCONTRADA!</string>
+    <string name="mafia_det_verdict_innocent">INOCENTE</string>
+    <string name="mafia_det_result_mafia">%1$s es un miembro de la Mafia.\n\n⚠️  Mantén esto en secreto.\nNo lo reveles directamente durante el día.</string>
+    <string name="mafia_det_result_innocent">%1$s no es parte de la Mafia.\n\n😇  Sigue investigando.\nNo lo reveles directamente durante el día.</string>
+
+    <!-- Mafia Host Activity -->
+    <string name="mafia_host_title">HOSPEDAR JUEGO</string>
+    <string name="mafia_host_subtitle">Tus amigos se unen a través de WiFi o punto de acceso</string>
+    <string name="mafia_host_your_name">TU NOMBRE</string>
+    <string name="mafia_host_name_hint">Introduce tu nombre</string>
+    <string name="mafia_host_start_hosting">INICIAR HOSPEDAJE</string>
+    <string name="mafia_host_server_ready">🟢  Servidor listo</string>
+    <string name="mafia_host_share_hint">Amigos: abrir Mafia → Unirse al Juego\nAseguraos de estar en el mismo WiFi o punto de acceso</string>
+    <string name="mafia_host_game_settings">AJUSTES DEL JUEGO</string>
+    <string name="mafia_host_mafia_members">Miembros de la Mafia</string>
+    <string name="mafia_host_min_mafia_error">Mínimo 1 Mafia</string>
+    <string name="mafia_host_too_many_mafia_error">Demasiados Mafia para este número de jugadores</string>
+    <string name="mafia_host_starting">INICIANDO&#8230;</string>
+    <string name="mafia_host_too_many_special_roles">Demasiados roles especiales — reduce o añade jugadores</string>
+    <string name="mafia_enter_name_first">Introduce tu nombre primero</string>
+
+    <!-- Mafia Join Activity -->
+    <string name="mafia_join_title">UNIRSE AL JUEGO</string>
+    <string name="mafia_join_subtitle">Conéctate a un anfitrión en el mismo WiFi o punto de acceso</string>
+    <string name="mafia_join_find_join">BUSCAR Y UNIRSE</string>
+    <string name="mafia_join_connected_waiting">¡Conectado! Esperando a que el anfitrión comience&#8230;</string>
+    <string name="mafia_join_players_in_lobby">JUGADORES EN LA SALA</string>
+    <string name="mafia_join_players_in_lobby_count">JUGADORES EN LA SALA (%1$d)</string>
+    <string name="mafia_join_failed_msg">Anfitrión no encontrado.\n\nAsegúrate de estar en el mismo WiFi o punto de acceso que el anfitrión e inténtalo de nuevo.</string>
+
+    <!-- Mafia Network -->
+    <string name="mafia_net_searching">Transmitiendo para encontrar anfitrión&#8230;</string>
+    <string name="mafia_net_server_ready">🟢  Servidor listo — esperando jugadores&#8230;</string>
+    <string name="mafia_net_server_connected">🟢  Servidor listo  •  %1$d conectados</string>
+    <string name="mafia_net_players_lobby">JUGADORES (%1$d en la sala)</string>
+    <string name="mafia_net_searching_btn">BUSCANDO&#8230;</string>
+    <string name="mafia_net_try_again">REINTENTAR</string>
+    <string name="mafia_net_host_not_found">Anfitrión no encontrado.\n\nAsegúrate de estar en el mismo WiFi o punto de acceso que el anfitrión.</string>
+    <string name="mafia_net_found_host">¡Anfitrión encontrado! Uniéndose&#8230;</string>
+    <string name="mafia_net_waiting_night_result">Está cayendo la noche&#8230;\n\nEsperando a que el anfitrión resuelva la noche.</string>
+    <string name="mafia_net_day_starting_soon">☀️  La fase diurna comenzará pronto&#8230;\nEsperando al anfitrión.</string>
+    <string name="mafia_net_waiting_votes">Esperando a que todos los jugadores voten&#8230;</string>
+    <string name="mafia_net_voting_for">Votando a: %1$s</string>
+    <string name="mafia_net_vote_submitted">VOTO ENVIADO ✓</string>
+    <string name="mafia_net_submit_vote">ENVIAR VOTO</string>
+    <string name="mafia_net_got_it_waiting">ENTENDIDO — ESPERANDO EL RESULTADO NOCTURNO</string>
+    <string name="mafia_net_role_assigned">¡Rol asignado! Prepárate&#8230;</string>
+    <string name="mafia_net_your_role_assigned">%1$s — tu rol</string>
+    <string name="mafia_net_your_role">Tu Rol</string>
+    <string name="mafia_net_lock_subtitle">Mantén presionado el botón de abajo para revelar tu rol secreto</string>
+    <string name="mafia_net_confirm_kill">CONFIRMAR ELIMINACIÓN</string>
+    <string name="mafia_net_confirm_protect">CONFIRMAR PROTECCIÓN</string>
+    <string name="mafia_net_investigate">INVESTIGAR</string>
+    <string name="mafia_net_det_result_mafia_toast">🧛 ¡%1$s ES Mafia!</string>
+    <string name="mafia_net_det_result_innocent_toast">✅ %1$s NO es Mafia</string>
+    <string name="mafia_net_night_quiet">La noche transcurre tranquilamente&#8230;</string>
+    <string name="mafia_net_day_starting_msg">☀️  La fase diurna comenzará pronto&#8230;\nEsperando al anfitrión.</string>
+
+    <!-- Mafia Roles -->
+    <string name="mafia_role_mafia">MAFIA</string>
+    <string name="mafia_role_civilian">CIVIL</string>
+    <string name="mafia_role_doctor_name">DOCTOR</string>
+    <string name="mafia_role_detective_name">DETECTIVE</string>
+    <string name="mafia_role_mafia_desc">Cada noche, elige a un jugador para eliminarlo con tus compañeros de la Mafia.</string>
+    <string name="mafia_role_doctor_full_desc">Cada noche, elige a un jugador para protegerlo.\nSi la Mafia lo ataca, sobrevivirá.</string>
+    <string name="mafia_role_detective_full_desc">Cada noche, investiga a un jugador.\nSabrás si es Mafia o no.</string>
+    <string name="mafia_role_civilian_desc">No tienes ningún poder nocturno especial.\nAyuda a identificar a la Mafia durante el día.</string>
+
+    <string name="mafia_elim_title_mafia">MIEMBRO DE LA MAFIA</string>
+    <string name="mafia_elim_title_doctor">DOCTOR</string>
+    <string name="mafia_elim_title_detective">DETECTIVE</string>
+    <string name="mafia_elim_title_civilian">CIVIL</string>
+    <string name="mafia_elim_desc_mafia">¡El pueblo ha desenmascarado a un miembro de la Mafia!\nEl pueblo es ahora más seguro.</string>
+    <string name="mafia_elim_desc_doctor">El pueblo ha perdido a su sanador.\nLa Mafia se hace más fuerte.</string>
+    <string name="mafia_elim_desc_detective">El pueblo ha perdido a su investigador.\nLos secretos de la Mafia están a salvo.</string>
+    <string name="mafia_elim_desc_civilian">Un civil inocente ha sido eliminado.\nLa Mafia se esconde entre los demás.</string>
+    <string name="mafia_elim_continue">CONTINUAR  →</string>
+
+    <!-- Theme Names -->
+    <string name="theme_objects">Objetos Cotidianos</string>
+    <string name="theme_places">Lugares</string>
+    <string name="theme_food">Comida y Bebida</string>
+    <string name="theme_tech">Tecnología e Internet</string>
+    <string name="theme_animals">Animales</string>
+    <string name="theme_jobs">Trabajos y Profesiones</string>
+    <string name="theme_sports">Deportes y Juegos</string>
+    <string name="theme_school">Escuela y Estudio</string>
+    <string name="theme_fun">Azar y Diversión</string>
+
+</resources>

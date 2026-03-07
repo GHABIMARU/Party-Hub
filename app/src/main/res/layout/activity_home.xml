@@ -21,13 +21,13 @@
             android:scaleType="fitCenter"
             android:layout_gravity="center"
             android:layout_marginBottom="12dp"
-            android:contentDescription="Mix Party"/>
+            android:contentDescription="@string/app_name"/>
 
         <!-- Always "Mix Party" regardless of language -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Mix Party"
+            android:text="@string/app_name"
             android:textSize="34sp"
             android:textStyle="bold"
             android:letterSpacing="0.2"
@@ -37,8 +37,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="CHOSSE YOUR GAME
-"
+            android:text="@string/home_choose_game"
             android:textSize="11sp"
             android:letterSpacing="0.35"
             android:textColor="@color/text_secondary"
@@ -75,7 +74,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Spyfall"
+                    android:text="@string/game_spyfall"
                     android:textSize="20sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_primary"/>
@@ -128,7 +127,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mafia"
+                    android:text="@string/game_mafia"
                     android:textSize="20sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_primary"/>
@@ -157,7 +156,7 @@
             android:id="@+id/btn_change_language"
             android:layout_width="match_parent"
             android:layout_height="52dp"
-            android:text="Languages 🌐"
+            android:text="@string/home_languages"
             android:textSize="14sp"
             android:textStyle="bold"
             android:letterSpacing="0.05"

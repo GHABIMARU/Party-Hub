@@ -22,7 +22,7 @@ public class MafiaNetworkGameOverActivity extends AppCompatActivity {
 
         String title   = getIntent().getStringExtra("title");
         String message = getIntent().getStringExtra("message");
-        if (title   == null) title   = "Game Over";
+        if (title   == null) title   = getString(R.string.result_default);
         if (message == null) message = "";
         buildUi(title, message);
     }
@@ -79,7 +79,7 @@ public class MafiaNetworkGameOverActivity extends AppCompatActivity {
 
         // Main menu button
         TextView btnMenu = new TextView(this);
-        btnMenu.setText("MAIN MENU");
+        btnMenu.setText(R.string.result_main_menu);
         btnMenu.setTextSize(15);
         btnMenu.setTypeface(null, Typeface.BOLD);
         btnMenu.setTextColor(ContextCompat.getColor(this, R.color.bg_dark));

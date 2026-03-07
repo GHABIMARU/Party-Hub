@@ -31,7 +31,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="ROUND 1"
+                android:text="@string/mafia_round"
                 android:textSize="11sp"
                 android:letterSpacing="0.35"
                 android:textColor="@color/gold"/>
@@ -40,7 +40,7 @@
                 android:id="@+id/tv_votes_remaining"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="6 votes remaining"
+                android:text="@string/mafia_votes_remaining"
                 android:textSize="11sp"
                 android:letterSpacing="0.1"
                 android:textColor="@color/text_secondary"/>
@@ -81,7 +81,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="VOTE TO ELIMINATE"
+            android:text="@string/mafia_vote_to_eliminate"
             android:textSize="10sp"
             android:letterSpacing="0.35"
             android:textColor="@color/gold"
@@ -117,7 +117,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="LEADING  "
+                android:text="@string/mafia_leading"
                 android:textSize="10sp"
                 android:letterSpacing="0.3"
                 android:textColor="@color/text_secondary"/>
@@ -136,7 +136,7 @@
                 android:id="@+id/tv_leading_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="0 votes"
+                android:text="@string/mafia_leading_count"
                 android:textSize="13sp"
                 android:textColor="@color/gold"
                 android:textStyle="bold"/>
@@ -148,7 +148,7 @@
             android:id="@+id/btn_eliminate"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="CONFIRM"
+            android:text="@string/mafia_confirm"
             android:textSize="14sp"
             android:textStyle="bold"
             android:letterSpacing="0.2"
@@ -164,7 +164,7 @@
             android:id="@+id/btn_skip_vote"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="SKIP &#8212; BEGIN NIGHT"
+            android:text="@string/mafia_skip_vote"
             android:textSize="12sp"
             android:letterSpacing="0.15"
             android:textColor="#FF000000"

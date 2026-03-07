@@ -2,6 +2,7 @@ package com.example.mini_projet.spyfall.game;
 
 import android.util.Log;
 
+import com.example.mini_projet.R;
 import com.example.mini_projet.spyfall.ui.MainActivity;
 import com.example.mini_projet.shared.model.Message;
 import com.example.mini_projet.shared.model.Player;
@@ -100,6 +101,55 @@ public class GameEngine {
         }
     }
 
+    public void reset() {
+        synchronized (players) { players.clear(); }
+        synchronized (originalPlayers) { originalPlayers.clear(); }
+        synchronized (votes) { votes.clear(); }
+        synchronized (readyPlayers) { readyPlayers.clear(); }
+
+        eliminatedImpostorNames.clear();
+        impostorIds.clear();
+
+        gameState = GameState.LOBBY;
+        revealIndex = 0;
+        secretWord = null;
+        result = null;
+        myRole = null;
+        myPlayerId = -1;
+
+        if (hostServer != null) {
+            hostServer.stopServer();
+            hostServer = null;
+        }
+        if (clientConnection != null) {
+            clientConnection.disconnect();
+            clientConnection = null;
+        }
+        gameMode = Mode.PASS_PLAY;
+    }
+
+    public void restartGame() {
+        synchronized (players) {
+            players.clear();
+            synchronized (originalPlayers) {
+                players.addAll(originalPlayers);
+            }
+        }
+        synchronized (votes) { votes.clear(); }
+        synchronized (readyPlayers) { readyPlayers.clear(); }
+        eliminatedImpostorNames.clear();
+        impostorIds.clear();
+
+        gameState = GameState.LOBBY;
+        revealIndex = 0;
+        secretWord = null;
+        result = null;
+
+        if (gameMode == Mode.HOST && hostServer != null) {
+            hostServer.broadcast(new Message("STATE_CHANGE", null, GameState.LOBBY.name()));
+        }
+    }
+
     public boolean startGame() {
         List<Player> snap;
         synchronized (players) { snap = new ArrayList<>(players); }
@@ -121,7 +171,7 @@ public class GameEngine {
         impostorIds.clear();
         for (int i = 0; i < actualImpostors; i++) impostorIds.add(ids.get(i));
 
-        secretWord = WordList.getRandom(selectedThemes.isEmpty() ? null : selectedThemes);
+        secretWord = WordList.getRandom(activity, selectedThemes.isEmpty() ? null : selectedThemes);
         Log.d(TAG, "startGame: word=" + secretWord
                 + " impostors=" + impostorIds + " total=" + snap.size());
 
@@ -185,14 +235,14 @@ public class GameEngine {
     }
 
     public void tallyVotes() {
+        if (activity == null) return;
         Map<Integer, Integer> snap;
         synchronized (votes) { snap = new HashMap<>(votes); }
 
         if (snap.isEmpty()) {
-            setResult("No votes cast — "
-                    + buildImpostorNames()
-                    + " win" + (impostorIds.size() == 1 ? "s" : "")
-                    + " by default! 😈");
+            setResult(activity.getString(R.string.spy_result_no_votes,
+                    buildImpostorNames(),
+                    (impostorIds.size() == 1 ? activity.getString(R.string.verb_wins) : activity.getString(R.string.verb_win))));
             goToResult();
             return;
         }
@@ -216,8 +266,9 @@ public class GameEngine {
                     if (top.contains(p.getId())) tiedNames.add(p.getName());
                 }
             }
-            setResult("TIE: " + buildNameList(tiedNames) + " — "
-                    + buildImpostorNames() + " survive! Impostors win! 😈");
+            setResult(activity.getString(R.string.spy_result_tie,
+                    buildNameList(tiedNames),
+                    buildImpostorNames()));
             goToResult();
             return;
         }
@@ -234,7 +285,8 @@ public class GameEngine {
                 }
             }
             if (eliminated == null) {
-                setResult(buildImpostorNames() + " win! 😈");
+                setResult(activity.getString(R.string.spy_result_impostor_win_generic,
+                        buildImpostorNames(), activity.getString(R.string.verb_win)));
                 goToResult();
                 return;
             }
@@ -245,12 +297,14 @@ public class GameEngine {
 
             if (wasImpostor) {
                 eliminatedImpostorNames.add(eliminated.getName());
-                String label = eliminatedImpostorNames.size() == 1
-                        ? " was the impostor" : " were the impostors";
-                setResult(buildNameList(eliminatedImpostorNames) + label + "! Crewmates win! 🎉");
+                String verb = eliminatedImpostorNames.size() == 1
+                        ? activity.getString(R.string.verb_was) : activity.getString(R.string.verb_were);
+                String plural = eliminatedImpostorNames.size() == 1 ? "" : "s";
+                setResult(activity.getString(R.string.spy_result_crew_win,
+                        buildNameList(eliminatedImpostorNames), verb, plural));
             } else {
-                setResult(eliminated.getName() + " was innocent. "
-                        + buildImpostorNames() + " win! 😈");
+                setResult(activity.getString(R.string.spy_result_impostor_win_innocent,
+                        eliminated.getName(), buildImpostorNames(), activity.getString(R.string.verb_win)));
             }
             goToResult();
         }
@@ -298,93 +352,61 @@ public class GameEngine {
                     activity.runOnUiThread(() -> activity.refreshLobbyIfVisible());
                 break;
 
-            case "START_GAME":
-                myRole    = msg.getPayload();
+            case "START":
                 gameState = GameState.ROLE_REVEAL;
-                Log.d(TAG, "START_GAME myRole=" + myRole);
                 if (activity != null) activity.navigateTo(GameState.ROLE_REVEAL);
                 break;
 
-            case "STATE_CHANGE":
-                gameState = GameState.valueOf(msg.getPayload());
-                Log.d(TAG, "STATE_CHANGE → " + gameState);
-                if (activity != null) activity.navigateTo(gameState);
+            case "VOTE":
+                addVote(Integer.parseInt(msg.getPayload()));
+                break;
+
+            case "READY":
+                addReady(Integer.parseInt(msg.getSenderId().trim()));
                 break;
 
             case "RESULT":
-                setResult(msg.getPayload());
+                result = msg.getPayload();
+                gameState = GameState.RESULT;
+                if (activity != null) activity.navigateTo(GameState.RESULT);
+                break;
+
+            case "STATE_CHANGE":
+                GameState newState = GameState.valueOf(msg.getPayload());
+                gameState = newState;
+                if (activity != null) activity.navigateTo(newState);
                 break;
         }
     }
 
-    private String buildNameList(List<String> names) {
-        if (names.isEmpty()) return "The impostor";
-        if (names.size() == 1) return names.get(0);
+    private String buildPlayerListString() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < names.size(); i++) {
-            if (i > 0) sb.append(i == names.size() - 1 ? " & " : ", ");
-            sb.append(names.get(i));
+        synchronized (players) {
+            for (Player p : players) {
+                sb.append(p.getId()).append(":").append(p.getName()).append(";");
+            }
         }
         return sb.toString();
     }
 
     private String buildImpostorNames() {
         List<String> names = new ArrayList<>();
-        synchronized (players) {
-            for (Player p : players) {
+        synchronized (originalPlayers) {
+            for (Player p : originalPlayers) {
                 if (impostorIds.contains(p.getId())) names.add(p.getName());
             }
         }
         return buildNameList(names);
     }
 
-    public void reset() {
-        synchronized (players)         { players.clear(); }
-        synchronized (originalPlayers) { originalPlayers.clear(); }
-        synchronized (votes)           { votes.clear(); }
-        synchronized (readyPlayers)    { readyPlayers.clear(); }
-        impostorIds.clear();
-        eliminatedImpostorNames.clear();
-        selectedThemes.clear();
-        gameState     = GameState.LOBBY;
-        revealIndex   = 0;
-        secretWord    = null;
-        result        = null;
-        gameMode      = Mode.PASS_PLAY;
-        myPlayerId    = -1;
-        myRole        = null;
-        impostorCount = 1;
-        if (hostServer       != null) { hostServer.stopServer();      hostServer = null; }
-        if (clientConnection != null) { clientConnection.disconnect(); clientConnection = null; }
-    }
-
-    public void restartGame() {
-        synchronized (players) {
-            players.clear();
-            synchronized (originalPlayers) {
-                if (!originalPlayers.isEmpty()) players.addAll(originalPlayers);
-            }
-        }
-        synchronized (votes)        { votes.clear(); }
-        synchronized (readyPlayers) { readyPlayers.clear(); }
-        impostorIds.clear();
-        eliminatedImpostorNames.clear();
-        gameState   = GameState.LOBBY;
-        revealIndex = 0;
-        secretWord  = null;
-        result      = null;
-        myRole      = null;
-        if (hostServer       != null) { hostServer.stopServer();      hostServer = null; }
-        if (clientConnection != null) { clientConnection.disconnect(); clientConnection = null; }
-        gameMode   = Mode.PASS_PLAY;
-        myPlayerId = -1;
-    }
-
-    private String buildPlayerListString() {
+    private String buildNameList(List<String> names) {
+        if (names.isEmpty()) return "";
+        if (names.size() == 1) return names.get(0);
         StringBuilder sb = new StringBuilder();
-        synchronized (players) {
-            for (Player p : players)
-                sb.append(p.getId()).append(":").append(p.getName()).append(";");
+        for (int i = 0; i < names.size(); i++) {
+            sb.append(names.get(i));
+            if (i < names.size() - 2) sb.append(", ");
+            else if (i == names.size() - 2) sb.append(" & ");
         }
         return sb.toString();
     }

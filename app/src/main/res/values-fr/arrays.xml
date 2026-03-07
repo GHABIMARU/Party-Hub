@@ -1,0 +1,64 @@
+<resources>
+    <string-array name="theme_objects_words">
+        <item>Téléphone</item><item>Chargeur</item><item>Sac à dos</item><item>Cahier</item><item>Stylo</item>
+        <item>Crayon</item><item>Gomme</item><item>Marqueur</item><item>Écouteurs</item><item>Montre</item>
+        <item>Portefeuille</item><item>Clés</item><item>Miroir</item><item>Lunettes</item><item>Bouteille</item>
+        <item>Tasse</item><item>Assiette</item><item>Cuillère</item><item>Fourchette</item><item>Couteau</item>
+        <item>Oreiller</item><item>Couverture</item><item>Porte</item><item>Fenêtre</item><item>Chaise</item>
+        <item>Table</item><item>Lampe</item><item>Télécommande</item><item>Télévision</item><item>Ordinateur portable</item>
+    </string-array>
+
+    <string-array name="theme_places_words">
+        <item>École</item><item>Mosquée</item><item>Plage</item><item>Désert</item><item>Montagne</item>
+        <item>Stade</item><item>Café</item><item>Restaurant</item><item>Centre commercial</item><item>Marché</item>
+        <item>Aéroport</item><item>Hôpital</item><item>Pharmacie</item><item>Gymnase</item><item>Cinéma</item>
+        <item>Parc</item><item>Hôtel</item><item>Maison</item><item>Appartement</item><item>Garage</item>
+        <item>Bibliothèque</item><item>Musée</item><item>Zoo</item><item>Aquarium</item><item>Parc d\'attractions</item>
+    </string-array>
+
+    <string-array name="theme_food_words">
+        <item>Pizza</item><item>Burger</item><item>Tacos</item><item>Sandwich</item><item>Frites</item>
+        <item>Poulet</item><item>Kebab</item><item>Couscous</item><item>Tagine</item><item>Harira</item>
+        <item>Dattes</item><item>Orange</item><item>Banane</item><item>Pomme</item><item>Pastèque</item>
+        <item>Café</item><item>Thé à la menthe</item><item>Jus</item><item>Soda</item><item>Lait</item>
+        <item>Chocolat</item><item>Gâteau</item><item>Glace</item><item>Croissant</item><item>Crêpe</item>
+    </string-array>
+
+    <string-array name="theme_tech_words">
+        <item>Instagram</item><item>TikTok</item><item>YouTube</item><item>WhatsApp</item><item>Snapchat</item>
+        <item>Facebook</item><item>WiFi</item><item>Mot de passe</item><item>Application</item><item>Jeu vidéo</item>
+        <item>PlayStation</item><item>Xbox</item><item>Netflix</item><item>Spotify</item><item>Google</item>
+        <item>E-mail</item><item>Site web</item><item>Capture d\'écran</item><item>Emoji</item><item>Mème</item>
+    </string-array>
+
+    <string-array name="theme_animals_words">
+        <item>Chat</item><item>Chien</item><item>Lion</item><item>Tigre</item><item>Cheval</item>
+        <item>Vache</item><item>Chameau</item><item>Mouton</item><item>Chèvre</item><item>Singe</item>
+        <item>Éléphant</item><item>Serpent</item><item>Aigle</item><item>Faucon</item><item>Requin</item>
+        <item>Poisson</item><item>Poulet</item><item>Âne</item><item>Lapin</item><item>Loup</item>
+    </string-array>
+
+    <string-array name="theme_jobs_words">
+        <item>Docteur</item><item>Infirmier</item><item>Professeur</item><item>Ingénieur</item><item>Architecte</item>
+        <item>Policier</item><item>Soldat</item><item>Chef</item><item>Conducteur</item><item>Pilote</item>
+        <item>Programmeur</item><item>Designer</item><item>Photographe</item><item>Mécanicien</item><item>Électricien</item>
+    </string-array>
+
+    <string-array name="theme_sports_words">
+        <item>Football</item><item>Basket-ball</item><item>Tennis</item><item>Volley-ball</item><item>Natation</item>
+        <item>Boxe</item><item>Karaté</item><item>Course</item><item>Cyclisme</item><item>Surf</item>
+        <item>Gymnastique</item><item>But</item><item>Penalty</item><item>Coupe du Monde</item><item>Jeux Olympiques</item>
+    </string-array>
+
+    <string-array name="theme_school_words">
+        <item>Examen</item><item>Devoirs</item><item>Professeur</item><item>Salle de classe</item><item>Projet</item>
+        <item>Présentation</item><item>Note</item><item>Diplôme</item><item>Université</item><item>Bibliothèque</item>
+        <item>Bourse</item><item>Calculatrice</item><item>Histoire</item><item>Maths</item><item>Physique</item>
+    </string-array>
+
+    <string-array name="theme_fun_words">
+        <item>Secret</item><item>Ombre</item><item>Feu</item><item>Glace</item><item>Tempête</item>
+        <item>Vent</item><item>Soleil</item><item>Lune</item><item>Étoile</item><item>Nuage</item>
+        <item>Pluie</item><item>Tonnerre</item><item>Rêve</item><item>Argent</item><item>Pouvoir</item>
+    </string-array>
+</resources>

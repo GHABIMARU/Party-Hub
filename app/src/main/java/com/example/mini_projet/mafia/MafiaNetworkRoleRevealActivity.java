@@ -90,9 +90,9 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
         btnSeenRole     = findViewById(R.id.btn_seen_role);
 
         // Lock screen text
-        tvLockTitle.setText(me != null ? me.getName().toUpperCase() + " — your role" : "Your Role");
-        tvLockSubtitle.setText("Hold the button below to reveal your secret role");
-        tvProgress.setText("Round " + round);
+        tvLockTitle.setText(me != null ? getString(R.string.mafia_net_your_role_assigned, me.getName().toUpperCase()) : getString(R.string.mafia_net_your_role));
+        tvLockSubtitle.setText(R.string.mafia_net_lock_subtitle);
+        tvProgress.setText(getString(R.string.mafia_round, round));
 
         // Pre-fill role card
         fillRole();
@@ -110,20 +110,20 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
                     layoutLock.setVisibility(View.VISIBLE);
                     if (!roleRevealed) {
                         roleRevealed = true;
-                        btnShowRole.setText("HOLD AGAIN TO RE-CHECK");
+                        btnShowRole.setText(R.string.mafia_night_hold_recheck);
                         if (me != null) {
                             switch (me.getRole()) {
                                 case MAFIA:
-                                    btnSeenRole.setText("🧛  Who do you want to kill?");
+                                    btnSeenRole.setText(R.string.mafia_night_who_to_kill);
                                     break;
                                 case DOCTOR:
-                                    btnSeenRole.setText("🧑‍⚕️  Who do you want to protect?");
+                                    btnSeenRole.setText(R.string.mafia_night_who_to_protect);
                                     break;
                                 case DETECTIVE:
-                                    btnSeenRole.setText("🔎  Who do you suspect?");
+                                    btnSeenRole.setText(R.string.mafia_night_who_to_suspect);
                                     break;
                                 default:
-                                    btnSeenRole.setText("✅  I've seen my role");
+                                    btnSeenRole.setText(R.string.mafia_night_seen_role);
                                     break;
                             }
                         }
@@ -151,38 +151,37 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
         switch (me.getRole()) {
             case MAFIA:
                 tvRoleEmoji.setText("🧛");
-                tvRoleName.setText("MAFIA");
+                tvRoleName.setText(R.string.mafia_role_mafia);
                 tvRoleDesc.setText(buildMafiaInfo());
                 break;
             case DOCTOR:
                 tvRoleEmoji.setText("🧑‍⚕️");
-                tvRoleName.setText("DOCTOR");
-                tvRoleDesc.setText("Each night, choose one player to protect.\nIf the Mafia targets them, they survive.");
+                tvRoleName.setText(R.string.mafia_role_doctor_name);
+                tvRoleDesc.setText(R.string.mafia_role_doctor_full_desc);
                 break;
             case DETECTIVE:
                 tvRoleEmoji.setText("🔎");
-                tvRoleName.setText("DETECTIVE");
-                tvRoleDesc.setText("Each night, investigate one player.\nYou will learn if they are Mafia or not.");
+                tvRoleName.setText(R.string.mafia_role_detective_name);
+                tvRoleDesc.setText(R.string.mafia_role_detective_full_desc);
                 break;
             default:
                 tvRoleEmoji.setText("👤");
-                tvRoleName.setText("CIVILIAN");
-                tvRoleDesc.setText("You have no special night power.\nHelp identify the Mafia during the day.");
+                tvRoleName.setText(R.string.mafia_role_civilian);
+                tvRoleDesc.setText(R.string.mafia_role_civilian_desc);
                 break;
         }
     }
 
     private String buildMafiaInfo() {
-        StringBuilder sb = new StringBuilder("You are Mafia.\n\nYour team:\n");
+        StringBuilder teamSb = new StringBuilder();
         for (Player p : players) {
             if (p.getRole() == Player.Role.MAFIA) {
-                sb.append("• ").append(p.getName());
-                if (p.getId() == myId) sb.append(" (you)");
-                sb.append("\n");
+                teamSb.append("• ").append(p.getName());
+                if (p.getId() == myId) teamSb.append(" (you)");
+                teamSb.append("\n");
             }
         }
-        sb.append("\nChoose one town player to eliminate tonight.");
-        return sb.toString().trim();
+        return getString(R.string.mafia_role_mafia_team_info, teamSb.toString().trim());
     }
 
     private void unlockAction() {
@@ -194,30 +193,30 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
 
         switch (me.getRole()) {
             case MAFIA:
-                tvActionTitle.setText("🧛  Choose a player to eliminate:");
+                tvActionTitle.setText(R.string.mafia_night_action_kill);
                 buildActionList();
-                btnConfirm.setText("CONFIRM KILL");
+                btnConfirm.setText(R.string.mafia_net_confirm_kill);
                 btnConfirm.setVisibility(View.VISIBLE);
                 layoutAction.setVisibility(View.VISIBLE);
                 break;
             case DOCTOR:
-                tvActionTitle.setText("🧑‍⚕️  Choose a player to protect:");
+                tvActionTitle.setText(R.string.mafia_night_action_protect);
                 buildActionList();
-                btnConfirm.setText("CONFIRM PROTECT");
+                btnConfirm.setText(R.string.mafia_net_confirm_protect);
                 btnConfirm.setVisibility(View.VISIBLE);
                 layoutAction.setVisibility(View.VISIBLE);
                 break;
             case DETECTIVE:
-                tvActionTitle.setText("🔎  Choose a player to investigate:");
+                tvActionTitle.setText(R.string.mafia_night_action_investigate);
                 buildActionList();
-                btnConfirm.setText("INVESTIGATE");
+                btnConfirm.setText(R.string.mafia_net_investigate);
                 btnConfirm.setVisibility(View.VISIBLE);
                 layoutAction.setVisibility(View.VISIBLE);
                 break;
             case CIVILIAN:
                 layoutAction.setVisibility(View.GONE);
                 btnConfirm.setVisibility(View.GONE);
-                btnCivilianReady.setText("GOT IT — WAITING FOR NIGHT RESULT");
+                btnCivilianReady.setText(R.string.mafia_net_got_it_waiting);
                 btnCivilianReady.setVisibility(View.VISIBLE);
                 btnCivilianReady.setOnClickListener(v -> showWaiting());
                 break;
@@ -243,7 +242,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
             row.setLayoutParams(lp);
             row.setOnClickListener(v -> {
                 actionTarget = p;
-                tvSelectedName.setText("Selected: " + p.getName());
+                tvSelectedName.setText(getString(R.string.mafia_night_selected_prefix, p.getName()));
                 for (int i = 0; i < llActionList.getChildCount(); i++)
                     llActionList.getChildAt(i).setAlpha(0.45f);
                 row.setAlpha(1f);
@@ -254,7 +253,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
 
     private void confirmAction() {
         if (actionTarget == null) {
-            Toast.makeText(this, "Select a player first", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.mafia_night_select_first, Toast.LENGTH_SHORT).show();
             return;
         }
         if (actionConfirmed) return;
@@ -264,8 +263,8 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
         if (me.getRole() == Player.Role.DETECTIVE) {
             boolean isMafia = actionTarget.getRole() == Player.Role.MAFIA;
             Toast.makeText(this,
-                    isMafia ? "🧛 " + actionTarget.getName() + " IS Mafia!"
-                            : "✅ " + actionTarget.getName() + " is NOT Mafia",
+                    isMafia ? getString(R.string.mafia_net_det_result_mafia_toast, actionTarget.getName())
+                            : getString(R.string.mafia_net_det_result_innocent_toast, actionTarget.getName()),
                     Toast.LENGTH_LONG).show();
         }
 
@@ -296,7 +295,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
             root.addView(em);
 
             TextView tw = new TextView(this);
-            tw.setText("Night is falling...\n\nWaiting for the host to resolve the night.");
+            tw.setText(R.string.mafia_net_waiting_night_result);
             tw.setTextSize(15);
             tw.setTextColor(0xFF8A9BC4);
             tw.setGravity(Gravity.CENTER);
@@ -305,7 +304,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
 
             setContentView(sv);
         } else {
-            tvWaiting.setText("🌙  Night is falling...\n\nWaiting for the host to resolve the night.");
+            tvWaiting.setText(R.string.mafia_net_waiting_night_result);
             tvWaiting.setVisibility(View.VISIBLE);
         }
     }
@@ -328,7 +327,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
                 case MafiaEventBus.EVENT_GAME_OVER: {
                     String[] p = payload.split("\\|", 2);
                     Intent i = new Intent(this, MafiaNetworkGameOverActivity.class);
-                    i.putExtra("title",   p.length > 0 ? p[0] : "Game Over");
+                    i.putExtra("title",   p.length > 0 ? p[0] : getString(R.string.result_default));
                     i.putExtra("message", p.length > 1 ? p[1] : "");
                     startActivity(i);
                     finish();

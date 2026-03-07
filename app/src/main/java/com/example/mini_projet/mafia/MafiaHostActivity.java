@@ -70,11 +70,11 @@ public class MafiaHostActivity extends AppCompatActivity
         scroll.addView(root);
 
         // Header
-        TextView tvHeader = label("HOST GAME", 22, true, 0xFFF0F4FF);
+        TextView tvHeader = label(getString(R.string.mafia_host_title), 22, true, 0xFFF0F4FF);
         tvHeader.setPadding(0, 0, 0, dp(4));
         root.addView(tvHeader);
 
-        TextView tvSub = label("Friends join you over WiFi or hotspot", 13, false, 0xFF8A9BC4);
+        TextView tvSub = label(getString(R.string.mafia_host_subtitle), 13, false, 0xFF8A9BC4);
         marginBottom(tvSub, dp(28));
         root.addView(tvSub);
 
@@ -83,14 +83,14 @@ public class MafiaHostActivity extends AppCompatActivity
         stepName.setOrientation(LinearLayout.VERTICAL);
         root.addView(stepName);
 
-        stepName.addView(sectionLabel("YOUR NAME"));
+        stepName.addView(sectionLabel(getString(R.string.mafia_host_your_name)));
 
         LinearLayout nameCard = card();
         marginBottom(nameCard, dp(20));
         stepName.addView(nameCard);
 
         etHostName = new EditText(this);
-        etHostName.setHint("Enter your name");
+        etHostName.setHint(R.string.mafia_host_name_hint);
         etHostName.setHintTextColor(ContextCompat.getColor(this, R.color.text_secondary));
         etHostName.setTextColor(ContextCompat.getColor(this, R.color.text_primary));
         etHostName.setTextSize(16);
@@ -100,7 +100,7 @@ public class MafiaHostActivity extends AppCompatActivity
         etHostName.setPadding(0, dp(14), 0, dp(14));
         nameCard.addView(etHostName);
 
-        Button btnContinue = goldButton("START HOSTING");
+        Button btnContinue = goldButton(getString(R.string.mafia_host_start_hosting));
         btnContinue.setOnClickListener(v -> onContinueClicked());
         stepName.addView(btnContinue);
 
@@ -138,16 +138,16 @@ public class MafiaHostActivity extends AppCompatActivity
                 0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
         ipCard.addView(textCol);
 
-        tvIp = label("🟢  Server ready", 15, true, 0xFF38B2AC);
+        tvIp = label(getString(R.string.mafia_host_server_ready), 15, true, 0xFF38B2AC);
         textCol.addView(tvIp);
 
-        TextView tvShareHint = label("Friends: open Mafia → Join Game\nMake sure you're on the same WiFi or hotspot", 12, false, 0xFF8A9BC4);
+        TextView tvShareHint = label(getString(R.string.mafia_host_share_hint), 12, false, 0xFF8A9BC4);
         tvShareHint.setPadding(0, dp(6), 0, 0);
         tvShareHint.setLineSpacing(0, 1.4f);
         textCol.addView(tvShareHint);
 
         // Player list
-        tvPlayerCount = sectionLabel("PLAYERS (1 in lobby)");
+        tvPlayerCount = sectionLabel(getString(R.string.mafia_net_players_lobby, 1));
         marginBottom(tvPlayerCount, dp(10));
         stepLobby.addView(tvPlayerCount);
 
@@ -161,7 +161,7 @@ public class MafiaHostActivity extends AppCompatActivity
         marginBottom(configCard, dp(24));
         stepLobby.addView(configCard);
 
-        configCard.addView(sectionLabel("GAME SETTINGS"));
+        configCard.addView(sectionLabel(getString(R.string.mafia_host_game_settings)));
 
         // Mafia count row
         LinearLayout mafiaRow = new LinearLayout(this);
@@ -172,7 +172,7 @@ public class MafiaHostActivity extends AppCompatActivity
         mrLp.topMargin = dp(12);
         mafiaRow.setLayoutParams(mrLp);
 
-        TextView tvMafiaTitle = label("Mafia members", 14, true, 0xFFF0F4FF);
+        TextView tvMafiaTitle = label(getString(R.string.mafia_host_mafia_members), 14, true, 0xFFF0F4FF);
         tvMafiaTitle.setLayoutParams(new LinearLayout.LayoutParams(
                 0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
         mafiaRow.addView(tvMafiaTitle);
@@ -182,7 +182,7 @@ public class MafiaHostActivity extends AppCompatActivity
         btnMinus.setFocusable(true);
         btnMinus.setOnClickListener(v -> {
             if (mafiaCount > MIN_MAFIA) { mafiaCount--; refreshMafiaLabel(); }
-            else Toast.makeText(this, "Minimum 1 Mafia", Toast.LENGTH_SHORT).show();
+            else Toast.makeText(this, R.string.mafia_host_min_mafia_error, Toast.LENGTH_SHORT).show();
         });
         mafiaRow.addView(btnMinus);
 
@@ -197,7 +197,7 @@ public class MafiaHostActivity extends AppCompatActivity
         btnPlus.setOnClickListener(v -> {
             int max = Math.max(1, server.getPlayers().size() / 3);
             if (mafiaCount < max) { mafiaCount++; refreshMafiaLabel(); }
-            else Toast.makeText(this, "Too many Mafia for this player count", Toast.LENGTH_SHORT).show();
+            else Toast.makeText(this, R.string.mafia_host_too_many_mafia_error, Toast.LENGTH_SHORT).show();
         });
         mafiaRow.addView(btnPlus);
         configCard.addView(mafiaRow);
@@ -206,15 +206,15 @@ public class MafiaHostActivity extends AppCompatActivity
 
         swDoctor = new Switch(this);
         swDoctor.setChecked(true);
-        configCard.addView(toggleRow("Doctor", "Protects one player each night", swDoctor));
+        configCard.addView(toggleRow(getString(R.string.mafia_role_doctor), getString(R.string.mafia_role_doctor_desc), swDoctor));
 
         configCard.addView(divider(dp(4)));
 
         swDetective = new Switch(this);
         swDetective.setChecked(true);
-        configCard.addView(toggleRow("Detective", "Investigates one player each night", swDetective));
+        configCard.addView(toggleRow(getString(R.string.mafia_role_detective), getString(R.string.mafia_role_detective_desc), swDetective));
 
-        btnStart = goldButton("START GAME");
+        btnStart = goldButton(getString(R.string.mafia_setup_start));
         btnStart.setOnClickListener(v -> onStartClicked());
         stepLobby.addView(btnStart);
 
@@ -225,7 +225,7 @@ public class MafiaHostActivity extends AppCompatActivity
     private void onContinueClicked() {
         hostName = etHostName.getText().toString().trim();
         if (hostName.isEmpty()) {
-            Toast.makeText(this, "Enter your name first", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.mafia_enter_name_first, Toast.LENGTH_SHORT).show();
             return;
         }
         stepName.setVisibility(View.GONE);
@@ -237,7 +237,7 @@ public class MafiaHostActivity extends AppCompatActivity
         server.addHostPlayer(hostName);   // host = player id 0
         MafiaServerHolder.set(server);    // make server reachable from game screens
 
-        tvIp.setText("🟢  Server ready — waiting for players...");
+        tvIp.setText(R.string.mafia_net_server_ready);
 
         refreshPlayerChips(server.getPlayers());
     }
@@ -246,20 +246,20 @@ public class MafiaHostActivity extends AppCompatActivity
     private void onStartClicked() {
         List<Player> current = server.getPlayers();
         if (current.size() < 4) {
-            Toast.makeText(this, "Need at least 4 players", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.mafia_setup_min_players_error, Toast.LENGTH_SHORT).show();
             return;
         }
         int special = mafiaCount
                 + (swDoctor.isChecked()    ? 1 : 0)
                 + (swDetective.isChecked() ? 1 : 0);
         if (special >= current.size()) {
-            Toast.makeText(this, "Too many special roles — reduce or add players",
+            Toast.makeText(this, R.string.mafia_host_too_many_special_roles,
                     Toast.LENGTH_LONG).show();
             return;
         }
 
         btnStart.setEnabled(false);
-        btnStart.setText("STARTING...");
+        btnStart.setText(R.string.mafia_host_starting);
 
         // Assign roles + send YOUR_ROLE + START to all TCP clients
         server.startGame(mafiaCount, swDoctor.isChecked(), swDetective.isChecked());
@@ -291,9 +291,9 @@ public class MafiaHostActivity extends AppCompatActivity
     private void refreshPlayerChips(List<Player> players) {
         if (tvPlayerCount == null) return;
         uiHandler.post(() -> {
-            tvPlayerCount.setText("PLAYERS (" + players.size() + " in lobby)");
+            tvPlayerCount.setText(getString(R.string.mafia_net_players_lobby, players.size()));
             if (tvIp != null)
-                tvIp.setText("🟢  Server ready  •  " + players.size() + " connected");
+                tvIp.setText(getString(R.string.mafia_net_server_connected, players.size()));
             llPlayerChips.removeAllViews();
             for (Player p : players) {
                 TextView chip = label("    " + p.getName(), 15, false, 0xFF8A9BC4);

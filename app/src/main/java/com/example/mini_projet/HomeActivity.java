@@ -11,7 +11,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
+import androidx.core.os.LocaleListCompat;
 
 import com.example.mini_projet.mafia.Mafiasetupactivity;
 import com.example.mini_projet.mafia.MafiaHostActivity;
@@ -27,34 +29,36 @@ public class HomeActivity extends AppCompatActivity {
 
         LinearLayout cardSpyfall = findViewById(R.id.card_spyfall);
         LinearLayout cardMafia   = findViewById(R.id.card_mafia);
+        TextView btnChangeLanguage = findViewById(R.id.btn_change_language);
 
         applyPressEffect(cardSpyfall);
         applyPressEffect(cardMafia);
+        if (btnChangeLanguage != null) applyPressEffect(btnChangeLanguage);
 
-        // Spyfall — unchanged
+        // Spyfall
         cardSpyfall.setOnClickListener(v ->
                 startActivity(new Intent(this, MainActivity.class)));
 
-        // Mafia — show mode picker: Pass & Play / Host / Join
+        // Mafia — show mode picker
         cardMafia.setOnClickListener(v -> showMafiaModeDialog());
+
+        // Languages
+        if (btnChangeLanguage != null) {
+            btnChangeLanguage.setOnClickListener(v -> showLanguageDialog());
+        }
     }
 
     /**
-     * Shows a bottom-sheet-style dialog so the player can choose:
-     *   🃏  Pass & Play   — everyone shares one device (original flow)
-     *   📡  Host Game     — start a server, friends join via network
-     *   🔗  Join Game     — discover and connect to a host
+     * Shows custom-styled language picker
      */
-    private void showMafiaModeDialog() {
-        // Build custom view
+    private void showLanguageDialog() {
         LinearLayout container = new LinearLayout(this);
         container.setOrientation(LinearLayout.VERTICAL);
         container.setBackgroundColor(ContextCompat.getColor(this, R.color.bg_dark));
         container.setPadding(dp(24), dp(8), dp(24), dp(24));
 
-        // Title
         TextView tvTitle = new TextView(this);
-        tvTitle.setText("CHOOSE MODE");
+        tvTitle.setText(getString(R.string.home_languages));
         tvTitle.setTextSize(11);
         tvTitle.setLetterSpacing(0.18f);
         tvTitle.setTextColor(0xFF8A9BC4);
@@ -62,43 +66,73 @@ public class HomeActivity extends AppCompatActivity {
         tvTitle.setGravity(Gravity.CENTER);
         container.addView(tvTitle);
 
-        // Pass & Play button
-        container.addView(modeButton("🃏  Pass & Play",
-                "One device, everyone takes turns",
-                v -> startActivity(new Intent(this, Mafiasetupactivity.class))));
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(container)
+                .setCancelable(true)
+                .create();
 
-        container.addView(modeDivider());
+        String[] langs = {"English", "Español", "Français", "العربية"};
+        String[] codes = {"en", "es", "fr", "ar"};
 
-        // Host button
-        container.addView(modeButton("📡  Host Game",
-                "Start a server — friends join via WiFi",
-                v -> startActivity(new Intent(this, MafiaHostActivity.class))));
+        for (int i = 0; i < langs.length; i++) {
+            if (i > 0) container.addView(modeDivider());
+            final String code = codes[i];
+            container.addView(modeButton(langs[i], "", v -> {
+                dialog.dismiss();
+                setLocale(code);
+            }));
+        }
 
-        container.addView(modeDivider());
+        dialog.show();
+    }
 
-        // Join button
-        container.addView(modeButton("🔗  Join Game",
-                "Find and join a host on the same network",
-                v -> startActivity(new Intent(this, MafiaJoinActivity.class))));
+    private void setLocale(String langCode) {
+        LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(langCode);
+        AppCompatDelegate.setApplicationLocales(appLocales);
+    }
+
+    /**
+     * Shows a bottom-sheet-style dialog so the player can choose:
+     *   🃏  Pass & Play   — everyone shares one device
+     *   📡  Host Game     — start a server, friends join via network
+     *   🔗  Join Game     — discover and connect to a host
+     */
+    private void showMafiaModeDialog() {
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.setBackgroundColor(ContextCompat.getColor(this, R.color.bg_dark));
+        container.setPadding(dp(24), dp(8), dp(24), dp(24));
+
+        TextView tvTitle = new TextView(this);
+        tvTitle.setText(getString(R.string.mafia_mode_choose));
+        tvTitle.setTextSize(11);
+        tvTitle.setLetterSpacing(0.18f);
+        tvTitle.setTextColor(0xFF8A9BC4);
+        tvTitle.setPadding(0, dp(16), 0, dp(20));
+        tvTitle.setGravity(Gravity.CENTER);
+        container.addView(tvTitle);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setView(container)
                 .setCancelable(true)
                 .create();
 
-        // Re-wire buttons so they also dismiss the dialog
-        String[] modes = {"🃏  Pass & Play", "📡  Host Game", "🔗  Join Game"};
+        String[] modes = {
+                getString(R.string.mafia_mode_pass_play),
+                getString(R.string.mafia_mode_host),
+                getString(R.string.mafia_mode_join)
+        };
+        String[] descs = {
+                getString(R.string.mafia_mode_pass_play_desc),
+                getString(R.string.mafia_mode_host_desc),
+                getString(R.string.mafia_mode_join_desc)
+        };
         Class<?>[] targets = {Mafiasetupactivity.class, MafiaHostActivity.class, MafiaJoinActivity.class};
-        container.removeAllViews();
-        container.addView(tvTitle);
 
         for (int i = 0; i < modes.length; i++) {
             if (i > 0) container.addView(modeDivider());
             final Intent intent = new Intent(this, targets[i]);
-            String desc = i == 0 ? "One device, everyone takes turns"
-                    : i == 1 ? "Start a server — friends join via WiFi"
-                    : "Find and join a host on the same network";
-            container.addView(modeButton(modes[i], desc, v -> {
+            container.addView(modeButton(modes[i], descs[i], v -> {
                 dialog.dismiss();
                 startActivity(intent);
             }));
@@ -113,10 +147,8 @@ public class HomeActivity extends AppCompatActivity {
         row.setPadding(dp(8), dp(18), dp(8), dp(18));
         row.setClickable(true);
         row.setFocusable(true);
-        row.setBackground(null);
         row.setOnClickListener(listener);
 
-        // Ripple on press
         row.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN)
                 row.setAlpha(0.6f);
@@ -131,14 +163,18 @@ public class HomeActivity extends AppCompatActivity {
         tvTitle.setTextSize(16);
         tvTitle.setTypeface(null, Typeface.BOLD);
         tvTitle.setTextColor(0xFFF0F4FF);
-        tvTitle.setPadding(0, 0, 0, dp(4));
+        if (subtitle != null && !subtitle.isEmpty()) {
+            tvTitle.setPadding(0, 0, 0, dp(4));
+        }
         row.addView(tvTitle);
 
-        TextView tvSub = new TextView(this);
-        tvSub.setText(subtitle);
-        tvSub.setTextSize(12);
-        tvSub.setTextColor(0xFF8A9BC4);
-        row.addView(tvSub);
+        if (subtitle != null && !subtitle.isEmpty()) {
+            TextView tvSub = new TextView(this);
+            tvSub.setText(subtitle);
+            tvSub.setTextSize(12);
+            tvSub.setTextColor(0xFF8A9BC4);
+            row.addView(tvSub);
+        }
 
         return row;
     }

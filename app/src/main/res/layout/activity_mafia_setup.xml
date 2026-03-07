@@ -32,7 +32,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="MAFIA"
+                android:text="@string/game_mafia"
                 android:textSize="36sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.25"
@@ -50,7 +50,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="FIND THE KILLER AMONG YOU"
+                android:text="@string/mafia_setup_tagline"
                 android:textSize="11sp"
                 android:letterSpacing="0.3"
                 android:textColor="@color/text_secondary"
@@ -76,7 +76,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="PLAYERS"
+                    android:text="@string/mafia_setup_players"
                     android:textSize="10sp"
                     android:letterSpacing="0.2"
                     android:textColor="@color/text_secondary"
@@ -126,7 +126,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="4 minimum · 12 maximum"
+                    android:text="@string/mafia_setup_players_range"
                     android:textSize="11sp"
                     android:textColor="@color/text_secondary"
                     android:gravity="center"
@@ -145,7 +145,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="MAFIA MEMBERS"
+                    android:text="@string/mafia_setup_mafia_members"
                     android:textSize="10sp"
                     android:letterSpacing="0.2"
                     android:textColor="@color/text_secondary"
@@ -195,7 +195,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Max ⅓ of total players"
+                    android:text="@string/mafia_setup_mafia_limit"
                     android:textSize="11sp"
                     android:textColor="@color/text_secondary"
                     android:gravity="center"
@@ -214,7 +214,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="SPECIAL ROLES"
+                    android:text="@string/mafia_setup_special_roles"
                     android:textSize="10sp"
                     android:letterSpacing="0.2"
                     android:textColor="@color/text_secondary"
@@ -243,7 +243,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Doctor"
+                            android:text="@string/mafia_role_doctor"
                             android:textSize="14sp"
                             android:textStyle="bold"
                             android:textColor="@color/text_primary"/>
@@ -251,7 +251,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Protects one player each night"
+                            android:text="@string/mafia_role_doctor_desc"
                             android:textSize="11sp"
                             android:textColor="@color/text_secondary"/>
 
@@ -294,7 +294,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Detective"
+                            android:text="@string/mafia_role_detective"
                             android:textSize="14sp"
                             android:textStyle="bold"
                             android:textColor="@color/text_primary"/>
@@ -302,7 +302,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Investigates one player each night"
+                            android:text="@string/mafia_role_detective_desc"
                             android:textSize="11sp"
                             android:textColor="@color/text_secondary"/>
 
@@ -323,7 +323,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:background="@drawable/bg_gold_button"
-                android:text="NEXT  →  ENTER NAMES"
+                android:text="@string/mafia_setup_next"
                 android:textColor="@color/bg_dark"
                 android:textSize="14sp"
                 android:textStyle="bold"
@@ -349,7 +349,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="PLAYER NAMES"
+                    android:text="@string/mafia_setup_player_names"
                     android:textSize="10sp"
                     android:letterSpacing="0.3"
                     android:textColor="@color/gold"/>
@@ -358,7 +358,7 @@
                     android:id="@+id/btn_back_to_settings"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="← BACK"
+                    android:text="@string/mafia_setup_back"
                     android:textSize="11sp"
                     android:textColor="@color/text_secondary"
                     android:clickable="true"
@@ -387,7 +387,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:background="@drawable/bg_gold_button"
-                android:text="START GAME"
+                android:text="@string/mafia_setup_start"
                 android:textColor="@color/bg_dark"
                 android:textSize="14sp"
                 android:textStyle="bold"

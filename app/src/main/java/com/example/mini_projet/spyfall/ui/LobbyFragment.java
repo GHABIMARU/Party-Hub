@@ -71,9 +71,9 @@ public class LobbyFragment extends Fragment {
         mgParams.bottomMargin = dp(16);
         modeGroup.setLayoutParams(mgParams);
 
-        RadioButton rbPassPlay = makeRadioBtn("🃏  Pass & Play");
-        RadioButton rbHost     = makeRadioBtn("📡  Host");
-        RadioButton rbJoin     = makeRadioBtn("🔗  Join");
+        RadioButton rbPassPlay = makeRadioBtn(getString(R.string.lobby_mode_pass_play));
+        RadioButton rbHost     = makeRadioBtn(getString(R.string.lobby_mode_host));
+        RadioButton rbJoin     = makeRadioBtn(getString(R.string.lobby_mode_join));
         modeGroup.addView(rbPassPlay);
         modeGroup.addView(rbHost);
         modeGroup.addView(rbJoin);
@@ -112,22 +112,22 @@ public class LobbyFragment extends Fragment {
             if (checkedId == rbPassPlay.getId()) {
                 selectedMode = GameEngine.Mode.PASS_PLAY;
                 addBtn.setVisibility(View.VISIBLE);
-                nameInput.setHint("Agent codename...");
-                startBtn.setText("START MISSION");
+                nameInput.setHint(R.string.lobby_name_hint);
+                startBtn.setText(R.string.lobby_start_mission);
                 impostorCard.setVisibility(View.VISIBLE);
             } else if (checkedId == rbHost.getId()) {
                 selectedMode = GameEngine.Mode.HOST;
                 addBtn.setVisibility(View.GONE);
-                nameInput.setHint("Your codename (host)");
-                startBtn.setText("START HOSTING");
+                nameInput.setHint(R.string.lobby_hint_host);
+                startBtn.setText(R.string.lobby_start_hosting);
                 impostorCard.setVisibility(View.VISIBLE);
             } else {
                 selectedMode = GameEngine.Mode.CLIENT;
                 addBtn.setVisibility(View.GONE);
-                nameInput.setHint("Your codename");
-                startBtn.setText("FIND & JOIN");
+                nameInput.setHint(R.string.lobby_hint_join);
+                startBtn.setText(R.string.lobby_find_join);
                 impostorCard.setVisibility(View.GONE);
-                tvInfo.setText("Make sure you are on the host's hotspot or WiFi.");
+                tvInfo.setText(R.string.lobby_network_info);
                 tvInfo.setVisibility(View.VISIBLE);
             }
         });
@@ -137,7 +137,7 @@ public class LobbyFragment extends Fragment {
             String name = nameInput.getText().toString().trim();
             if (name.isEmpty()) {
                 if (engine.getPlayers().size() < GameEngine.MIN_PLAYERS)
-                    Toast.makeText(requireContext(), "Enter a name", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), R.string.lobby_enter_name, Toast.LENGTH_SHORT).show();
                 return;
             }
             engine.addPlayer(name);
@@ -159,7 +159,7 @@ public class LobbyFragment extends Fragment {
         startBtn.setOnClickListener(v -> {
             String name = nameInput.getText().toString().trim();
             if (name.isEmpty() && selectedMode != GameEngine.Mode.PASS_PLAY) {
-                Toast.makeText(requireContext(), "Enter your name first", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), R.string.lobby_enter_your_name, Toast.LENGTH_SHORT).show();
                 return;
             }
             if (impostorPicker != null) {
@@ -223,13 +223,13 @@ public class LobbyFragment extends Fragment {
                 LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
 
         TextView label = new TextView(requireContext());
-        label.setText("IMPOSTORS");
+        label.setText(R.string.lobby_impostors_label);
         label.setTextSize(10f);
         label.setLetterSpacing(0.2f);
         label.setTextColor(0xFF8A9BC4);
 
         tvImpostorLabel = new TextView(requireContext());
-        tvImpostorLabel.setText("1 impostor");
+        tvImpostorLabel.setText(R.string.lobby_impostor_count_one);
         tvImpostorLabel.setTextSize(15f);
         tvImpostorLabel.setTextColor(0xFFF0F4FF);
         tvImpostorLabel.setPadding(0, dp(4), 0, 0);
@@ -270,15 +270,20 @@ public class LobbyFragment extends Fragment {
     }
 
     private void updateImpostorLabel(int count) {
-        if (tvImpostorLabel != null)
-            tvImpostorLabel.setText(count + (count == 1 ? " impostor" : " impostors"));
+        if (tvImpostorLabel != null) {
+            if (count == 1) {
+                tvImpostorLabel.setText(R.string.lobby_impostor_count_one);
+            } else {
+                tvImpostorLabel.setText(getString(R.string.lobby_impostor_count_plural, count));
+            }
+        }
     }
 
     // ── Game modes ────────────────────────────────────────────────────────────
     private void startPassPlay() {
         if (engine.getPlayers().size() < GameEngine.MIN_PLAYERS) {
             Toast.makeText(requireContext(),
-                    "Need at least " + GameEngine.MIN_PLAYERS + " players", Toast.LENGTH_SHORT).show();
+                    getString(R.string.lobby_min_players_error, GameEngine.MIN_PLAYERS), Toast.LENGTH_SHORT).show();
             return;
         }
         ((MainActivity) requireActivity()).navigateTo(GameState.THEME_PICKER);
@@ -287,7 +292,7 @@ public class LobbyFragment extends Fragment {
     private void startHosting(String name, EditText nameInput,
                               Button addBtn, Button startBtn, TextView tvInfo) {
         if (name.isEmpty()) {
-            Toast.makeText(requireContext(), "Enter your name first", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), R.string.lobby_enter_your_name, Toast.LENGTH_SHORT).show();
             return;
         }
         engine.addPlayer(name);
@@ -298,14 +303,13 @@ public class LobbyFragment extends Fragment {
         engine.handleMessage(new Message("PLAYER_LIST", null, "0:" + name + ";"));
 
         String localIp = Utils.getLocalIp();
-        tvInfo.setText("✅  Hosting  •  IP: " + (localIp != null ? localIp : "unknown")
-                + "\nAgents auto-discover you on the same network.");
+        tvInfo.setText(getString(R.string.lobby_hosting_status, (localIp != null ? localIp : "unknown")));
         tvInfo.setTextColor(0xFF38B2AC);
         tvInfo.setVisibility(View.VISIBLE);
 
         nameInput.setEnabled(false);
         addBtn.setVisibility(View.GONE);
-        startBtn.setText("START GAME");
+        startBtn.setText(R.string.mafia_setup_start);
         updateImpostorPickerMax();
 
         startBtn.setOnClickListener(v -> {
@@ -315,7 +319,7 @@ public class LobbyFragment extends Fragment {
             }
             if (engine.getPlayers().size() < GameEngine.MIN_PLAYERS) {
                 Toast.makeText(requireContext(),
-                        "Need at least " + GameEngine.MIN_PLAYERS + " agents", Toast.LENGTH_SHORT).show();
+                        getString(R.string.lobby_min_agents_error, GameEngine.MIN_PLAYERS), Toast.LENGTH_SHORT).show();
                 return;
             }
             ((MainActivity) requireActivity()).navigateTo(GameState.THEME_PICKER);
@@ -327,10 +331,10 @@ public class LobbyFragment extends Fragment {
     private void joinGame(String name, EditText nameInput,
                           Button addBtn, Button startBtn, TextView tvInfo) {
         startBtn.setEnabled(false);
-        startBtn.setText("SCANNING...");
+        startBtn.setText(R.string.lobby_scanning);
         nameInput.setEnabled(false);
         addBtn.setVisibility(View.GONE);
-        tvInfo.setText("🔍  Broadcasting to find host...");
+        tvInfo.setText(R.string.lobby_broadcasting);
         tvInfo.setTextColor(0xFF8A9BC4);
         tvInfo.setVisibility(View.VISIBLE);
 
@@ -341,17 +345,17 @@ public class LobbyFragment extends Fragment {
                 () -> {
                     client.send(new Message("JOIN", null, name));
                     uiHandler.post(() -> {
-                        startBtn.setText("WAITING FOR HOST...");
-                        tvInfo.setText("✅  Connected! Waiting for host to start.");
+                        startBtn.setText(R.string.lobby_waiting_for_host);
+                        tvInfo.setText(R.string.lobby_connected_waiting);
                         tvInfo.setTextColor(0xFF38B2AC);
                         startPolling();
                     });
                 },
                 () -> uiHandler.post(() -> {
-                    tvInfo.setText("❌  Host not found. Check network and try again.");
+                    tvInfo.setText(R.string.lobby_host_not_found);
                     tvInfo.setTextColor(0xFFE53E3E);
                     startBtn.setEnabled(true);
-                    startBtn.setText("FIND & JOIN");
+                    startBtn.setText(R.string.lobby_find_join);
                     nameInput.setEnabled(true);
                 })
         );

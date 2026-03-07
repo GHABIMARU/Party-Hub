@@ -42,7 +42,7 @@ public class ResultFragment extends Fragment {
         View     accentBar     = view.findViewById(R.id.result_accent_bar);
 
         String result = engine.getResult();
-        if (result == null) result = "Game Over";
+        if (result == null) result = getString(R.string.result_default);
 
         // Determine outcome colors
         final int accentColor;

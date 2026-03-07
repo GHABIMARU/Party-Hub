@@ -124,10 +124,10 @@ public class RoleRevealFragment extends Fragment {
 
     private void applyRoleToRevealLayout() {
         if ("IMPOSTOR".equals(currentRole)) {
-            roleText.setText("🕵️\nYOU ARE\nTHE IMPOSTOR");
+            roleText.setText(getString(R.string.reveal_impostor_text));
             roleText.setTextColor(0xFFE53E3E);
         } else if ("ERROR".equals(currentRole)) {
-            roleText.setText("Error — please restart");
+            roleText.setText(getString(R.string.reveal_error));
             roleText.setTextColor(0xFF8A9BC4);
         } else {
             roleText.setText("🌍\n" + currentRole);
