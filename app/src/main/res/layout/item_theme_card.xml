@@ -28,6 +28,7 @@
         android:gravity="center"
         android:layout_marginTop="6dp"/>
 
+    <!-- Word count hidden -->
     <TextView
         android:id="@+id/tv_theme_count"
         android:layout_width="wrap_content"
@@ -35,15 +36,17 @@
         android:textSize="10sp"
         android:textColor="@color/text_secondary"
         android:gravity="center"
-        android:layout_marginTop="2dp"/>
+        android:layout_marginTop="2dp"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/tv_check"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="✓"
+        android:text="&#10003;"
         android:textSize="16sp"
         android:textColor="@color/gold"
         android:visibility="invisible"
         android:layout_marginTop="4dp"/>
+
 </LinearLayout>

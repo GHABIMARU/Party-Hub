@@ -5,7 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.GridLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,9 +23,9 @@ import java.util.List;
 
 public class ThemePickerFragment extends Fragment {
 
-    private final GameEngine            engine         = GameEngine.getInstance();
-    private final List<WordList.Theme>  selected       = new ArrayList<>();
-    private final List<View>            tileViews      = new ArrayList<>();
+    private final GameEngine           engine    = GameEngine.getInstance();
+    private final List<WordList.Theme> selected  = new ArrayList<>();
+    private final List<View>           tileViews = new ArrayList<>();
 
     public ThemePickerFragment() { super(R.layout.fragment_theme_picker); }
 
@@ -37,18 +37,33 @@ public class ThemePickerFragment extends Fragment {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         if (view == null) return null;
 
-        GridLayout  grid       = view.findViewById(R.id.grid_themes);
-        TextView    tvCount    = view.findViewById(R.id.tv_selected_count);
-        Button      btnAll     = view.findViewById(R.id.btn_select_all);
-        Button      btnStart   = view.findViewById(R.id.btn_start);
+        LinearLayout grid     = view.findViewById(R.id.grid_themes);
+        TextView     tvCount  = view.findViewById(R.id.tv_selected_count);
+        Button       btnAll   = view.findViewById(R.id.btn_select_all);
+        Button       btnStart = view.findViewById(R.id.btn_start);
 
-        WordList.Theme[] themes = WordList.Theme.values();
+        WordList.Theme[] themes  = WordList.Theme.values();
+        final int        COLUMNS = 3;
+        final int        MARGIN  = dpToPx(5);
+
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
-        int columns     = 3;
-        int tilePx      = (screenWidth - dpToPx(24)) / columns;
+        int tilePx = (screenWidth - dpToPx(24) - (MARGIN * 2 * COLUMNS)) / COLUMNS;
 
-        for (WordList.Theme theme : themes) {
-            View tile = inflater.inflate(R.layout.item_theme_card, grid, false);
+        LinearLayout currentRow = null;
+        for (int i = 0; i < themes.length; i++) {
+            if (i % COLUMNS == 0) {
+                currentRow = new LinearLayout(requireContext());
+                currentRow.setOrientation(LinearLayout.HORIZONTAL);
+                currentRow.setGravity(android.view.Gravity.CENTER);
+                LinearLayout.LayoutParams rowLp = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                currentRow.setLayoutParams(rowLp);
+                grid.addView(currentRow);
+            }
+
+            WordList.Theme theme = themes[i];
+            View tile = inflater.inflate(R.layout.item_theme_card, currentRow, false);
 
             TextView tvEmoji = tile.findViewById(R.id.tv_theme_emoji);
             TextView tvName  = tile.findViewById(R.id.tv_theme_name);
@@ -59,10 +74,8 @@ public class ThemePickerFragment extends Fragment {
             tvName.setText(theme.label);
             tvWc.setText(WordList.getWordsForTheme(theme).length + " words");
 
-            GridLayout.LayoutParams lp = new GridLayout.LayoutParams();
-            lp.width  = tilePx;
-            lp.height = tilePx;
-            lp.setMargins(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4));
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(tilePx, tilePx);
+            lp.setMargins(MARGIN, MARGIN, MARGIN, MARGIN);
             tile.setLayoutParams(lp);
 
             tile.setOnClickListener(v -> {
@@ -77,23 +90,33 @@ public class ThemePickerFragment extends Fragment {
             });
 
             tileViews.add(tile);
-            grid.addView(tile);
+            currentRow.addView(tile);
+        }
+
+        int remainder = themes.length % COLUMNS;
+        if (remainder != 0 && currentRow != null) {
+            for (int i = remainder; i < COLUMNS; i++) {
+                View spacer = new View(requireContext());
+                LinearLayout.LayoutParams sp = new LinearLayout.LayoutParams(tilePx, tilePx);
+                sp.setMargins(MARGIN, MARGIN, MARGIN, MARGIN);
+                spacer.setLayoutParams(sp);
+                spacer.setVisibility(View.INVISIBLE);
+                currentRow.addView(spacer);
+            }
         }
 
         btnAll.setOnClickListener(v -> {
             if (selected.size() == themes.length) {
                 selected.clear();
-                for (int i = 0; i < tileViews.size(); i++) {
-                    View tile = tileViews.get(i);
+                for (View tile : tileViews)
                     setTileSelected(tile, tile.findViewById(R.id.tv_check), false);
-                }
                 btnAll.setText("ALL");
             } else {
                 selected.clear();
                 for (int i = 0; i < themes.length; i++) {
                     selected.add(themes[i]);
-                    View tile = tileViews.get(i);
-                    setTileSelected(tile, tile.findViewById(R.id.tv_check), true);
+                    setTileSelected(tileViews.get(i),
+                            tileViews.get(i).findViewById(R.id.tv_check), true);
                 }
                 btnAll.setText("NONE");
             }
@@ -135,19 +158,18 @@ public class ThemePickerFragment extends Fragment {
             tvCount.setText("Select at least one theme");
             tvCount.setTextColor(0xFFE53E3E);
         } else if (n == WordList.Theme.values().length) {
-            tvCount.setText("All themes selected — " + WordList.totalWords() + " words");
+            tvCount.setText("All themes selected \u2014 " + WordList.totalWords() + " words");
             tvCount.setTextColor(0xFF38B2AC);
         } else {
             int wordCount = 0;
             for (WordList.Theme t : selected)
                 wordCount += WordList.getWordsForTheme(t).length;
-            tvCount.setText(n + " theme" + (n > 1 ? "s" : "") + " — " + wordCount + " words");
+            tvCount.setText(n + " theme" + (n > 1 ? "s" : "") + " \u2014 " + wordCount + " words");
             tvCount.setTextColor(0xFFF0B429);
         }
     }
 
     private int dpToPx(int dp) {
-        float density = getResources().getDisplayMetrics().density;
-        return Math.round(dp * density);
+        return Math.round(dp * getResources().getDisplayMetrics().density);
     }
 }

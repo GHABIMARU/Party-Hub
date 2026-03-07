@@ -22,11 +22,13 @@ import java.util.Map;
 public class MafiadayActivity extends AppCompatActivity
         implements MafiaNetworkServer.VoteCallback {
 
+    // ── Intent keys ───────────────────────────────────────────────────────────
     public static final String EXTRA_PLAYERS      = "extra_players";
     public static final String EXTRA_ROUND        = "extra_round";
     public static final String EXTRA_NIGHT_RESULT = "extra_night_result";
     public static final String EXTRA_IS_HOST      = "is_host";
 
+    // ── Views ─────────────────────────────────────────────────────────────────
     private TextView     tv_day_round;
     private TextView     tv_night_result_emoji;
     private TextView     tv_night_result_text;
@@ -37,6 +39,7 @@ public class MafiadayActivity extends AppCompatActivity
     private TextView     btn_eliminate;
     private TextView     btn_skip_vote;
 
+    // ── State ─────────────────────────────────────────────────────────────────
     private ArrayList<Player> players;
     private int    round;
     private String nightResultText;
@@ -46,20 +49,31 @@ public class MafiadayActivity extends AppCompatActivity
     private final Map<Integer, TextView> voteBadges = new HashMap<>();
     private int totalVotes  = 0;
     private int totalVoters = 0;
-    private int currentVoterIndex = 0;
+    private int currentVoterIndex = 0;   // index in alive list — whose turn to vote
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mafia_day);
 
+        // Day sky — drawn behind all UI via decorView index 0
+        android.widget.FrameLayout dayRoot =
+                (android.widget.FrameLayout) getWindow().getDecorView();
+        DaySkyView daySky = new DaySkyView(this);
+        daySky.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+        dayRoot.addView(daySky, 0);
+
         players         = (ArrayList<Player>) getIntent().getSerializableExtra(EXTRA_PLAYERS);
         round           = getIntent().getIntExtra(EXTRA_ROUND, 1);
         nightResultText = getIntent().getStringExtra(EXTRA_NIGHT_RESULT);
         isHost          = getIntent().getBooleanExtra(EXTRA_IS_HOST, false);
 
+        // Register as vote receiver so client votes come in via VoteCallback
         if (isHost && MafiaServerHolder.isHosting()) {
             MafiaServerHolder.get().setVoteCallback(this);
+            // Tell all clients to navigate to the day voting screen
             MafiaServerHolder.get().broadcastState("DAY");
         }
 
@@ -67,8 +81,240 @@ public class MafiadayActivity extends AppCompatActivity
         setupNightResult();
         buildVoteList();
         checkWinCondition();
+
+        // Post cinematic AFTER window is fully laid out
+        if (nightResultText != null) {
+            getWindow().getDecorView().post(() -> showNightResultCinematic());
+        }
     }
 
+    // ── Night result cinematic overlay ────────────────────────────────────────
+    private void showNightResultCinematic() {
+        boolean killed  = nightResultText.contains("eliminated");
+        boolean saved   = nightResultText.contains("saved");
+        // quiet night = neither
+
+        int bgColor     = killed ? 0xFF0D0000 : saved ? 0xFF001A08 : 0xFF020818;
+        int accentColor = killed ? 0xFFFF1111 : saved ? 0xFF2ECC71 : 0xFF8AB4FF;
+        String bigEmoji = killed ? "💀"        : saved ? "🧑‍⚕️"        : "🌙";
+        String headline = killed ? "SOMEONE FELL TONIGHT"
+                : saved  ? "THE DOCTOR SAVED SOMEONE"
+                : "A QUIET NIGHT...";
+
+        android.widget.FrameLayout overlay = new android.widget.FrameLayout(this);
+        overlay.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+        overlay.setBackgroundColor(bgColor);
+        overlay.setElevation(dpToPx(200));
+
+        // Particle layer
+        NightResultParticleView particles = new NightResultParticleView(this, killed, saved);
+        overlay.addView(particles, new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+
+        // Center content
+        LinearLayout center = new LinearLayout(this);
+        center.setOrientation(LinearLayout.VERTICAL);
+        center.setGravity(Gravity.CENTER);
+        center.setPadding(dpToPx(32), 0, dpToPx(32), 0);
+        overlay.addView(center, new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+
+        // Big icon
+        TextView tvIcon = new TextView(this);
+        tvIcon.setText(bigEmoji);
+        tvIcon.setTextSize(88);
+        tvIcon.setGravity(Gravity.CENTER);
+        tvIcon.setScaleX(0f); tvIcon.setScaleY(0f); tvIcon.setAlpha(0f);
+        LinearLayout.LayoutParams iLp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        iLp.bottomMargin = dpToPx(20);
+        tvIcon.setLayoutParams(iLp);
+        center.addView(tvIcon);
+
+        // Headline
+        TextView tvHeadline = new TextView(this);
+        tvHeadline.setText(headline);
+        tvHeadline.setTextSize(22);
+        tvHeadline.setTypeface(null, android.graphics.Typeface.BOLD);
+        tvHeadline.setLetterSpacing(0.15f);
+        tvHeadline.setGravity(Gravity.CENTER);
+        tvHeadline.setTextColor(accentColor);
+        tvHeadline.setAlpha(0f);
+        tvHeadline.setTranslationY(dpToPx(30));
+        LinearLayout.LayoutParams hLp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        hLp.bottomMargin = dpToPx(14);
+        tvHeadline.setLayoutParams(hLp);
+        center.addView(tvHeadline);
+
+        // Result detail text
+        TextView tvDetail = new TextView(this);
+        tvDetail.setText(nightResultText);
+        tvDetail.setTextSize(14);
+        tvDetail.setGravity(Gravity.CENTER);
+        tvDetail.setTextColor(0xFF8A9BC4);
+        tvDetail.setLineSpacing(0, 1.6f);
+        tvDetail.setAlpha(0f);
+        LinearLayout.LayoutParams dLp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dLp.bottomMargin = dpToPx(48);
+        tvDetail.setLayoutParams(dLp);
+        center.addView(tvDetail);
+
+        // "GO TO VOTE" button
+        TextView btnVote = new TextView(this);
+        btnVote.setText("⚖️  GO TO VOTE");
+        btnVote.setTextSize(15);
+        btnVote.setTypeface(null, android.graphics.Typeface.BOLD);
+        btnVote.setGravity(Gravity.CENTER);
+        btnVote.setLetterSpacing(0.1f);
+        btnVote.setTextColor(ContextCompat.getColor(this, R.color.bg_dark));
+        btnVote.setBackgroundResource(R.drawable.bg_button_gold);
+        btnVote.setAlpha(0f);
+        btnVote.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(56)));
+        center.addView(btnVote);
+
+        android.view.ViewGroup root = (android.view.ViewGroup) getWindow().getDecorView();
+        root.addView(overlay);
+
+        // ── Sequence ──────────────────────────────────────────────────────────
+
+        // Flash bg (0ms)
+        android.animation.ObjectAnimator flash = android.animation.ObjectAnimator
+                .ofArgb(overlay, "backgroundColor",
+                        bgColor,
+                        (accentColor & 0x00FFFFFF) | 0x44000000,
+                        bgColor);
+        flash.setDuration(500);
+        flash.start();
+
+        // Icon bursts in (100ms)
+        tvIcon.postDelayed(() ->
+                tvIcon.animate().scaleX(1.3f).scaleY(1.3f).alpha(1f)
+                        .setDuration(400)
+                        .setInterpolator(new android.view.animation.OvershootInterpolator(4f))
+                        .withEndAction(() -> tvIcon.animate()
+                                .scaleX(1f).scaleY(1f).setDuration(200).start())
+                        .start(), 100);
+
+        // If kill → icon shakes (600ms)
+        if (killed) {
+            tvIcon.postDelayed(() -> {
+                android.animation.ObjectAnimator shake = android.animation.ObjectAnimator
+                        .ofFloat(tvIcon, "translationX",
+                                0f, -20f, 20f, -15f, 15f, -8f, 8f, 0f);
+                shake.setDuration(500);
+                shake.start();
+            }, 600);
+        }
+
+        // Headline slides up (500ms)
+        tvHeadline.postDelayed(() ->
+                tvHeadline.animate().alpha(1f).translationY(0f)
+                        .setDuration(400)
+                        .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                        .start(), 500);
+
+        // Detail fades in (900ms)
+        tvDetail.postDelayed(() ->
+                tvDetail.animate().alpha(1f).setDuration(400).start(), 900);
+
+        // Button slides in (1400ms)
+        btnVote.postDelayed(() ->
+                btnVote.animate().alpha(1f)
+                        .setDuration(350)
+                        .setInterpolator(new android.view.animation.OvershootInterpolator(2f))
+                        .start(), 1400);
+
+        // Button dismisses overlay
+        btnVote.setOnClickListener(vv ->
+                overlay.animate().alpha(0f).setDuration(350)
+                        .withEndAction(() -> root.removeView(overlay))
+                        .start());
+    }
+
+    // ── Night result particles ────────────────────────────────────────────────
+    private class NightResultParticleView extends android.view.View {
+        private final java.util.Random rnd = new java.util.Random();
+        private final android.graphics.Paint paint =
+                new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        private final boolean killed, saved;
+        private final float[][] pts = new float[35][6];
+        private boolean initialized = false;
+
+        NightResultParticleView(android.content.Context ctx, boolean killed, boolean saved) {
+            super(ctx);
+            this.killed = killed;
+            this.saved  = saved;
+        }
+
+        @Override
+        protected void onSizeChanged(int w, int h, int ow, int oh) {
+            if (!initialized && w > 0) {
+                for (float[] p : pts) {
+                    p[0] = rnd.nextFloat() * w;
+                    p[1] = rnd.nextFloat() * h;
+                    p[2] = 2f + rnd.nextFloat() * 6f;
+                    p[3] = 5f + rnd.nextFloat() * 12f;
+                    p[4] = 0.3f + rnd.nextFloat() * 0.7f;
+                    p[5] = -1.5f + rnd.nextFloat() * 3f;
+                }
+                initialized = true;
+            }
+        }
+
+        @Override
+        protected void onDraw(android.graphics.Canvas canvas) {
+            int w = getWidth(), h = getHeight();
+            for (float[] p : pts) {
+                if (killed) {
+                    // Blood drops falling
+                    paint.setColor(0xFFAA0000);
+                    paint.setAlpha((int)(p[4] * 255));
+                    paint.setStyle(android.graphics.Paint.Style.FILL);
+                    android.graphics.Path drop = new android.graphics.Path();
+                    drop.addCircle(p[0], p[1], p[3]*0.5f, android.graphics.Path.Direction.CW);
+                    drop.moveTo(p[0], p[1]-p[3]*0.5f);
+                    drop.lineTo(p[0]-p[3]*0.25f, p[1]-p[3]*1.3f);
+                    drop.lineTo(p[0]+p[3]*0.25f, p[1]-p[3]*1.3f);
+                    drop.close();
+                    canvas.drawPath(drop, paint);
+                    p[1] += p[2]; p[0] += p[5];
+                    if (p[1] > h+p[3]) { p[1] = -p[3]; p[0] = rnd.nextFloat()*w; }
+                } else if (saved) {
+                    // Green plus signs floating up
+                    paint.setColor(0xFF2ECC71);
+                    paint.setAlpha((int)(p[4] * 255));
+                    paint.setStyle(android.graphics.Paint.Style.FILL);
+                    float s = p[3]*0.28f;
+                    canvas.drawRect(p[0]-s, p[1]-p[3]*0.5f, p[0]+s, p[1]+p[3]*0.5f, paint);
+                    canvas.drawRect(p[0]-p[3]*0.5f, p[1]-s, p[0]+p[3]*0.5f, p[1]+s, paint);
+                    p[1] -= p[2]; p[0] += p[5];
+                    if (p[1] < -p[3]) { p[1] = h+p[3]; p[0] = rnd.nextFloat()*w; }
+                } else {
+                    // Quiet night — soft twinkling stars
+                    float twinkle = 0.3f + 0.7f * (float)(Math.sin(p[5] + p[2]) * 0.5 + 0.5);
+                    paint.setColor(0xFF8AB4FF);
+                    paint.setAlpha((int)(twinkle * p[4] * 200));
+                    paint.setStyle(android.graphics.Paint.Style.FILL);
+                    canvas.drawCircle(p[0], p[1], p[3]*0.4f, paint);
+                    paint.setAlpha((int)(twinkle * p[4] * 80));
+                    canvas.drawLine(p[0]-p[3], p[1], p[0]+p[3], p[1], paint);
+                    canvas.drawLine(p[0], p[1]-p[3], p[0], p[1]+p[3], paint);
+                    p[5] += 0.02f; // advance twinkle phase
+                }
+                if (p[0] < 0 || p[0] > w) p[5] = -p[5];
+            }
+            postInvalidateDelayed(16);
+        }
+    }
+
+    // ── Bind views ────────────────────────────────────────────────────────────
     private void bindViews() {
         tv_day_round          = findViewById(R.id.tv_day_round);
         tv_night_result_emoji = findViewById(R.id.tv_night_result_emoji);
@@ -85,10 +331,11 @@ public class MafiadayActivity extends AppCompatActivity
         btn_skip_vote.setOnClickListener(v -> confirmSkip());
     }
 
+    // ── Night result banner ───────────────────────────────────────────────────
     private void setupNightResult() {
         if (nightResultText == null) return;
         if (nightResultText.contains("saved")) {
-            tv_night_result_emoji.setText("🩺");
+            tv_night_result_emoji.setText("🧑‍⚕️");
         } else if (nightResultText.contains("eliminated")) {
             tv_night_result_emoji.setText("💀");
             int mafiaAlive = 0;
@@ -102,6 +349,7 @@ public class MafiadayActivity extends AppCompatActivity
         tv_night_result_text.setText(nightResultText);
     }
 
+    // ── Vote list ─────────────────────────────────────────────────────────────
     private void buildVoteList() {
         ll_vote_list.removeAllViews();
         voteMap.clear();
@@ -178,6 +426,7 @@ public class MafiadayActivity extends AppCompatActivity
         return btn;
     }
 
+    // ── Vote logic ────────────────────────────────────────────────────────────
     private void addVote(int playerId) {
         if (totalVotes >= totalVoters) {
             Toast.makeText(this, "All votes already cast", Toast.LENGTH_SHORT).show();
@@ -204,10 +453,15 @@ public class MafiadayActivity extends AppCompatActivity
         refreshVotesRemaining();
     }
 
+    // ── VoteCallback — called when a network client submits a vote ────────────
     @Override
     public void onVoteReceived(int voterId, int targetId) {
+        // Count each client's vote (one vote per player)
         runOnUiThread(() -> {
+            // Remove any previous vote from this voter
+            // (simple approach: just add the vote to the target's count)
             addVote(targetId);
+            // Auto-eliminate when all network players have voted
             if (isHost && totalVotes >= totalVoters) {
                 confirmElimination();
             }
@@ -239,15 +493,20 @@ public class MafiadayActivity extends AppCompatActivity
                 ? "All votes cast ✓"
                 : remaining + (remaining == 1 ? " vote remaining" : " votes remaining"));
     }
+
+    // ── Eliminate leader ──────────────────────────────────────────────────────
+    // ── Eliminate leader ──────────────────────────────────────────────────────
     private void confirmElimination() {
         if (voteMap.isEmpty() || totalVotes == 0) {
             Toast.makeText(this, "No votes cast yet", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Find max votes
         int maxVotes = 0;
         for (int v : voteMap.values()) if (v > maxVotes) maxVotes = v;
 
+        // Count how many players share the max — draw if more than one
         List<Player> tied = new ArrayList<>();
         for (Player p : getAlivePlayers()) {
             if (voteMap.getOrDefault(p.getId(), 0) == maxVotes) tied.add(p);
@@ -269,6 +528,7 @@ public class MafiadayActivity extends AppCompatActivity
         showEliminationDialog(leader);
     }
 
+    // ── Draw → go straight to night, no elimination ───────────────────────────
     private void showDrawDialog(List<Player> tied) {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -276,6 +536,7 @@ public class MafiadayActivity extends AppCompatActivity
         root.setBackgroundColor(0xFF12141F);
         root.setPadding(dpToPx(32), dpToPx(40), dpToPx(32), dpToPx(32));
 
+        // Icon
         TextView tvIcon = new TextView(this);
         tvIcon.setText("⚖️");
         tvIcon.setTextSize(64);
@@ -286,6 +547,7 @@ public class MafiadayActivity extends AppCompatActivity
         tvIcon.setLayoutParams(iLp);
         root.addView(tvIcon);
 
+        // Title
         TextView tvTitle = new TextView(this);
         tvTitle.setText("IT'S A DRAW");
         tvTitle.setTextSize(24);
@@ -299,6 +561,7 @@ public class MafiadayActivity extends AppCompatActivity
         tvTitle.setLayoutParams(tLp);
         root.addView(tvTitle);
 
+        // Tied player names
         StringBuilder names = new StringBuilder();
         for (Player p : tied) names.append("• ").append(p.getName()).append("\n");
         TextView tvTied = new TextView(this);
@@ -313,6 +576,7 @@ public class MafiadayActivity extends AppCompatActivity
         tvTied.setLayoutParams(nLp);
         root.addView(tvTied);
 
+        // Subtitle
         TextView tvSub = new TextView(this);
         tvSub.setText("No one is eliminated.\nThe night begins.");
         tvSub.setTextSize(13);
@@ -325,6 +589,7 @@ public class MafiadayActivity extends AppCompatActivity
         tvSub.setLayoutParams(sLp);
         root.addView(tvSub);
 
+        // Continue to night button
         TextView btnContinue = new TextView(this);
         btnContinue.setText("🌙  BEGIN NIGHT");
         btnContinue.setTextSize(14);
@@ -350,6 +615,7 @@ public class MafiadayActivity extends AppCompatActivity
     }
 
     private void showEliminationDialog(Player victim) {
+        // Colors by role
         int bgColor, accentColor;
         String emoji, verdict, flavour;
         switch (victim.getRole()) {
@@ -363,14 +629,14 @@ public class MafiadayActivity extends AppCompatActivity
             case DOCTOR:
                 bgColor     = 0xFF0A1A0F;
                 accentColor = 0xFF2ECC71;
-                emoji       = "🩺";
+                emoji       = "🧑‍⚕️";
                 verdict     = "DOCTOR";
                 flavour     = "The town has lost its healer.\nThe Mafia grows stronger.";
                 break;
             case DETECTIVE:
                 bgColor     = 0xFF0A0F1A;
                 accentColor = 0xFF3B9EFF;
-                emoji       = "🔎";
+                emoji       = "🕵️‍♀️";
                 verdict     = "DETECTIVE";
                 flavour     = "The town has lost its investigator.\nThe Mafia's secrets are safer.";
                 break;
@@ -389,6 +655,7 @@ public class MafiadayActivity extends AppCompatActivity
         root.setBackgroundColor(bgColor);
         root.setPadding(dpToPx(32), dpToPx(40), dpToPx(32), dpToPx(32));
 
+        // Big role emoji
         TextView tvEmoji = new TextView(this);
         tvEmoji.setText(emoji);
         tvEmoji.setTextSize(64);
@@ -399,6 +666,7 @@ public class MafiadayActivity extends AppCompatActivity
         tvEmoji.setLayoutParams(eLp);
         root.addView(tvEmoji);
 
+        // Role verdict (e.g. "MAFIA MEMBER")
         TextView tvVerdict = new TextView(this);
         tvVerdict.setText(verdict);
         tvVerdict.setTextSize(24);
@@ -412,6 +680,7 @@ public class MafiadayActivity extends AppCompatActivity
         tvVerdict.setLayoutParams(vLp);
         root.addView(tvVerdict);
 
+        // Victim name
         TextView tvName = new TextView(this);
         tvName.setText(victim.getName());
         tvName.setTextSize(22);
@@ -424,6 +693,7 @@ public class MafiadayActivity extends AppCompatActivity
         tvName.setLayoutParams(nLp);
         root.addView(tvName);
 
+        // Flavour description
         TextView tvDesc = new TextView(this);
         tvDesc.setText(flavour);
         tvDesc.setTextSize(13);
@@ -436,6 +706,7 @@ public class MafiadayActivity extends AppCompatActivity
         tvDesc.setLayoutParams(dLp);
         root.addView(tvDesc);
 
+        // Continue button
         TextView btnContinue = new TextView(this);
         btnContinue.setText("CONTINUE  →");
         btnContinue.setTextSize(14);
@@ -460,6 +731,7 @@ public class MafiadayActivity extends AppCompatActivity
         dialog.show();
     }
 
+    // ── Skip voting ───────────────────────────────────────────────────────────
     private void confirmSkip() {
         new AlertDialog.Builder(this)
                 .setTitle("Skip Voting?")
@@ -469,6 +741,7 @@ public class MafiadayActivity extends AppCompatActivity
                 .show();
     }
 
+    // ── Win condition ─────────────────────────────────────────────────────────
     private boolean checkWinCondition() {
         int mafiaAlive = 0, townAlive = 0;
         for (Player p : players) {
@@ -504,71 +777,316 @@ public class MafiadayActivity extends AppCompatActivity
         return sb.toString().trim();
     }
 
+    // ── Game over — full cinematic animated screen ────────────────────────────
     private void showGameOver(String title, String message) {
         btn_eliminate.setClickable(false);
         btn_skip_vote.setClickable(false);
 
-        LinearLayout container = new LinearLayout(this);
-        container.setOrientation(LinearLayout.VERTICAL);
-        container.setPadding(dpToPx(24), dpToPx(8), dpToPx(24), dpToPx(24));
+        boolean mafiaWins = title.contains("MAFIA");
 
+        android.widget.FrameLayout overlay = new android.widget.FrameLayout(this);
+        overlay.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+        overlay.setBackgroundColor(mafiaWins ? 0xFF0D0000 : 0xFF00050F);
+        overlay.setElevation(dpToPx(100));
+
+        // Particle layer
+        GameOverParticleView particles = new GameOverParticleView(this, mafiaWins);
+        overlay.addView(particles, new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+
+        // Center content
+        LinearLayout center = new LinearLayout(this);
+        center.setOrientation(LinearLayout.VERTICAL);
+        center.setGravity(Gravity.CENTER);
+        center.setPadding(dpToPx(32), 0, dpToPx(32), 0);
+        overlay.addView(center, new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+
+        // Big icon
+        TextView tvIcon = new TextView(this);
+        tvIcon.setText(mafiaWins ? "🧛" : "🏆");
+        tvIcon.setTextSize(88);
+        tvIcon.setGravity(Gravity.CENTER);
+        tvIcon.setScaleX(0f); tvIcon.setScaleY(0f); tvIcon.setAlpha(0f);
+        LinearLayout.LayoutParams iLp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        iLp.bottomMargin = dpToPx(20);
+        tvIcon.setLayoutParams(iLp);
+        center.addView(tvIcon);
+
+        // Win title
+        TextView tvTitle = new TextView(this);
+        tvTitle.setText(mafiaWins ? "MAFIA WINS" : "TOWN WINS");
+        tvTitle.setTextSize(34);
+        tvTitle.setTypeface(null, Typeface.BOLD);
+        tvTitle.setLetterSpacing(0.25f);
+        tvTitle.setGravity(Gravity.CENTER);
+        tvTitle.setTextColor(mafiaWins ? 0xFFFF1111 : 0xFFF0B429);
+        tvTitle.setAlpha(0f); tvTitle.setTranslationY(dpToPx(30));
+        LinearLayout.LayoutParams tLp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        tLp.bottomMargin = dpToPx(16);
+        tvTitle.setLayoutParams(tLp);
+        center.addView(tvTitle);
+
+        // Message
         TextView tvMsg = new TextView(this);
         tvMsg.setText(message);
         tvMsg.setTextSize(14);
-        tvMsg.setTextColor(ContextCompat.getColor(this, R.color.text_secondary));
-        tvMsg.setLineSpacing(0, 1.4f);
-        tvMsg.setPadding(0, 0, 0, dpToPx(24));
-        container.addView(tvMsg);
+        tvMsg.setGravity(Gravity.CENTER);
+        tvMsg.setTextColor(0xFF8A9BC4);
+        tvMsg.setLineSpacing(0, 1.6f);
+        tvMsg.setAlpha(0f);
+        LinearLayout.LayoutParams mLp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        mLp.bottomMargin = dpToPx(48);
+        tvMsg.setLayoutParams(mLp);
+        center.addView(tvMsg);
 
+        // Play Again button
         TextView btnPlayAgain = new TextView(this);
-        btnPlayAgain.setText("PLAY AGAIN");
+        btnPlayAgain.setText("🔁  PLAY AGAIN");
         btnPlayAgain.setTextSize(14);
         btnPlayAgain.setTypeface(null, Typeface.BOLD);
-        btnPlayAgain.setTextColor(ContextCompat.getColor(this, R.color.bg_dark));
         btnPlayAgain.setGravity(Gravity.CENTER);
+        btnPlayAgain.setTextColor(ContextCompat.getColor(this, R.color.bg_dark));
         btnPlayAgain.setBackgroundResource(R.drawable.bg_button_gold);
-        LinearLayout.LayoutParams lpA = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(52));
-        lpA.setMargins(0, 0, 0, dpToPx(12));
-        btnPlayAgain.setLayoutParams(lpA);
+        btnPlayAgain.setAlpha(0f);
+        LinearLayout.LayoutParams bLp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(56));
+        bLp.bottomMargin = dpToPx(12);
+        btnPlayAgain.setLayoutParams(bLp);
+        center.addView(btnPlayAgain);
 
+        // Main Menu button
         TextView btnMainMenu = new TextView(this);
-        btnMainMenu.setText("MAIN MENU");
+        btnMainMenu.setText("🏠  MAIN MENU");
         btnMainMenu.setTextSize(14);
         btnMainMenu.setTypeface(null, Typeface.BOLD);
-        btnMainMenu.setTextColor(ContextCompat.getColor(this, R.color.gold));
         btnMainMenu.setGravity(Gravity.CENTER);
+        btnMainMenu.setTextColor(ContextCompat.getColor(this, R.color.gold));
         btnMainMenu.setBackgroundResource(R.drawable.bg_button_outline);
+        btnMainMenu.setAlpha(0f);
         btnMainMenu.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(52)));
+        center.addView(btnMainMenu);
 
-        container.addView(btnPlayAgain);
-        container.addView(btnMainMenu);
+        android.view.ViewGroup root = (android.view.ViewGroup) getWindow().getDecorView();
+        root.addView(overlay);
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(title)
-                .setView(container)
-                .setCancelable(false)
-                .create();
+        // ── Animation sequence ────────────────────────────────────────────────
+
+        // 1. Background flash (0ms)
+        android.animation.ObjectAnimator flash = android.animation.ObjectAnimator
+                .ofArgb(overlay, "backgroundColor",
+                        mafiaWins ? 0xFF0D0000 : 0xFF00050F,
+                        mafiaWins ? 0xFF550000 : 0xFF002244,
+                        mafiaWins ? 0xFF0D0000 : 0xFF00050F);
+        flash.setDuration(600);
+        flash.start();
+
+        // 2. Icon bursts in (100ms)
+        tvIcon.postDelayed(() ->
+                tvIcon.animate().scaleX(1.3f).scaleY(1.3f).alpha(1f)
+                        .setDuration(400)
+                        .setInterpolator(new android.view.animation.OvershootInterpolator(4f))
+                        .withEndAction(() -> tvIcon.animate()
+                                .scaleX(1f).scaleY(1f).setDuration(200).start())
+                        .start(), 100);
+
+        // 3. Title slides up (500ms)
+        tvTitle.postDelayed(() ->
+                tvTitle.animate().alpha(1f).translationY(0f)
+                        .setDuration(400)
+                        .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                        .start(), 500);
+
+        // 4. Message fades in (900ms)
+        tvMsg.postDelayed(() ->
+                tvMsg.animate().alpha(1f).setDuration(400).start(), 900);
+
+        // 5. Buttons appear (1300ms)
+        btnPlayAgain.postDelayed(() -> {
+            btnPlayAgain.animate().alpha(1f).setDuration(300).start();
+            btnMainMenu.animate().alpha(1f).setDuration(300).setStartDelay(100).start();
+        }, 1300);
+
+        // Pulse title repeatedly
+        overlay.postDelayed(() -> {
+            android.animation.ObjectAnimator pulse = android.animation.ObjectAnimator
+                    .ofFloat(tvTitle, "scaleX", 1f, 1.06f, 1f);
+            pulse.setDuration(900);
+            pulse.setRepeatCount(android.animation.ObjectAnimator.INFINITE);
+            pulse.start();
+            android.animation.ObjectAnimator pulseY = android.animation.ObjectAnimator
+                    .ofFloat(tvTitle, "scaleY", 1f, 1.06f, 1f);
+            pulseY.setDuration(900);
+            pulseY.setRepeatCount(android.animation.ObjectAnimator.INFINITE);
+            pulseY.start();
+        }, 900);
 
         btnPlayAgain.setOnClickListener(v -> {
-            dialog.dismiss();
             startActivity(new Intent(this, Mafiasetupactivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
             finish();
         });
 
         btnMainMenu.setOnClickListener(v -> {
-            dialog.dismiss();
             startActivity(new Intent(this, com.example.mini_projet.HomeActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
             finish();
         });
-
-        dialog.show();
     }
 
+    // ── Game over particle view ───────────────────────────────────────────────
+    private class GameOverParticleView extends android.view.View {
+        private final java.util.Random rnd = new java.util.Random();
+        private final android.graphics.Paint paint =
+                new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        private final boolean mafiaWins;
+
+        // Mafia: blood drops.  Town: fireworks rockets + burst particles
+        private final float[][] drops  = new float[40][6]; // blood drops
+        private final float[][] rockets = new float[8][7]; // x,y,vx,vy,r,alpha,burst
+        private final java.util.List<float[]> sparks = new java.util.ArrayList<>();
+        private boolean initialized = false;
+        // Firework colors
+        private final int[] fwColors = {
+                0xFFFFC107, 0xFFFF5722, 0xFF4CAF50, 0xFF2196F3,
+                0xFFE91E63, 0xFFFFEB3B, 0xFF00BCD4, 0xFFFF9800
+        };
+
+        GameOverParticleView(android.content.Context ctx, boolean mafiaWins) {
+            super(ctx);
+            this.mafiaWins = mafiaWins;
+        }
+
+        @Override
+        protected void onSizeChanged(int w, int h, int ow, int oh) {
+            if (!initialized && w > 0) {
+                if (mafiaWins) {
+                    for (float[] d : drops) {
+                        d[0] = rnd.nextFloat() * w;
+                        d[1] = rnd.nextFloat() * h;
+                        d[2] = 4f + rnd.nextFloat() * 7f;   // speed
+                        d[3] = 7f + rnd.nextFloat() * 13f;  // size
+                        d[4] = 0.5f + rnd.nextFloat() * 0.5f; // alpha
+                        d[5] = -1.5f + rnd.nextFloat() * 3f; // drift
+                    }
+                } else {
+                    // Town: launch rockets from bottom
+                    for (int i = 0; i < rockets.length; i++) {
+                        resetRocket(rockets[i], w, h, i);
+                    }
+                }
+                initialized = true;
+            }
+        }
+
+        private void resetRocket(float[] r, int w, int h, int i) {
+            r[0] = (w / (rockets.length + 1f)) * (i + 1) + rnd.nextFloat() * 60 - 30;
+            r[1] = h + 10;
+            r[2] = -1f + rnd.nextFloat() * 2f;  // vx
+            r[3] = -(12f + rnd.nextFloat() * 8f); // vy upward
+            r[4] = 4f;   // radius
+            r[5] = 1f;   // alpha
+            r[6] = 0;    // burst=0 rising, 1=exploded
+        }
+
+        private void burst(float x, float y, int color) {
+            for (int i = 0; i < 28; i++) {
+                double angle = Math.random() * Math.PI * 2;
+                float speed = 3f + rnd.nextFloat() * 7f;
+                sparks.add(new float[]{
+                        x, y,
+                        (float)(Math.cos(angle) * speed),
+                        (float)(Math.sin(angle) * speed),
+                        5f + rnd.nextFloat() * 5f, // size
+                        1f,  // alpha
+                        color
+                });
+            }
+        }
+
+        @Override
+        protected void onDraw(android.graphics.Canvas canvas) {
+            int w = getWidth(), h = getHeight();
+            if (!initialized) { postInvalidateDelayed(16); return; }
+
+            if (mafiaWins) {
+                // ── Blood rain ────────────────────────────────────────────────
+                for (float[] d : drops) {
+                    paint.setColor(0xFFCC0000);
+                    paint.setAlpha((int)(d[4] * 255));
+                    paint.setStyle(android.graphics.Paint.Style.FILL);
+
+                    android.graphics.Path drop = new android.graphics.Path();
+                    drop.addCircle(d[0], d[1], d[3] * 0.5f,
+                            android.graphics.Path.Direction.CW);
+                    drop.moveTo(d[0], d[1] - d[3] * 0.5f);
+                    drop.lineTo(d[0] - d[3] * 0.25f, d[1] - d[3] * 1.4f);
+                    drop.lineTo(d[0] + d[3] * 0.25f, d[1] - d[3] * 1.4f);
+                    drop.close();
+                    canvas.drawPath(drop, paint);
+
+                    d[1] += d[2]; d[0] += d[5];
+                    if (d[1] > h + d[3]) { d[1] = -d[3]; d[0] = rnd.nextFloat() * w; }
+                    if (d[0] < 0 || d[0] > w) d[5] = -d[5];
+                }
+            } else {
+                // ── Fireworks ─────────────────────────────────────────────────
+                for (int i = 0; i < rockets.length; i++) {
+                    float[] r = rockets[i];
+                    if (r[6] == 0) {
+                        // Rising rocket trail
+                        paint.setColor(0xFFFFFFFF);
+                        paint.setAlpha(180);
+                        paint.setStyle(android.graphics.Paint.Style.FILL);
+                        canvas.drawCircle(r[0], r[1], r[4], paint);
+                        // trail
+                        for (int t = 1; t <= 5; t++) {
+                            paint.setAlpha(40 * (6 - t));
+                            canvas.drawCircle(r[0] - r[2]*t, r[1] + t*6, r[4]*0.6f, paint);
+                        }
+                        r[0] += r[2]; r[1] += r[3];
+                        r[3] += 0.3f; // gravity
+                        // Explode when slowing near peak
+                        if (r[3] >= -2f) {
+                            r[6] = 1;
+                            burst(r[0], r[1], fwColors[i % fwColors.length]);
+                            // relaunch after delay
+                            postDelayed(() -> resetRocket(r, w, h, (int)(rnd.nextFloat()*8)),
+                                    (long)(800 + rnd.nextFloat() * 1200));
+                        }
+                    }
+                }
+
+                // Spark particles
+                java.util.Iterator<float[]> it = sparks.iterator();
+                while (it.hasNext()) {
+                    float[] sp = it.next();
+                    paint.setColor((int)sp[6]);
+                    paint.setAlpha((int)(sp[5] * 255));
+                    paint.setStyle(android.graphics.Paint.Style.FILL);
+                    canvas.drawCircle(sp[0], sp[1], sp[4] * sp[5], paint);
+                    sp[0] += sp[2]; sp[1] += sp[3];
+                    sp[3] += 0.15f; // gravity
+                    sp[5] -= 0.018f; // fade
+                    sp[2] *= 0.97f; sp[3] *= 0.97f; // drag
+                    if (sp[5] <= 0) it.remove();
+                }
+            }
+            postInvalidateDelayed(16);
+        }
+    }
+
+    // ── Go to next night ──────────────────────────────────────────────────────
     private void goToNightPhase() {
+        // Broadcast ROLE_REVEAL so clients navigate to next night screen
         if (isHost && MafiaServerHolder.isHosting()) {
             MafiaServerHolder.get().broadcastState("ROLE_REVEAL");
         }
@@ -581,6 +1099,7 @@ public class MafiadayActivity extends AppCompatActivity
         finish();
     }
 
+    // ── Helpers ───────────────────────────────────────────────────────────────
     private Player getLeader() {
         int maxVotes = 0;
         for (int v : voteMap.values()) if (v > maxVotes) maxVotes = v;
@@ -602,8 +1121,8 @@ public class MafiadayActivity extends AppCompatActivity
     private String getRoleEmoji(Player.Role role) {
         switch (role) {
             case MAFIA:     return "🧛";
-            case DOCTOR:    return "🩺";
-            case DETECTIVE: return "🔎";
+            case DOCTOR:    return "🧑‍⚕️";
+            case DETECTIVE: return "🕵️‍♀️";
             default:        return "👤";
         }
     }
@@ -611,4 +1130,135 @@ public class MafiadayActivity extends AppCompatActivity
     private int dpToPx(int dp) {
         return Math.round(dp * getResources().getDisplayMetrics().density);
     }
+    // =========================================================================
+    //  DaySkyView: animated day sky with sun+rays, layered clouds, flying birds
+    // =========================================================================
+    private static class DaySkyView extends android.view.View {
+        private final java.util.Random rnd = new java.util.Random(55443L);
+        private final android.graphics.Paint p =
+                new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        private float sX, sY, sR;
+        private final float[][] clouds = new float[9][7];
+        private final float[][] birds  = new float[7][6];
+        private float time=0f; private boolean ready=false; private int W,H;
+
+        DaySkyView(android.content.Context ctx){super(ctx);}
+        private float dp(float v){return v*getResources().getDisplayMetrics().density;}
+
+        @Override protected void onSizeChanged(int w,int h,int ow,int oh){
+            if(w<=0||h<=0)return; W=w; H=h; rnd.setSeed(55443L);
+            sX=w*0.72f; sY=h*0.14f; sR=dp(44);
+            for(int i=0;i<clouds.length;i++){
+                clouds[i][0]=rnd.nextFloat()*w;
+                clouds[i][1]=h*(0.06f+rnd.nextFloat()*0.38f);
+                clouds[i][2]=dp(55)+rnd.nextFloat()*dp(80);
+                clouds[i][3]=dp(18)+rnd.nextFloat()*dp(28);
+                clouds[i][4]=i<4?dp(1)*(0.3f+rnd.nextFloat()*0.4f):dp(1)*(0.7f+rnd.nextFloat()*0.9f);
+                clouds[i][5]=i<4?0.40f+rnd.nextFloat()*0.22f:0.72f+rnd.nextFloat()*0.22f;
+                clouds[i][6]=i<4?0:1;
+            }
+            for(float[]b:birds){
+                b[0]=rnd.nextFloat()*w; b[1]=h*(0.05f+rnd.nextFloat()*0.26f);
+                b[2]=dp(1)*(1.2f+rnd.nextFloat()*1.8f); b[3]=rnd.nextFloat()*6.283f;
+                b[4]=0.08f+rnd.nextFloat()*0.12f; b[5]=0.6f+rnd.nextFloat()*0.9f;
+            }
+            ready=true;
+        }
+
+        @Override protected void onDraw(android.graphics.Canvas canvas){
+            if(!ready){postInvalidateDelayed(30);return;} time+=0.018f;
+
+            // Sky gradient
+            android.graphics.LinearGradient sky=new android.graphics.LinearGradient(
+                    0,0,0,H,new int[]{0xFF083870,0xFF1468B8,0xFF2E94E0,0xFF78C8F0,0xFFBEE8F8,0xFFE4F5FF},
+                    new float[]{0f,0.18f,0.42f,0.65f,0.84f,1f},android.graphics.Shader.TileMode.CLAMP);
+            p.setShader(sky); canvas.drawRect(0,0,W,H,p); p.setShader(null);
+
+            // Horizon glow
+            android.graphics.LinearGradient horiz=new android.graphics.LinearGradient(
+                    0,H*0.68f,0,H,new int[]{0x00FFE0A0,0x28FFD080,0x14FFBB60},
+                    null,android.graphics.Shader.TileMode.CLAMP);
+            p.setShader(horiz); canvas.drawRect(0,H*0.68f,W,H,p); p.setShader(null);
+
+            // Sun far pulsing halo
+            float br=1f+0.04f*(float)Math.sin(time*0.7f);
+            for(int g=10;g>=1;g--){
+                p.setColor((int)(255*0.015f*(11-g)/10f)<<24|0x00FFE080);
+                canvas.drawCircle(sX,sY,sR*br+dp(g*10),p);
+            }
+
+            // Sun atmospheric halo
+            android.graphics.RadialGradient sa=new android.graphics.RadialGradient(
+                    sX,sY,sR*2.8f,new int[]{0x40FFE890,0x20FFD060,0x00000000},
+                    new float[]{0f,0.45f,1f},android.graphics.Shader.TileMode.CLAMP);
+            p.setShader(sa); canvas.drawCircle(sX,sY,sR*2.8f,p); p.setShader(null);
+
+            // Sun rays
+            float rot=time*0.18f;
+            p.setStyle(android.graphics.Paint.Style.STROKE);
+            for(int i=0;i<16;i++){
+                float ang=rot+i*(float)(Math.PI*2.0/16);
+                float pulse=0.55f+0.45f*(float)Math.sin(time*1.2f+i*0.6f);
+                p.setStrokeWidth(dp(1)*(1.4f+0.8f*pulse)*(i%2==0?1.4f:0.8f));
+                p.setColor((int)(pulse*155)<<24|0x00FFE890);
+                float inn=sR*1.18f, out=sR*(1.6f+0.28f*pulse);
+                canvas.drawLine(sX+(float)Math.cos(ang)*inn,sY+(float)Math.sin(ang)*inn,
+                        sX+(float)Math.cos(ang)*out,sY+(float)Math.sin(ang)*out,p);
+            }
+            p.setStyle(android.graphics.Paint.Style.FILL);
+
+            // Sun body
+            android.graphics.RadialGradient sb=new android.graphics.RadialGradient(
+                    sX-sR*0.25f,sY-sR*0.25f,sR*1.1f,
+                    new int[]{0xFFFFFFF0,0xFFFFF880,0xFFFFE040,0xFFFFBB00},
+                    new float[]{0f,0.38f,0.72f,1f},android.graphics.Shader.TileMode.CLAMP);
+            p.setShader(sb); canvas.drawCircle(sX,sY,sR,p); p.setShader(null);
+            android.graphics.RadialGradient ss=new android.graphics.RadialGradient(
+                    sX-sR*0.32f,sY-sR*0.32f,sR*0.48f,new int[]{0x50FFFFFF,0x00FFFFFF},
+                    null,android.graphics.Shader.TileMode.CLAMP);
+            p.setShader(ss); canvas.drawCircle(sX,sY,sR,p); p.setShader(null);
+
+            // Clouds (far then near)
+            drawClouds(canvas,0); drawClouds(canvas,1);
+
+            // Birds
+            for(float[]b:birds){
+                b[0]+=b[2]; if(b[0]>W+dp(40))b[0]=-dp(40);
+                b[3]+=b[4];
+                drawBird(canvas,b[0],b[1],b[5],(float)(Math.sin(b[3])*Math.PI*0.45f));
+            }
+            // Scroll clouds
+            for(float[]c:clouds){c[0]+=c[4]; if(c[0]>W+c[2]*1.5f)c[0]=-c[2]*1.5f;}
+            postInvalidateDelayed(30);
+        }
+
+        private void drawClouds(android.graphics.Canvas cv,int layer){
+            for(float[]c:clouds){
+                if((int)c[6]!=layer)continue;
+                drawPuff(cv,c[0],c[1],c[2],c[3],(int)(c[5]*255));
+                drawPuff(cv,c[0]+c[2]*0.45f,c[1]-c[3]*0.12f,c[2]*0.65f,c[3]*0.78f,(int)(c[5]*0.78f*255));
+                drawPuff(cv,c[0]-c[2]*0.42f,c[1]-c[3]*0.06f,c[2]*0.58f,c[3]*0.70f,(int)(c[5]*0.65f*255));
+            }
+        }
+
+        private void drawPuff(android.graphics.Canvas cv,float cx,float cy,float rx,float ry,int al){
+            android.graphics.RadialGradient g=new android.graphics.RadialGradient(
+                    cx,cy,Math.max(rx,ry),new int[]{al<<24|0x00FFFFFF,0x00FFFFFF},
+                    new float[]{0f,1f},android.graphics.Shader.TileMode.CLAMP);
+            p.setShader(g); cv.save(); cv.scale(1f,ry/rx,cx,cy);
+            cv.drawCircle(cx,cy,rx,p); cv.restore(); p.setShader(null);
+        }
+
+        private void drawBird(android.graphics.Canvas cv,float x,float y,float sc,float flap){
+            p.setStyle(android.graphics.Paint.Style.STROKE);
+            p.setStrokeWidth(dp(1)*sc*1.1f); p.setColor(0xAA223344);
+            float ws=dp(7)*sc, lift=(float)Math.sin(flap)*ws*0.55f;
+            cv.drawLine(x,y,x-ws*0.55f,y-lift*0.4f,p);
+            cv.drawLine(x-ws*0.55f,y-lift*0.4f,x-ws,y-lift,p);
+            cv.drawLine(x,y,x+ws*0.55f,y-lift*0.4f,p);
+            cv.drawLine(x+ws*0.55f,y-lift*0.4f,x+ws,y-lift,p);
+            p.setStyle(android.graphics.Paint.Style.FILL);
+        }
+    }
+
 }

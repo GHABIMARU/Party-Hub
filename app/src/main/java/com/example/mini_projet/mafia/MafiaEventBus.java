@@ -3,6 +3,10 @@ package com.example.mini_projet.mafia;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Minimal in-process event bus.
+ * Used to push server messages from MafiaJoinActivity to the active game screen.
+ */
 public class MafiaEventBus {
 
     public static final String EVENT_NIGHT_RESULT = "NIGHT_RESULT";

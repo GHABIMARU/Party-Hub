@@ -36,6 +36,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
     private boolean actionConfirmed = false;
     private boolean roleRevealed    = false;
 
+    // Views
     private LinearLayout layoutLock;
     private ScrollView   layoutReveal;
     private TextView     tvLockTitle;
@@ -88,12 +89,15 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
         btnShowRole     = findViewById(R.id.btn_show_role);
         btnSeenRole     = findViewById(R.id.btn_seen_role);
 
+        // Lock screen text
         tvLockTitle.setText(me != null ? me.getName().toUpperCase() + " — your role" : "Your Role");
         tvLockSubtitle.setText("Hold the button below to reveal your secret role");
         tvProgress.setText("Round " + round);
 
+        // Pre-fill role card
         fillRole();
 
+        // Hold-to-reveal
         btnShowRole.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
@@ -113,7 +117,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
                                     btnSeenRole.setText("🧛  Who do you want to kill?");
                                     break;
                                 case DOCTOR:
-                                    btnSeenRole.setText("🩺  Who do you want to protect?");
+                                    btnSeenRole.setText("🧑‍⚕️  Who do you want to protect?");
                                     break;
                                 case DETECTIVE:
                                     btnSeenRole.setText("🔎  Who do you suspect?");
@@ -133,6 +137,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
         btnSeenRole.setOnClickListener(v -> unlockAction());
         btnConfirm.setOnClickListener(v -> confirmAction());
 
+        // Initial state
         layoutReveal.setVisibility(View.GONE);
         layoutAction.setVisibility(View.GONE);
         btnConfirm.setVisibility(View.GONE);
@@ -150,7 +155,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
                 tvRoleDesc.setText(buildMafiaInfo());
                 break;
             case DOCTOR:
-                tvRoleEmoji.setText("🩺");
+                tvRoleEmoji.setText("🧑‍⚕️");
                 tvRoleName.setText("DOCTOR");
                 tvRoleDesc.setText("Each night, choose one player to protect.\nIf the Mafia targets them, they survive.");
                 break;
@@ -196,7 +201,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
                 layoutAction.setVisibility(View.VISIBLE);
                 break;
             case DOCTOR:
-                tvActionTitle.setText("🩺  Choose a player to protect:");
+                tvActionTitle.setText("🧑‍⚕️  Choose a player to protect:");
                 buildActionList();
                 btnConfirm.setText("CONFIRM PROTECT");
                 btnConfirm.setVisibility(View.VISIBLE);
@@ -255,6 +260,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
         if (actionConfirmed) return;
         actionConfirmed = true;
 
+        // Show detective result immediately (only they can see it)
         if (me.getRole() == Player.Role.DETECTIVE) {
             boolean isMafia = actionTarget.getRole() == Player.Role.MAFIA;
             Toast.makeText(this,
@@ -274,6 +280,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
         layoutLock.setVisibility(View.GONE);
 
         if (tvWaiting == null) {
+            // Build a full-screen waiting view
             ScrollView sv = new ScrollView(this);
             sv.setBackgroundColor(ContextCompat.getColor(this, R.color.bg_dark));
             LinearLayout root = new LinearLayout(this);
@@ -303,6 +310,7 @@ public class MafiaNetworkRoleRevealActivity extends AppCompatActivity
         }
     }
 
+    // ── EventBus ──────────────────────────────────────────────────────────────
     @Override
     public void onEvent(String type, String payload) {
         runOnUiThread(() -> {

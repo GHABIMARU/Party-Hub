@@ -1,21 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_night_sky"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_dark">
+    android:background="#010510">
 
+    <!--
+        NightSkyView is added programmatically at index 0 in onCreate.
+        The root background #010510 (near-black deep blue) shows as
+        a fallback and also fills any gap before onDraw fires.
+        Every child must have transparent background so the sky shows through.
+    -->
+
+    <!-- ══ LOCK SCREEN ════════════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/layout_lock"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
-        android:background="@color/bg_dark"
+        android:background="@android:color/transparent"
         android:paddingStart="40dp"
         android:paddingEnd="40dp"
         android:visibility="visible">
 
+        <!-- Night phase label -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="&#127769;  NIGHT PHASE"
+            android:textSize="11sp"
+            android:letterSpacing="0.3"
+            android:textColor="#88C8D8FF"
+            android:gravity="start"
+            android:layout_marginBottom="4dp"/>
+
+        <!-- Progress: "1 / 6" -->
         <TextView
             android:id="@+id/tv_progress"
             android:layout_width="match_parent"
@@ -27,20 +48,22 @@
             android:gravity="end"
             android:layout_marginBottom="24dp"/>
 
+        <!-- Lock icon -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🔒"
+            android:text="&#128274;"
             android:textSize="52sp"
             android:gravity="center"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="20dp"/>
 
+        <!-- Player name -->
         <TextView
             android:id="@+id/tv_lock_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Player 1, it's your turn"
+            android:text="Player 1, it&#8217;s your turn"
             android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"
@@ -48,6 +71,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="12dp"/>
 
+        <!-- Subtitle -->
         <TextView
             android:id="@+id/tv_lock_subtitle"
             android:layout_width="wrap_content"
@@ -60,11 +84,12 @@
             android:lineSpacingMultiplier="1.5"
             android:layout_marginBottom="48dp"/>
 
+        <!-- HOLD TO SEE YOUR ROLE -->
         <TextView
             android:id="@+id/btn_show_role"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:text="👁  HOLD TO SEE YOUR ROLE"
+            android:text="&#128065;  HOLD TO SEE YOUR ROLE"
             android:textSize="14sp"
             android:textStyle="bold"
             android:letterSpacing="0.1"
@@ -75,11 +100,12 @@
             android:focusable="true"
             android:layout_marginBottom="16dp"/>
 
+        <!-- I've seen my role -->
         <TextView
             android:id="@+id/btn_seen_role"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="✅  I'VE SEEN MY ROLE"
+            android:text="&#9989;  I&#8217;VE SEEN MY ROLE"
             android:textSize="14sp"
             android:textStyle="bold"
             android:letterSpacing="0.08"
@@ -91,12 +117,15 @@
             android:visibility="gone"/>
 
     </LinearLayout>
+
+    <!-- ══ ROLE + ACTION SCREEN ═══════════════════════════════════════════ -->
     <ScrollView
         android:id="@+id/scroll_role_visible"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
         android:overScrollMode="never"
+        android:background="@android:color/transparent"
         android:visibility="gone">
 
         <LinearLayout
@@ -104,11 +133,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:background="@android:color/transparent"
             android:paddingStart="32dp"
             android:paddingEnd="32dp"
             android:paddingTop="48dp"
             android:paddingBottom="48dp">
 
+            <!-- Role card -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -122,7 +153,7 @@
                     android:id="@+id/tv_role_emoji"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🔴"
+                    android:text="&#128308;"
                     android:textSize="52sp"
                     android:gravity="center"
                     android:layout_marginBottom="10dp"/>
@@ -138,6 +169,7 @@
                     android:textColor="@color/gold"
                     android:gravity="center"
                     android:layout_marginBottom="14dp"/>
+
                 <TextView
                     android:id="@+id/tv_role_description"
                     android:layout_width="match_parent"
@@ -150,6 +182,7 @@
 
             </LinearLayout>
 
+            <!-- Action panel -->
             <LinearLayout
                 android:id="@+id/layout_action_panel"
                 android:layout_width="match_parent"
@@ -177,6 +210,7 @@
                     android:orientation="vertical"
                     android:layout_marginBottom="12dp"/>
 
+                <!-- Selected player banner -->
                 <LinearLayout
                     android:id="@+id/layout_action_selected"
                     android:layout_width="match_parent"
@@ -201,7 +235,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="—"
+                        android:text="&#8212;"
                         android:textSize="15sp"
                         android:textStyle="bold"
                         android:textColor="@color/text_primary"/>
@@ -209,7 +243,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="✓"
+                        android:text="&#10003;"
                         android:textSize="18sp"
                         android:textColor="@color/gold"/>
 
@@ -217,11 +251,12 @@
 
             </LinearLayout>
 
+            <!-- Confirm button -->
             <TextView
                 android:id="@+id/btn_confirm_action"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="CONFIRM — PASS PHONE  →"
+                android:text="CONFIRM &#8212; PASS PHONE  &#8594;"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.1"
@@ -233,11 +268,12 @@
                 android:layout_marginBottom="12dp"
                 android:visibility="gone"/>
 
+            <!-- Civilian done button -->
             <TextView
                 android:id="@+id/btn_civilian_done"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="GOT IT — PASS PHONE  →"
+                android:text="GOT IT &#8212; PASS PHONE  &#8594;"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.1"

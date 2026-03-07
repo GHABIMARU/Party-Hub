@@ -6,13 +6,14 @@
     android:orientation="vertical"
     android:background="@color/bg_dark">
 
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
         android:paddingTop="32dp"
-        android:paddingBottom="16dp"
+        android:paddingBottom="20dp"
         android:paddingStart="24dp"
         android:paddingEnd="24dp">
 
@@ -26,34 +27,47 @@
             android:textColor="@color/text_primary"/>
 
         <TextView
+            android:id="@+id/tv_selected_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/tv_selected_count"
             android:text="Select at least one theme"
             android:textSize="12sp"
-            android:letterSpacing="0.1"
-            android:textColor="@color/text_secondary"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
+            android:textColor="#FFF0B429"
             android:gravity="center"
-            android:layout_marginTop="6dp"/>
+            android:layout_marginTop="12dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:background="@drawable/bg_card"/>
+
     </LinearLayout>
 
+    <!-- Theme grid — rows built in Java, centered -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:overScrollMode="never">
 
-        <GridLayout
+        <!-- This LinearLayout holds rows of 3 tiles each, all centered -->
+        <LinearLayout
             android:id="@+id/grid_themes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:columnCount="3"
+            android:orientation="vertical"
+            android:gravity="center"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
-            android:paddingBottom="12dp"
-            android:useDefaultMargins="false"/>
+            android:paddingTop="8dp"
+            android:paddingBottom="16dp"/>
+
     </ScrollView>
 
+    <!-- Bottom bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -85,5 +99,6 @@
             android:letterSpacing="0.1"
             android:background="@drawable/bg_gold_button"
             android:textColor="@color/bg_dark"/>
+
     </LinearLayout>
 </LinearLayout>

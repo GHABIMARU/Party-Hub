@@ -29,9 +29,15 @@ public class MafiaHostActivity extends AppCompatActivity
         implements MafiaNetworkServer.HostCallback {
 
     private MafiaNetworkServer server;
+
+    // ── Step containers ───────────────────────────────────────────────────────
     private LinearLayout stepName;
     private LinearLayout stepLobby;
+
+    // ── Step 1 ────────────────────────────────────────────────────────────────
     private EditText etHostName;
+
+    // ── Step 2 lobby views ────────────────────────────────────────────────────
     private TextView     tvIp;
     private TextView     tvPlayerCount;
     private LinearLayout llPlayerChips;
@@ -39,12 +45,15 @@ public class MafiaHostActivity extends AppCompatActivity
     private Switch       swDoctor;
     private Switch       swDetective;
     private Button       btnStart;
+
+    // ── Config state ──────────────────────────────────────────────────────────
     private int    mafiaCount = 2;
     private String hostName   = "";
     private static final int MIN_MAFIA = 1;
 
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
 
+    // ── onCreate ──────────────────────────────────────────────────────────────
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +69,7 @@ public class MafiaHostActivity extends AppCompatActivity
         root.setPadding(dp(20), dp(40), dp(20), dp(20));
         scroll.addView(root);
 
+        // Header
         TextView tvHeader = label("HOST GAME", 22, true, 0xFFF0F4FF);
         tvHeader.setPadding(0, 0, 0, dp(4));
         root.addView(tvHeader);
@@ -68,6 +78,7 @@ public class MafiaHostActivity extends AppCompatActivity
         marginBottom(tvSub, dp(28));
         root.addView(tvSub);
 
+        // ── STEP 1: enter your name ───────────────────────────────────────────
         stepName = new LinearLayout(this);
         stepName.setOrientation(LinearLayout.VERTICAL);
         root.addView(stepName);
@@ -93,11 +104,13 @@ public class MafiaHostActivity extends AppCompatActivity
         btnContinue.setOnClickListener(v -> onContinueClicked());
         stepName.addView(btnContinue);
 
+        // ── STEP 2: lobby ─────────────────────────────────────────────────────
         stepLobby = new LinearLayout(this);
         stepLobby.setOrientation(LinearLayout.VERTICAL);
         stepLobby.setVisibility(View.GONE);
         root.addView(stepLobby);
 
+        // Server status card — no IP shown
         LinearLayout ipCard = new LinearLayout(this);
         ipCard.setOrientation(LinearLayout.HORIZONTAL);
         ipCard.setBackgroundResource(R.drawable.bg_card);
@@ -111,12 +124,14 @@ public class MafiaHostActivity extends AppCompatActivity
         ipCard.setLayoutParams(ipCardLp);
         stepLobby.addView(ipCard);
 
+        // Antenna icon
         TextView tvIcon = new TextView(this);
         tvIcon.setText("📡");
         tvIcon.setTextSize(36);
         tvIcon.setPadding(0, 0, dp(16), 0);
         ipCard.addView(tvIcon);
 
+        // Text column
         LinearLayout textCol = new LinearLayout(this);
         textCol.setOrientation(LinearLayout.VERTICAL);
         textCol.setLayoutParams(new LinearLayout.LayoutParams(
@@ -131,6 +146,7 @@ public class MafiaHostActivity extends AppCompatActivity
         tvShareHint.setLineSpacing(0, 1.4f);
         textCol.addView(tvShareHint);
 
+        // Player list
         tvPlayerCount = sectionLabel("PLAYERS (1 in lobby)");
         marginBottom(tvPlayerCount, dp(10));
         stepLobby.addView(tvPlayerCount);
@@ -140,12 +156,14 @@ public class MafiaHostActivity extends AppCompatActivity
         marginBottom(llPlayerChips, dp(24));
         stepLobby.addView(llPlayerChips);
 
+        // Config card
         LinearLayout configCard = card();
         marginBottom(configCard, dp(24));
         stepLobby.addView(configCard);
 
         configCard.addView(sectionLabel("GAME SETTINGS"));
 
+        // Mafia count row
         LinearLayout mafiaRow = new LinearLayout(this);
         mafiaRow.setOrientation(LinearLayout.HORIZONTAL);
         mafiaRow.setGravity(Gravity.CENTER_VERTICAL);
@@ -203,6 +221,7 @@ public class MafiaHostActivity extends AppCompatActivity
         setContentView(scroll);
     }
 
+    // ── Step 1: enter name → start server ────────────────────────────────────
     private void onContinueClicked() {
         hostName = etHostName.getText().toString().trim();
         if (hostName.isEmpty()) {
@@ -215,14 +234,15 @@ public class MafiaHostActivity extends AppCompatActivity
         server = new MafiaNetworkServer();
         server.setCallback(this);
         server.start();
-        server.addHostPlayer(hostName);
-        MafiaServerHolder.set(server);
+        server.addHostPlayer(hostName);   // host = player id 0
+        MafiaServerHolder.set(server);    // make server reachable from game screens
 
         tvIp.setText("🟢  Server ready — waiting for players...");
 
         refreshPlayerChips(server.getPlayers());
     }
 
+    // ── Step 2: start game ────────────────────────────────────────────────────
     private void onStartClicked() {
         List<Player> current = server.getPlayers();
         if (current.size() < 4) {
@@ -241,18 +261,22 @@ public class MafiaHostActivity extends AppCompatActivity
         btnStart.setEnabled(false);
         btnStart.setText("STARTING...");
 
+        // Assign roles + send YOUR_ROLE + START to all TCP clients
         server.startGame(mafiaCount, swDoctor.isChecked(), swDetective.isChecked());
 
+        // Host device launches the pass-and-play game with full player list
         ArrayList<Player> players = new ArrayList<>(server.getPlayers());
         uiHandler.postDelayed(() -> {
             Intent i = new Intent(this, MafiaRoleRevealActivity.class);
             i.putExtra(MafiaRoleRevealActivity.EXTRA_PLAYERS, players);
             i.putExtra(MafiaRoleRevealActivity.EXTRA_ROUND, 1);
+            // Flag: this is a hosted game — after each night the host must broadcast result
             i.putExtra("is_host", true);
             startActivity(i);
         }, 400);
     }
 
+    // ── HostCallback — called on UI thread ────────────────────────────────────
     @Override
     public void onPlayerJoined(List<Player> currentPlayers) {
         refreshPlayerChips(currentPlayers);
@@ -263,6 +287,7 @@ public class MafiaHostActivity extends AppCompatActivity
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
+    // ── Helpers ───────────────────────────────────────────────────────────────
     private void refreshPlayerChips(List<Player> players) {
         if (tvPlayerCount == null) return;
         uiHandler.post(() -> {
@@ -284,6 +309,7 @@ public class MafiaHostActivity extends AppCompatActivity
         if (tvMafiaCount != null) tvMafiaCount.setText(String.valueOf(mafiaCount));
     }
 
+    // ── View factories ────────────────────────────────────────────────────────
     private TextView label(String t, float size, boolean bold, int color) {
         TextView tv = new TextView(this);
         tv.setText(t); tv.setTextSize(size); tv.setTextColor(color);

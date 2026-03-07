@@ -20,11 +20,13 @@ public class Player implements Serializable {
         this.isAlive = true;
     }
 
+    // Getters
     public int getId()       { return id; }
     public String getName()  { return name; }
     public Role getRole()    { return role; }
     public boolean isAlive() { return isAlive; }
 
+    // Setters
     public void setAlive(boolean alive) { isAlive = alive; }
     public void setRole(Role role)      { this.role = role; }
 }

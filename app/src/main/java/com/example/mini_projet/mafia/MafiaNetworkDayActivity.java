@@ -52,6 +52,7 @@ public class MafiaNetworkDayActivity extends AppCompatActivity
         root.setPadding(dp(20), dp(40), dp(20), dp(20));
         scroll.addView(root);
 
+        // Header
         tvTitle = label("☀️  DAY  •  Round " + round, 22, true, 0xFFF0F4FF);
         marginBottom(tvTitle, dp(6));
         root.addView(tvTitle);
@@ -68,12 +69,14 @@ public class MafiaNetworkDayActivity extends AppCompatActivity
         root.addView(llPlayers);
         buildPlayerList();
 
+        // Status
         tvStatus = label("", 13, false, 0xFF8A9BC4);
         tvStatus.setGravity(Gravity.CENTER);
         marginBottom(tvStatus, dp(16));
         tvStatus.setVisibility(View.GONE);
         root.addView(tvStatus);
 
+        // Vote button
         btnVote = new TextView(this);
         btnVote.setText("SUBMIT VOTE");
         btnVote.setTextSize(15);
@@ -137,22 +140,27 @@ public class MafiaNetworkDayActivity extends AppCompatActivity
         tvStatus.setTextColor(0xFF8A9BC4);
         tvStatus.setVisibility(View.VISIBLE);
 
+        // Send vote to host via MafiaJoinActivity relay
         MafiaEventBus.post("SEND_VOTE", myId + ":" + selectedTarget.getId());
     }
 
+    // ── EventBus ──────────────────────────────────────────────────────────────
     @Override
     public void onEvent(String type, String payload) {
         runOnUiThread(() -> {
             switch (type) {
 
                 case MafiaEventBus.EVENT_ELIMINATED: {
+                    // "PlayerName:ROLE"
                     String[] parts = payload.split(":", 2);
                     String name = parts.length > 0 ? parts[0] : "Someone";
                     String role = parts.length > 1 ? parts[1] : "CIVILIAN";
                     String emoji = roleEmoji(role);
+                    // Mark that player as dead in local list
                     for (Player p : players) {
                         if (p.getName().equals(name)) { p.setAlive(false); break; }
                     }
+                    // Show dialog
                     new AlertDialog.Builder(this)
                             .setTitle("☀️  Eliminated")
                             .setMessage(name + " has been eliminated.\n\nTheir role was: " + emoji + "  " + role)
@@ -164,6 +172,7 @@ public class MafiaNetworkDayActivity extends AppCompatActivity
 
                 case MafiaEventBus.EVENT_STATE: {
                     if ("ROLE_REVEAL".equals(payload)) {
+                        // Next night — go back to role reveal
                         Intent i = new Intent(this, MafiaNetworkRoleRevealActivity.class);
                         i.putExtra(MafiaNetworkRoleRevealActivity.EXTRA_PLAYERS, players);
                         i.putExtra(MafiaNetworkRoleRevealActivity.EXTRA_MY_ID,   myId);
@@ -190,12 +199,13 @@ public class MafiaNetworkDayActivity extends AppCompatActivity
     private String roleEmoji(String role) {
         switch (role) {
             case "MAFIA":     return "🧛";
-            case "DOCTOR":    return "🩺";
+            case "DOCTOR":    return "🧑‍⚕️";
             case "DETECTIVE": return "🔎";
             default:          return "👤";
         }
     }
 
+    // ── View helpers ──────────────────────────────────────────────────────────
     private TextView label(String t, float size, boolean bold, int color) {
         TextView tv = new TextView(this);
         tv.setText(t); tv.setTextSize(size); tv.setTextColor(color);
