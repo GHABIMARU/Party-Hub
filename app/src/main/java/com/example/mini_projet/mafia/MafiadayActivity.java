@@ -733,12 +733,195 @@ public class MafiadayActivity extends AppCompatActivity
 
     // ── Skip voting ───────────────────────────────────────────────────────────
     private void confirmSkip() {
-        new AlertDialog.Builder(this)
-                .setTitle("Skip Voting?")
-                .setMessage("No one will be eliminated. Night begins.")
-                .setPositiveButton("SKIP", (d, w) -> goToNightPhase())
-                .setNegativeButton("CANCEL", null)
-                .show();
+        android.widget.FrameLayout root =
+                (android.widget.FrameLayout) getWindow().getDecorView();
+
+        android.widget.FrameLayout overlay = new android.widget.FrameLayout(this);
+        overlay.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+        overlay.setBackgroundColor(0xEE030A18);
+        overlay.setElevation(dpToPx(150));
+
+        // Flash particle layer
+        SkipFlashView flash = new SkipFlashView(this);
+        overlay.addView(flash, new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+
+        // Center content
+        android.widget.LinearLayout center = new android.widget.LinearLayout(this);
+        center.setOrientation(android.widget.LinearLayout.VERTICAL);
+        center.setGravity(android.view.Gravity.CENTER);
+        overlay.addView(center, new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+
+        // Moon emoji
+        android.widget.TextView tvMoon = new android.widget.TextView(this);
+        tvMoon.setText("\uD83C\uDF19");
+        tvMoon.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 80);
+        tvMoon.setGravity(android.view.Gravity.CENTER);
+        tvMoon.setScaleX(0f);
+        tvMoon.setScaleY(0f);
+        tvMoon.setAlpha(0f);
+        center.addView(tvMoon);
+
+        // Headline
+        android.widget.TextView tvTitle = new android.widget.TextView(this);
+        tvTitle.setText("SKIPPING VOTE");
+        tvTitle.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 24);
+        tvTitle.setTypeface(null, android.graphics.Typeface.BOLD);
+        tvTitle.setLetterSpacing(0.2f);
+        tvTitle.setTextColor(0xFFB0C8FF);
+        tvTitle.setGravity(android.view.Gravity.CENTER);
+        tvTitle.setAlpha(0f);
+        android.widget.LinearLayout.LayoutParams titleLp =
+                new android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+        titleLp.setMargins(0, dpToPx(18), 0, 0);
+        tvTitle.setLayoutParams(titleLp);
+        center.addView(tvTitle);
+
+        // Subtitle
+        android.widget.TextView tvSub = new android.widget.TextView(this);
+        tvSub.setText("No one eliminated \uD83D\uDE4F\nNight begins...");
+        tvSub.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 14);
+        tvSub.setTextColor(0xFF7A9BC4);
+        tvSub.setGravity(android.view.Gravity.CENTER);
+        tvSub.setLineSpacing(0, 1.6f);
+        tvSub.setAlpha(0f);
+        android.widget.LinearLayout.LayoutParams subLp =
+                new android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+        subLp.setMargins(dpToPx(40), dpToPx(12), dpToPx(40), 0);
+        tvSub.setLayoutParams(subLp);
+        center.addView(tvSub);
+
+        // Tap hint
+        android.widget.TextView tvTap = new android.widget.TextView(this);
+        tvTap.setText("tap to continue");
+        tvTap.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 11);
+        tvTap.setTextColor(0x66B0C8FF);
+        tvTap.setGravity(android.view.Gravity.CENTER);
+        tvTap.setAlpha(0f);
+        android.widget.LinearLayout.LayoutParams tapLp =
+                new android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+        tapLp.setMargins(0, dpToPx(48), 0, 0);
+        tvTap.setLayoutParams(tapLp);
+        center.addView(tvTap);
+
+        root.addView(overlay);
+
+        // Moon bounces in with overshoot
+        tvMoon.animate()
+                .scaleX(1f).scaleY(1f).alpha(1f)
+                .setDuration(450)
+                .setInterpolator(new android.view.animation.OvershootInterpolator(2.4f))
+                .withEndAction(() -> {
+                    tvMoon.animate().rotation(20f).setDuration(130)
+                            .withEndAction(() ->
+                                    tvMoon.animate().rotation(-15f).setDuration(110)
+                                            .withEndAction(() ->
+                                                    tvMoon.animate().rotation(0f).setDuration(90).start())
+                                            .start())
+                            .start();
+                }).start();
+
+        tvTitle.animate().alpha(1f).translationYBy(-dpToPx(12))
+                .setStartDelay(180).setDuration(380).start();
+        tvSub.animate().alpha(1f).translationYBy(-dpToPx(8))
+                .setStartDelay(320).setDuration(360).start();
+        tvTap.animate().alpha(1f)
+                .setStartDelay(900).setDuration(500).start();
+
+        // Auto-proceed after 2.2s
+        Runnable proceed = () -> overlay.animate().alpha(0f).setDuration(380)
+                .withEndAction(() -> { root.removeView(overlay); goToNightPhase(); }).start();
+        overlay.postDelayed(proceed, 2200);
+
+        // Tap to skip wait
+        overlay.setOnClickListener(vv -> {
+            overlay.removeCallbacks(proceed);
+            overlay.animate().alpha(0f).setDuration(280)
+                    .withEndAction(() -> { root.removeView(overlay); goToNightPhase(); }).start();
+        });
+    }
+    private static class SkipFlashView extends android.view.View {
+        private final java.util.Random rnd = new java.util.Random();
+        private final android.graphics.Paint p =
+                new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        // [x, y, vx, vy, size, alpha, type(0=8pt star, 1=circle, 2=cross)]
+        private final float[][] pts = new float[45][7];
+        private boolean ready = false;
+        private float time = 0f;
+
+        SkipFlashView(android.content.Context ctx) {
+            super(ctx);
+            postDelayed(() -> {
+                int w = getWidth(), h = getHeight();
+                if (w == 0) return;
+                for (float[] pt : pts) {
+                    pt[0] = rnd.nextFloat() * w;
+                    pt[1] = h * 0.3f + rnd.nextFloat() * h * 0.7f;
+                    pt[2] = (rnd.nextFloat() - 0.5f) * 5f;
+                    pt[3] = -1.5f - rnd.nextFloat() * 4.5f;
+                    pt[4] = 5f + rnd.nextFloat() * 13f;
+                    pt[5] = 0.5f + rnd.nextFloat() * 0.5f;
+                    pt[6] = rnd.nextInt(3);
+                }
+                ready = true;
+                invalidate();
+            }, 60);
+        }
+
+        @Override
+        protected void onDraw(android.graphics.Canvas canvas) {
+            if (!ready) return;
+            time += 0.04f;
+            p.setStyle(android.graphics.Paint.Style.FILL);
+
+            for (float[] pt : pts) {
+                pt[0] += pt[2];
+                pt[1] += pt[3];
+                pt[5] -= 0.010f;
+                if (pt[5] <= 0f || pt[1] < -60f) {
+                    pt[0] = rnd.nextFloat() * getWidth();
+                    pt[1] = getHeight() + 20f;
+                    pt[2] = (rnd.nextFloat() - 0.5f) * 5f;
+                    pt[3] = -1.5f - rnd.nextFloat() * 4.5f;
+                    pt[5] = 0.4f + rnd.nextFloat() * 0.5f;
+                    pt[6] = rnd.nextInt(3);
+                }
+
+                float pulse = 0.65f + 0.35f * (float) Math.sin(time * 2.5f + pt[0] * 0.05f);
+                int al = (int)(pt[5] * pulse * 255);
+                int col = (int)pt[6] == 0 ? 0x00C0D8FF :
+                        (int)pt[6] == 1 ? 0x00FFE890 : 0x00D0A8FF;
+                p.setColor(al << 24 | col);
+                float s = pt[4] * pulse;
+
+                if ((int)pt[6] == 1) {
+                    canvas.drawCircle(pt[0], pt[1], s * 0.55f, p);
+                } else {
+                    p.setStyle(android.graphics.Paint.Style.STROKE);
+                    p.setStrokeWidth(1.8f);
+                    canvas.drawLine(pt[0]-s, pt[1], pt[0]+s, pt[1], p);
+                    canvas.drawLine(pt[0], pt[1]-s, pt[0], pt[1]+s, p);
+                    if ((int)pt[6] == 0) {
+                        float sd = s * 0.68f;
+                        canvas.drawLine(pt[0]-sd,pt[1]-sd, pt[0]+sd,pt[1]+sd, p);
+                        canvas.drawLine(pt[0]-sd,pt[1]+sd, pt[0]+sd,pt[1]-sd, p);
+                    }
+                    p.setStyle(android.graphics.Paint.Style.FILL);
+                }
+            }
+            postInvalidateDelayed(30);
+        }
     }
 
     // ── Win condition ─────────────────────────────────────────────────────────
