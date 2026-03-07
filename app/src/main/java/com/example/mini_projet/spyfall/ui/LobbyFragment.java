@@ -1,5 +1,6 @@
 package com.example.mini_projet.spyfall.ui;
 
+import android.animation.ObjectAnimator;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Handler;
@@ -7,6 +8,7 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -36,6 +38,7 @@ public class LobbyFragment extends Fragment {
 
     private LinearLayout playersView;
     private TextView     tvNoPlayers;
+    private TextView     tvPlayerCount;
     private Handler      uiHandler;
     private Runnable     pollRunnable;
     private NumberPicker impostorPicker;
@@ -51,13 +54,15 @@ public class LobbyFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-
         View view = super.onCreateView(inflater, container, savedInstanceState);
         if (view == null) return null;
 
         uiHandler = new Handler(Looper.getMainLooper());
-        LinearLayout root = (LinearLayout) ((ScrollView) view).getChildAt(0);
 
+        ScrollView scrollView = view.findViewById(R.id.lobby_scroll);
+        LinearLayout root = (LinearLayout) scrollView.getChildAt(0);
+
+        // ── MODE SELECTOR ─────────────────────────────────────────────────────
         RadioGroup modeGroup = new RadioGroup(requireContext());
         modeGroup.setOrientation(RadioGroup.HORIZONTAL);
         LinearLayout.LayoutParams mgParams = new LinearLayout.LayoutParams(
@@ -73,6 +78,8 @@ public class LobbyFragment extends Fragment {
         modeGroup.addView(rbHost);
         modeGroup.addView(rbJoin);
         root.addView(modeGroup, 1);
+
+        // ── STATUS LABEL ──────────────────────────────────────────────────────
         TextView tvInfo = new TextView(requireContext());
         tvInfo.setTextSize(13f);
         tvInfo.setTextColor(0xFF8A9BC4);
@@ -84,35 +91,40 @@ public class LobbyFragment extends Fragment {
         tvInfo.setLayoutParams(infoParams);
         tvInfo.setVisibility(View.GONE);
         root.addView(tvInfo, 2);
+
+        // ── IMPOSTOR CARD ─────────────────────────────────────────────────────
         impostorCard = buildImpostorCard();
         root.addView(impostorCard, 5);
 
-        EditText nameInput = view.findViewById(R.id.name_input);
-        Button   addBtn    = view.findViewById(R.id.add_player_btn);
-        playersView  = view.findViewById(R.id.players_view);
-        tvNoPlayers  = view.findViewById(R.id.tv_no_players);
-        Button   startBtn  = view.findViewById(R.id.start_game_btn);
+        // ── WIRE XML VIEWS ────────────────────────────────────────────────────
+        EditText nameInput   = view.findViewById(R.id.name_input);
+        Button   addBtn      = view.findViewById(R.id.add_player_btn);
+        playersView          = view.findViewById(R.id.players_view);
+        tvNoPlayers          = view.findViewById(R.id.tv_no_players);
+        tvPlayerCount        = view.findViewById(R.id.tv_player_count);
+        Button   startBtn    = view.findViewById(R.id.start_game_btn);
 
         modeGroup.check(rbPassPlay.getId());
 
+        // ── MODE CHANGE ───────────────────────────────────────────────────────
         modeGroup.setOnCheckedChangeListener((group, checkedId) -> {
             tvInfo.setVisibility(View.GONE);
             if (checkedId == rbPassPlay.getId()) {
                 selectedMode = GameEngine.Mode.PASS_PLAY;
                 addBtn.setVisibility(View.VISIBLE);
-                nameInput.setHint("Player name");
+                nameInput.setHint("Agent codename...");
                 startBtn.setText("START MISSION");
                 impostorCard.setVisibility(View.VISIBLE);
             } else if (checkedId == rbHost.getId()) {
                 selectedMode = GameEngine.Mode.HOST;
                 addBtn.setVisibility(View.GONE);
-                nameInput.setHint("Your name (host)");
+                nameInput.setHint("Your codename (host)");
                 startBtn.setText("START HOSTING");
                 impostorCard.setVisibility(View.VISIBLE);
             } else {
                 selectedMode = GameEngine.Mode.CLIENT;
                 addBtn.setVisibility(View.GONE);
-                nameInput.setHint("Your name");
+                nameInput.setHint("Your codename");
                 startBtn.setText("FIND & JOIN");
                 impostorCard.setVisibility(View.GONE);
                 tvInfo.setText("Make sure you are on the host's hotspot or WiFi.");
@@ -120,21 +132,30 @@ public class LobbyFragment extends Fragment {
             }
         });
 
+        // ── ADD PLAYER ────────────────────────────────────────────────────────
         addBtn.setOnClickListener(v -> {
             String name = nameInput.getText().toString().trim();
             if (name.isEmpty()) {
-                if (engine.getPlayers().size() < GameEngine.MIN_PLAYERS) {
+                if (engine.getPlayers().size() < GameEngine.MIN_PLAYERS)
                     Toast.makeText(requireContext(), "Enter a name", Toast.LENGTH_SHORT).show();
-                }
                 return;
             }
             engine.addPlayer(name);
             nameInput.setText("");
             nameInput.requestFocus();
+
+            // Bounce the add button
+            addBtn.animate().scaleX(0.85f).scaleY(0.85f).setDuration(60)
+                    .withEndAction(() -> addBtn.animate().scaleX(1f).scaleY(1f)
+                            .setDuration(150)
+                            .setInterpolator(new OvershootInterpolator(2.5f)).start())
+                    .start();
+
             refreshPlayersList();
             updateImpostorPickerMax();
         });
 
+        // ── START BUTTON ──────────────────────────────────────────────────────
         startBtn.setOnClickListener(v -> {
             String name = nameInput.getText().toString().trim();
             if (name.isEmpty() && selectedMode != GameEngine.Mode.PASS_PLAY) {
@@ -146,17 +167,43 @@ public class LobbyFragment extends Fragment {
                 engine.setImpostorCount(impostorPicker.getValue());
             }
             engine.setMode(selectedMode);
-            switch (selectedMode) {
-                case PASS_PLAY: startPassPlay(); break;
-                case HOST:      startHosting(name, nameInput, addBtn, startBtn, tvInfo); break;
-                case CLIENT:    joinGame(name, nameInput, addBtn, startBtn, tvInfo); break;
-            }
+
+            // Press animation
+            startBtn.animate().scaleX(0.96f).scaleY(0.96f).setDuration(80)
+                    .withEndAction(() -> {
+                        startBtn.animate().scaleX(1f).scaleY(1f).setDuration(120)
+                                .setInterpolator(new OvershootInterpolator(1.5f)).start();
+                        switch (selectedMode) {
+                            case PASS_PLAY: startPassPlay(); break;
+                            case HOST:      startHosting(name, nameInput, addBtn, startBtn, tvInfo); break;
+                            case CLIENT:    joinGame(name, nameInput, addBtn, startBtn, tvInfo); break;
+                        }
+                    }).start();
         });
+
+        // ── ENTRANCE ANIMATION ────────────────────────────────────────────────
+        animateEntrance(root);
 
         refreshPlayersList();
         return view;
     }
 
+    private void animateEntrance(LinearLayout root) {
+        for (int i = 0; i < root.getChildCount(); i++) {
+            View child = root.getChildAt(i);
+            child.setAlpha(0f);
+            child.setTranslationY(dp(30));
+            child.animate()
+                    .alpha(1f)
+                    .translationY(0f)
+                    .setStartDelay(100 + i * 70L)
+                    .setDuration(350)
+                    .setInterpolator(new OvershootInterpolator(0.8f))
+                    .start();
+        }
+    }
+
+    // ── Impostor counter card ─────────────────────────────────────────────────
     private LinearLayout buildImpostorCard() {
         LinearLayout card = new LinearLayout(requireContext());
         card.setOrientation(LinearLayout.HORIZONTAL);
@@ -167,7 +214,6 @@ public class LobbyFragment extends Fragment {
         LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
-        cardParams.topMargin    = dp(0);
         cardParams.bottomMargin = dp(16);
         card.setLayoutParams(cardParams);
 
@@ -228,6 +274,7 @@ public class LobbyFragment extends Fragment {
             tvImpostorLabel.setText(count + (count == 1 ? " impostor" : " impostors"));
     }
 
+    // ── Game modes ────────────────────────────────────────────────────────────
     private void startPassPlay() {
         if (engine.getPlayers().size() < GameEngine.MIN_PLAYERS) {
             Toast.makeText(requireContext(),
@@ -280,7 +327,7 @@ public class LobbyFragment extends Fragment {
     private void joinGame(String name, EditText nameInput,
                           Button addBtn, Button startBtn, TextView tvInfo) {
         startBtn.setEnabled(false);
-        startBtn.setText("SCANNING NETWORK...");
+        startBtn.setText("SCANNING...");
         nameInput.setEnabled(false);
         addBtn.setVisibility(View.GONE);
         tvInfo.setText("🔍  Broadcasting to find host...");
@@ -310,6 +357,7 @@ public class LobbyFragment extends Fragment {
         );
     }
 
+    // ── Polling ───────────────────────────────────────────────────────────────
     private void startPolling() {
         stopPolling();
         pollRunnable = new Runnable() {
@@ -336,36 +384,52 @@ public class LobbyFragment extends Fragment {
 
         if (tvNoPlayers != null)
             tvNoPlayers.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+        if (tvPlayerCount != null)
+            tvPlayerCount.setText(String.valueOf(list.size()));
 
-        for (Player p : list) {
+        for (int idx = 0; idx < list.size(); idx++) {
+            Player p = list.get(idx);
             LinearLayout row = new LinearLayout(requireContext());
             row.setOrientation(LinearLayout.HORIZONTAL);
             row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            row.setBackgroundResource(R.drawable.bg_player_item);
             LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT);
             rowParams.bottomMargin = dp(6);
             row.setLayoutParams(rowParams);
+            row.setPadding(dp(14), dp(10), dp(14), dp(10));
+
+            // Bullet
+            TextView tvBullet = new TextView(requireContext());
+            tvBullet.setText("⬡");
+            tvBullet.setTextColor(0xFF3D4F72);
+            tvBullet.setTextSize(12f);
+            tvBullet.setPadding(0, 0, dp(10), 0);
 
             TextView tvName = new TextView(requireContext());
-            tvName.setText("⬡  " + p.getName());
-            tvName.setTextColor(0xFF8A9BC4);
-            tvName.setTextSize(15f);
+            tvName.setText(p.getName());
+            tvName.setTextColor(0xFFF0F4FF);
+            tvName.setTextSize(14f);
             tvName.setLayoutParams(new LinearLayout.LayoutParams(
                     0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
 
             TextView btnDelete = new TextView(requireContext());
             btnDelete.setText("✕");
             btnDelete.setTextColor(0xFF3D4F72);
-            btnDelete.setTextSize(16f);
-            btnDelete.setPadding(dp(12), dp(4), dp(4), dp(4));
+            btnDelete.setTextSize(15f);
+            btnDelete.setPadding(dp(12), dp(2), dp(4), dp(2));
             btnDelete.setClickable(true);
             btnDelete.setFocusable(true);
             int playerId = p.getId();
             btnDelete.setOnClickListener(v -> {
-                engine.removePlayer(playerId);
-                refreshPlayersList();
-                updateImpostorPickerMax();
+                // Fade out then remove
+                row.animate().alpha(0f).translationX(dp(20)).setDuration(180)
+                        .withEndAction(() -> {
+                            engine.removePlayer(playerId);
+                            refreshPlayersList();
+                            updateImpostorPickerMax();
+                        }).start();
             });
             btnDelete.setOnTouchListener((v, event) -> {
                 if (event.getAction() == android.view.MotionEvent.ACTION_DOWN)
@@ -373,11 +437,22 @@ public class LobbyFragment extends Fragment {
                 else if (event.getAction() == android.view.MotionEvent.ACTION_UP
                         || event.getAction() == android.view.MotionEvent.ACTION_CANCEL)
                     btnDelete.setTextColor(0xFF3D4F72);
+                v.performClick();
                 return false;
             });
 
+            row.addView(tvBullet);
             row.addView(tvName);
             row.addView(btnDelete);
+
+            // Staggered slide-in
+            row.setAlpha(0f);
+            row.setTranslationX(-dp(20));
+            final int delay = idx * 40;
+            row.animate().alpha(1f).translationX(0f)
+                    .setStartDelay(delay).setDuration(250)
+                    .setInterpolator(new OvershootInterpolator(0.6f)).start();
+
             playersView.addView(row);
         }
         updateImpostorPickerMax();
@@ -399,8 +474,5 @@ public class LobbyFragment extends Fragment {
     }
 
     @Override
-    public void onDestroyView() {
-        stopPolling();
-        super.onDestroyView();
-    }
+    public void onDestroyView() { stopPolling(); super.onDestroyView(); }
 }

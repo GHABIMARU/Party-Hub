@@ -1,126 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/touch_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_dark"
     android:clickable="true"
     android:focusable="true">
+
+    <!-- Top gold bar -->
+    <View android:layout_width="match_parent" android:layout_height="2dp"
+        android:background="#44F0B429" android:layout_gravity="top"/>
+
+    <!-- INTRO STATE: tap to reveal -->
     <LinearLayout
         android:id="@+id/layout_intro"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="40dp">
+        android:padding="32dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="YOUR ROLE"
-            android:textSize="11sp"
-            android:letterSpacing="0.3"
-            android:textColor="@color/text_secondary"
-            android:layout_marginBottom="32dp"/>
+            android:text="👁"
+            android:textSize="64sp"
+            android:gravity="center"/>
 
         <TextView
             android:id="@+id/tv_player_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="AGENT"
-            android:textSize="38sp"
+            android:textSize="28sp"
             android:textStyle="bold"
-            android:textColor="@color/text_primary"
+            android:letterSpacing="0.15"
+            android:textColor="@color/gold"
             android:gravity="center"
-            android:layout_marginBottom="48dp"/>
+            android:layout_marginTop="20dp"/>
+
+        <View
+            android:layout_width="60dp"
+            android:layout_height="2dp"
+            android:background="@color/gold"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:layout_gravity="center_horizontal"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="☞"
-            android:textSize="36sp"
-            android:gravity="center"
-            android:alpha="0.4"
-            android:layout_marginBottom="12dp"/>
-
-        <TextView
-            android:id="@+id/tv_hint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Press and hold anywhere\nto see your role"
-            android:textSize="15sp"
+            android:text="HOLD TO REVEAL ROLE"
+            android:textSize="11sp"
+            android:letterSpacing="0.2"
             android:textColor="@color/text_secondary"
-            android:gravity="center"
-            android:lineSpacingMultiplier="1.5"/>
+            android:gravity="center"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="░░░░░░░░░░░░░░"
+            android:textSize="18sp"
+            android:textColor="@color/border"
+            android:gravity="center"
+            android:layout_marginTop="16dp"/>
+
+        <!-- Continue button — shown after reveal -->
+        <Button
+            android:id="@+id/next_btn"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:text="CONTINUE  ›"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
+            android:textColor="@color/bg_dark"
+            android:background="@drawable/bg_gold_button"
+            android:visibility="gone"
+            android:layout_marginTop="36dp"/>
+
+        <TextView
+            android:id="@+id/tv_waiting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Waiting for other agents..."
+            android:textSize="13sp"
+            android:textColor="@color/text_secondary"
+            android:visibility="gone"
+            android:layout_marginTop="24dp"/>
     </LinearLayout>
+
+    <!-- REVEAL STATE: shown while holding -->
     <LinearLayout
         android:id="@+id/layout_reveal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="40dp"
+        android:padding="32dp"
         android:visibility="invisible">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="YOUR ROLE"
-            android:textSize="11sp"
-            android:letterSpacing="0.3"
-            android:textColor="@color/text_secondary"
-            android:layout_marginBottom="32dp"/>
-
-        <TextView
             android:id="@+id/role_text"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text=""
-            android:textSize="42sp"
+            android:text="ROLE"
+            android:textSize="26sp"
             android:textStyle="bold"
-            android:textColor="@color/gold"
+            android:letterSpacing="0.05"
             android:gravity="center"
-            android:lineSpacingMultiplier="1.2"
-            android:layout_marginBottom="24dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Release to hide"
-            android:textSize="12sp"
-            android:letterSpacing="0.15"
-            android:textColor="@color/text_hint"
-            android:gravity="center"/>
-
+            android:lineSpacingMultiplier="1.4"/>
     </LinearLayout>
-    <Button
-        android:id="@+id/next_btn"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="40dp"
-        android:background="@drawable/bg_gold_button"
-        android:text="CONTINUE →"
-        android:textColor="@color/bg_dark"
-        android:textSize="13sp"
-        android:textStyle="bold"
-        android:letterSpacing="0.12"
-        android:stateListAnimator="@null"
-        android:visibility="gone"/>
-
-    <TextView
-        android:id="@+id/tv_waiting"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="48dp"
-        android:text="⏳  Waiting for other agents..."
-        android:textSize="13sp"
-        android:textColor="@color/text_secondary"
-        android:visibility="gone"/>
 
 </FrameLayout>
