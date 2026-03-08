@@ -4,10 +4,6 @@
     android:layout_height="match_parent"
     android:background="@color/bg_dark">
 
-    <!-- Top accent bar -->
-    <View android:layout_width="match_parent" android:layout_height="2dp"
-        android:background="#44F0B429" android:layout_gravity="top"/>
-
     <ScrollView
         android:id="@+id/lobby_scroll"
         android:layout_width="match_parent"
@@ -59,6 +55,138 @@
                     android:letterSpacing="0.15"
                     android:textColor="@color/text_secondary"
                     android:layout_marginTop="2dp"/>
+            </LinearLayout>
+
+            <!-- MODE PICKER -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MODE"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.2"
+                android:textColor="@color/text_secondary"
+                android:layout_marginBottom="12dp"
+                android:layout_marginStart="4dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <TextView
+                    android:id="@+id/mode_pass_play"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="@string/lobby_mode_pass_play"
+                    android:gravity="center"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_mode_button"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginEnd="8dp"/>
+
+                <TextView
+                    android:id="@+id/mode_host"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="@string/lobby_mode_host"
+                    android:gravity="center"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_mode_button"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginEnd="8dp"/>
+
+                <TextView
+                    android:id="@+id/mode_join"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="@string/lobby_mode_join"
+                    android:gravity="center"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_mode_button"
+                    android:clickable="true"
+                    android:focusable="true"/>
+            </LinearLayout>
+
+            <!-- IMPOSTOR SETTINGS -->
+            <TextView
+                android:id="@+id/impostor_settings_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="IMPOSTORS"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.2"
+                android:textColor="@color/text_secondary"
+                android:layout_marginBottom="12dp"
+                android:layout_marginStart="4dp"/>
+
+            <LinearLayout
+                android:id="@+id/impostor_settings_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_card"
+                android:padding="14dp"
+                android:layout_marginBottom="24dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Number of Impostors"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <Button
+                        android:id="@+id/btn_minus_impostor"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:text="-"
+                        android:textSize="18sp"
+                        android:textColor="@color/bg_dark"
+                        android:background="@drawable/bg_gold_button"
+                        android:padding="0dp"/>
+
+                    <TextView
+                        android:id="@+id/tv_impostor_count"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:text="1"
+                        android:textColor="@color/gold"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:gravity="center"/>
+
+                    <Button
+                        android:id="@+id/btn_plus_impostor"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:text="+"
+                        android:textSize="18sp"
+                        android:textColor="@color/bg_dark"
+                        android:background="@drawable/bg_gold_button"
+                        android:padding="0dp"/>
+                </LinearLayout>
             </LinearLayout>
 
             <!-- INPUT CARD -->
@@ -114,7 +242,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="10dp">
+                    android:layout_marginBottom="16dp">
 
                     <TextView
                         android:layout_width="0dp"
@@ -128,16 +256,16 @@
 
                     <TextView
                         android:id="@+id/tv_player_count"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:text="0"
-                        android:textSize="10sp"
-                        android:textColor="@color/gold"
-                        android:background="@drawable/bg_card"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:paddingTop="3dp"
-                        android:paddingBottom="3dp"/>
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="#4CAF50"
+                        android:gravity="center"
+                        android:background="@drawable/bg_timer_ring"
+                        android:backgroundTint="#4CAF50"
+                        android:alpha="0.8"/>
                 </LinearLayout>
 
                 <TextView

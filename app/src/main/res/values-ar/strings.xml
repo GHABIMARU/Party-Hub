@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ميكس بارتي</string>
+    <string name="app_name">Party Hub</string>
     <string name="role_impostor">%1$s\nأنت المحتال</string>
     <string name="role_word">%1$s\nالكلمة: %2$s</string>
     <string name="home_spyfall_desc">ابحث عن الجاسوس قبل أن يكتشف الموقع</string>

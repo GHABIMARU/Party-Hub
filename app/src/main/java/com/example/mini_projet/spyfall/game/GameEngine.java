@@ -101,6 +101,14 @@ public class GameEngine {
         }
     }
 
+    public void removePlayerByIndex(int index) {
+        synchronized (players) {
+            if (index >= 0 && index < players.size()) {
+                players.remove(index);
+            }
+        }
+    }
+
     public void reset() {
         synchronized (players) { players.clear(); }
         synchronized (originalPlayers) { originalPlayers.clear(); }

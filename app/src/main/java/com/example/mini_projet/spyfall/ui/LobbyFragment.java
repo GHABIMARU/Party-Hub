@@ -1,482 +1,273 @@
 package com.example.mini_projet.spyfall.ui;
 
-import android.animation.ObjectAnimator;
+import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
+import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.OvershootInterpolator;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.NumberPicker;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.mini_projet.R;
 import com.example.mini_projet.spyfall.game.GameEngine;
 import com.example.mini_projet.spyfall.game.GameState;
-import com.example.mini_projet.shared.model.Message;
-import com.example.mini_projet.shared.network.ClientConnection;
-import com.example.mini_projet.shared.network.HostServer;
-import com.example.mini_projet.shared.model.Player;
-import com.example.mini_projet.shared.utils.Utils;
+import com.example.mini_projet.spyfall.viewmodel.GameViewModel;
+
+import java.util.List;
 
 public class LobbyFragment extends Fragment {
 
-    private final GameEngine engine = GameEngine.getInstance();
-
+    private GameViewModel viewModel;
     private LinearLayout playersView;
-    private TextView     tvNoPlayers;
-    private TextView     tvPlayerCount;
-    private Handler      uiHandler;
-    private Runnable     pollRunnable;
-    private NumberPicker impostorPicker;
-    private TextView     tvImpostorLabel;
-    private LinearLayout impostorCard;
+    private EditText nameInput;
+    private TextView tvPlayerCount;
+    private View tvNoPlayers;
+    
+    private TextView modePassPlay, modeHost, modeJoin;
+    
+    private TextView tvImpostorCount;
+    private View impostorSettingsLabel, impostorSettingsLayout;
+    private int impostorCount = 1;
 
-    private GameEngine.Mode selectedMode = GameEngine.Mode.PASS_PLAY;
-
-    public LobbyFragment() { super(R.layout.fragment_lobby); }
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        viewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
+    }
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-        if (view == null) return null;
+        View root = inflater.inflate(R.layout.fragment_lobby, container, false);
 
-        uiHandler = new Handler(Looper.getMainLooper());
+        playersView = root.findViewById(R.id.players_view);
+        nameInput = root.findViewById(R.id.name_input);
+        tvPlayerCount = root.findViewById(R.id.tv_player_count);
+        tvNoPlayers = root.findViewById(R.id.tv_no_players);
+        Button addBtn = root.findViewById(R.id.add_player_btn);
+        Button startBtn = root.findViewById(R.id.start_game_btn);
+        
+        modePassPlay = root.findViewById(R.id.mode_pass_play);
+        modeHost = root.findViewById(R.id.mode_host);
+        modeJoin = root.findViewById(R.id.mode_join);
 
-        ScrollView scrollView = view.findViewById(R.id.lobby_scroll);
-        LinearLayout root = (LinearLayout) scrollView.getChildAt(0);
+        tvImpostorCount = root.findViewById(R.id.tv_impostor_count);
+        impostorSettingsLabel = root.findViewById(R.id.impostor_settings_label);
+        impostorSettingsLayout = root.findViewById(R.id.impostor_settings_layout);
+        Button btnMinus = root.findViewById(R.id.btn_minus_impostor);
+        Button btnPlus = root.findViewById(R.id.btn_plus_impostor);
 
-        // ── MODE SELECTOR ─────────────────────────────────────────────────────
-        RadioGroup modeGroup = new RadioGroup(requireContext());
-        modeGroup.setOrientation(RadioGroup.HORIZONTAL);
-        LinearLayout.LayoutParams mgParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        mgParams.bottomMargin = dp(16);
-        modeGroup.setLayoutParams(mgParams);
+        setupModePicker();
+        setupImpostorControls(btnMinus, btnPlus);
 
-        RadioButton rbPassPlay = makeRadioBtn(getString(R.string.lobby_mode_pass_play));
-        RadioButton rbHost     = makeRadioBtn(getString(R.string.lobby_mode_host));
-        RadioButton rbJoin     = makeRadioBtn(getString(R.string.lobby_mode_join));
-        modeGroup.addView(rbPassPlay);
-        modeGroup.addView(rbHost);
-        modeGroup.addView(rbJoin);
-        root.addView(modeGroup, 1);
-
-        // ── STATUS LABEL ──────────────────────────────────────────────────────
-        TextView tvInfo = new TextView(requireContext());
-        tvInfo.setTextSize(13f);
-        tvInfo.setTextColor(0xFF8A9BC4);
-        tvInfo.setLineSpacing(0, 1.5f);
-        LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        infoParams.bottomMargin = dp(12);
-        tvInfo.setLayoutParams(infoParams);
-        tvInfo.setVisibility(View.GONE);
-        root.addView(tvInfo, 2);
-
-        // ── IMPOSTOR CARD ─────────────────────────────────────────────────────
-        impostorCard = buildImpostorCard();
-        root.addView(impostorCard, 5);
-
-        // ── WIRE XML VIEWS ────────────────────────────────────────────────────
-        EditText nameInput   = view.findViewById(R.id.name_input);
-        Button   addBtn      = view.findViewById(R.id.add_player_btn);
-        playersView          = view.findViewById(R.id.players_view);
-        tvNoPlayers          = view.findViewById(R.id.tv_no_players);
-        tvPlayerCount        = view.findViewById(R.id.tv_player_count);
-        Button   startBtn    = view.findViewById(R.id.start_game_btn);
-
-        modeGroup.check(rbPassPlay.getId());
-
-        // ── MODE CHANGE ───────────────────────────────────────────────────────
-        modeGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            tvInfo.setVisibility(View.GONE);
-            if (checkedId == rbPassPlay.getId()) {
-                selectedMode = GameEngine.Mode.PASS_PLAY;
-                addBtn.setVisibility(View.VISIBLE);
-                nameInput.setHint(R.string.lobby_name_hint);
-                startBtn.setText(R.string.lobby_start_mission);
-                impostorCard.setVisibility(View.VISIBLE);
-            } else if (checkedId == rbHost.getId()) {
-                selectedMode = GameEngine.Mode.HOST;
-                addBtn.setVisibility(View.GONE);
-                nameInput.setHint(R.string.lobby_hint_host);
-                startBtn.setText(R.string.lobby_start_hosting);
-                impostorCard.setVisibility(View.VISIBLE);
-            } else {
-                selectedMode = GameEngine.Mode.CLIENT;
-                addBtn.setVisibility(View.GONE);
-                nameInput.setHint(R.string.lobby_hint_join);
-                startBtn.setText(R.string.lobby_find_join);
-                impostorCard.setVisibility(View.GONE);
-                tvInfo.setText(R.string.lobby_network_info);
-                tvInfo.setVisibility(View.VISIBLE);
-            }
-        });
-
-        // ── ADD PLAYER ────────────────────────────────────────────────────────
         addBtn.setOnClickListener(v -> {
             String name = nameInput.getText().toString().trim();
-            if (name.isEmpty()) {
-                if (engine.getPlayers().size() < GameEngine.MIN_PLAYERS)
-                    Toast.makeText(requireContext(), R.string.lobby_enter_name, Toast.LENGTH_SHORT).show();
-                return;
-            }
-            engine.addPlayer(name);
-            nameInput.setText("");
-            nameInput.requestFocus();
-
-            // Bounce the add button
-            addBtn.animate().scaleX(0.85f).scaleY(0.85f).setDuration(60)
-                    .withEndAction(() -> addBtn.animate().scaleX(1f).scaleY(1f)
-                            .setDuration(150)
-                            .setInterpolator(new OvershootInterpolator(2.5f)).start())
-                    .start();
-
-            refreshPlayersList();
-            updateImpostorPickerMax();
-        });
-
-        // ── START BUTTON ──────────────────────────────────────────────────────
-        startBtn.setOnClickListener(v -> {
-            String name = nameInput.getText().toString().trim();
-            if (name.isEmpty() && selectedMode != GameEngine.Mode.PASS_PLAY) {
-                Toast.makeText(requireContext(), R.string.lobby_enter_your_name, Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (impostorPicker != null) {
-                impostorPicker.clearFocus();
-                engine.setImpostorCount(impostorPicker.getValue());
-            }
-            engine.setMode(selectedMode);
-
-            // Press animation
-            startBtn.animate().scaleX(0.96f).scaleY(0.96f).setDuration(80)
-                    .withEndAction(() -> {
-                        startBtn.animate().scaleX(1f).scaleY(1f).setDuration(120)
-                                .setInterpolator(new OvershootInterpolator(1.5f)).start();
-                        switch (selectedMode) {
-                            case PASS_PLAY: startPassPlay(); break;
-                            case HOST:      startHosting(name, nameInput, addBtn, startBtn, tvInfo); break;
-                            case CLIENT:    joinGame(name, nameInput, addBtn, startBtn, tvInfo); break;
-                        }
-                    }).start();
-        });
-
-        // ── ENTRANCE ANIMATION ────────────────────────────────────────────────
-        animateEntrance(root);
-
-        refreshPlayersList();
-        return view;
-    }
-
-    private void animateEntrance(LinearLayout root) {
-        for (int i = 0; i < root.getChildCount(); i++) {
-            View child = root.getChildAt(i);
-            child.setAlpha(0f);
-            child.setTranslationY(dp(30));
-            child.animate()
-                    .alpha(1f)
-                    .translationY(0f)
-                    .setStartDelay(100 + i * 70L)
-                    .setDuration(350)
-                    .setInterpolator(new OvershootInterpolator(0.8f))
-                    .start();
-        }
-    }
-
-    // ── Impostor counter card ─────────────────────────────────────────────────
-    private LinearLayout buildImpostorCard() {
-        LinearLayout card = new LinearLayout(requireContext());
-        card.setOrientation(LinearLayout.HORIZONTAL);
-        card.setBackgroundResource(R.drawable.bg_card);
-        card.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        int pad = dp(20);
-        card.setPadding(pad, pad, pad, pad);
-        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        cardParams.bottomMargin = dp(16);
-        card.setLayoutParams(cardParams);
-
-        LinearLayout leftCol = new LinearLayout(requireContext());
-        leftCol.setOrientation(LinearLayout.VERTICAL);
-        leftCol.setLayoutParams(new LinearLayout.LayoutParams(0,
-                LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-
-        TextView label = new TextView(requireContext());
-        label.setText(R.string.lobby_impostors_label);
-        label.setTextSize(10f);
-        label.setLetterSpacing(0.2f);
-        label.setTextColor(0xFF8A9BC4);
-
-        tvImpostorLabel = new TextView(requireContext());
-        tvImpostorLabel.setText(R.string.lobby_impostor_count_one);
-        tvImpostorLabel.setTextSize(15f);
-        tvImpostorLabel.setTextColor(0xFFF0F4FF);
-        tvImpostorLabel.setPadding(0, dp(4), 0, 0);
-
-        leftCol.addView(label);
-        leftCol.addView(tvImpostorLabel);
-        card.addView(leftCol);
-
-        impostorPicker = new NumberPicker(requireContext());
-        impostorPicker.setMinValue(1);
-        impostorPicker.setMaxValue(1);
-        impostorPicker.setValue(1);
-        impostorPicker.setWrapSelectorWheel(false);
-
-        try {
-            java.lang.reflect.Field f = NumberPicker.class.getDeclaredField("mInputText");
-            f.setAccessible(true);
-            EditText et = (EditText) f.get(impostorPicker);
-            if (et != null) et.setTextColor(0xFFF0B429);
-        } catch (Exception ignored) {}
-
-        impostorPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
-            engine.setImpostorCount(newVal);
-            updateImpostorLabel(newVal);
-        });
-
-        card.addView(impostorPicker);
-        return card;
-    }
-
-    private void updateImpostorPickerMax() {
-        if (impostorPicker == null) return;
-        int playerCount = engine.getPlayers().size();
-        int max = Math.max(1, (playerCount - 1) / 2);
-        impostorPicker.setMaxValue(max);
-        if (impostorPicker.getValue() > max) impostorPicker.setValue(max);
-        updateImpostorLabel(impostorPicker.getValue());
-    }
-
-    private void updateImpostorLabel(int count) {
-        if (tvImpostorLabel != null) {
-            if (count == 1) {
-                tvImpostorLabel.setText(R.string.lobby_impostor_count_one);
+            if (!TextUtils.isEmpty(name)) {
+                viewModel.addPlayer(name);
+                nameInput.setText("");
+                hideKeyboard();
             } else {
-                tvImpostorLabel.setText(getString(R.string.lobby_impostor_count_plural, count));
+                Toast.makeText(getContext(), R.string.lobby_enter_name, Toast.LENGTH_SHORT).show();
             }
-        }
-    }
-
-    // ── Game modes ────────────────────────────────────────────────────────────
-    private void startPassPlay() {
-        if (engine.getPlayers().size() < GameEngine.MIN_PLAYERS) {
-            Toast.makeText(requireContext(),
-                    getString(R.string.lobby_min_players_error, GameEngine.MIN_PLAYERS), Toast.LENGTH_SHORT).show();
-            return;
-        }
-        ((MainActivity) requireActivity()).navigateTo(GameState.THEME_PICKER);
-    }
-
-    private void startHosting(String name, EditText nameInput,
-                              Button addBtn, Button startBtn, TextView tvInfo) {
-        if (name.isEmpty()) {
-            Toast.makeText(requireContext(), R.string.lobby_enter_your_name, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        engine.addPlayer(name);
-        engine.setMyPlayerId(0);
-        HostServer host = new HostServer();
-        host.startServer();
-        engine.setHostServer(host);
-        engine.handleMessage(new Message("PLAYER_LIST", null, "0:" + name + ";"));
-
-        String localIp = Utils.getLocalIp();
-        tvInfo.setText(getString(R.string.lobby_hosting_status, (localIp != null ? localIp : "unknown")));
-        tvInfo.setTextColor(0xFF38B2AC);
-        tvInfo.setVisibility(View.VISIBLE);
-
-        nameInput.setEnabled(false);
-        addBtn.setVisibility(View.GONE);
-        startBtn.setText(R.string.mafia_setup_start);
-        updateImpostorPickerMax();
+        });
 
         startBtn.setOnClickListener(v -> {
-            if (impostorPicker != null) {
-                impostorPicker.clearFocus();
-                engine.setImpostorCount(impostorPicker.getValue());
-            }
-            if (engine.getPlayers().size() < GameEngine.MIN_PLAYERS) {
-                Toast.makeText(requireContext(),
-                        getString(R.string.lobby_min_agents_error, GameEngine.MIN_PLAYERS), Toast.LENGTH_SHORT).show();
+            List<String> players = viewModel.getPlayers().getValue();
+            int pCount = (players != null) ? players.size() : 0;
+            
+            if (pCount < 3) {
+                Toast.makeText(getContext(), getString(R.string.lobby_min_players_error, 3), Toast.LENGTH_SHORT).show();
                 return;
             }
+
+            int maxAllowed = Math.max(1, (pCount - 1) / 2);
+            if (impostorCount > maxAllowed) {
+                Toast.makeText(getContext(), "Too many impostors for this player count!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            GameEngine.getInstance().setImpostorCount(impostorCount);
             ((MainActivity) requireActivity()).navigateTo(GameState.THEME_PICKER);
         });
 
-        startPolling();
+        viewModel.getPlayers().observe(getViewLifecycleOwner(), this::updatePlayersList);
+
+        return root;
     }
 
-    private void joinGame(String name, EditText nameInput,
-                          Button addBtn, Button startBtn, TextView tvInfo) {
-        startBtn.setEnabled(false);
-        startBtn.setText(R.string.lobby_scanning);
-        nameInput.setEnabled(false);
-        addBtn.setVisibility(View.GONE);
-        tvInfo.setText(R.string.lobby_broadcasting);
-        tvInfo.setTextColor(0xFF8A9BC4);
-        tvInfo.setVisibility(View.VISIBLE);
-
-        ClientConnection client = new ClientConnection();
-        engine.setClientConnection(client);
-
-        client.discoverAndConnect(
-                () -> {
-                    client.send(new Message("JOIN", null, name));
-                    uiHandler.post(() -> {
-                        startBtn.setText(R.string.lobby_waiting_for_host);
-                        tvInfo.setText(R.string.lobby_connected_waiting);
-                        tvInfo.setTextColor(0xFF38B2AC);
-                        startPolling();
-                    });
-                },
-                () -> uiHandler.post(() -> {
-                    tvInfo.setText(R.string.lobby_host_not_found);
-                    tvInfo.setTextColor(0xFFE53E3E);
-                    startBtn.setEnabled(true);
-                    startBtn.setText(R.string.lobby_find_join);
-                    nameInput.setEnabled(true);
-                })
-        );
-    }
-
-    // ── Polling ───────────────────────────────────────────────────────────────
-    private void startPolling() {
-        stopPolling();
-        pollRunnable = new Runnable() {
-            @Override public void run() {
-                refreshPlayersList();
-                updateImpostorPickerMax();
-                uiHandler.postDelayed(this, 1000);
+    private void setupImpostorControls(Button minus, Button plus) {
+        minus.setOnClickListener(v -> {
+            if (impostorCount > 1) {
+                impostorCount--;
+                tvImpostorCount.setText(String.valueOf(impostorCount));
             }
-        };
-        uiHandler.post(pollRunnable);
+        });
+        plus.setOnClickListener(v -> {
+            List<String> players = viewModel.getPlayers().getValue();
+            int pCount = (players != null) ? players.size() : 0;
+            int maxAllowed = Math.max(1, (pCount - 1) / 2);
+            
+            if (impostorCount < maxAllowed) {
+                impostorCount++;
+                tvImpostorCount.setText(String.valueOf(impostorCount));
+            } else {
+                Toast.makeText(getContext(), "Need more players for more impostors!", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    private void stopPolling() {
-        if (uiHandler != null && pollRunnable != null) {
-            uiHandler.removeCallbacks(pollRunnable);
-            pollRunnable = null;
+    private void setupModePicker() {
+        View.OnClickListener modeListener = v -> {
+            modePassPlay.setSelected(v.getId() == R.id.mode_pass_play);
+            modeHost.setSelected(v.getId() == R.id.mode_host);
+            modeJoin.setSelected(v.getId() == R.id.mode_join);
+            
+            updateModeStyle(modePassPlay);
+            updateModeStyle(modeHost);
+            updateModeStyle(modeJoin);
+
+            boolean isJoin = v.getId() == R.id.mode_join;
+            if (impostorSettingsLabel != null) impostorSettingsLabel.setVisibility(isJoin ? View.GONE : View.VISIBLE);
+            if (impostorSettingsLayout != null) impostorSettingsLayout.setVisibility(isJoin ? View.GONE : View.VISIBLE);
+        };
+
+        modePassPlay.setOnClickListener(modeListener);
+        modeHost.setOnClickListener(modeListener);
+        modeJoin.setOnClickListener(modeListener);
+
+        // Default
+        modePassPlay.performClick();
+    }
+
+    private void updateModeStyle(TextView tv) {
+        if (tv.isSelected()) {
+            tv.setTextColor(ContextCompat.getColor(requireContext(), R.color.gold));
+        } else {
+            tv.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_secondary));
         }
     }
 
     public void refreshPlayersList() {
-        if (playersView == null) return;
-        playersView.removeAllViews();
-        java.util.List<Player> list = engine.getPlayers();
-
-        if (tvNoPlayers != null)
-            tvNoPlayers.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
-        if (tvPlayerCount != null)
-            tvPlayerCount.setText(String.valueOf(list.size()));
-
-        for (int idx = 0; idx < list.size(); idx++) {
-            Player p = list.get(idx);
-            LinearLayout row = new LinearLayout(requireContext());
-            row.setOrientation(LinearLayout.HORIZONTAL);
-            row.setGravity(android.view.Gravity.CENTER_VERTICAL);
-            row.setBackgroundResource(R.drawable.bg_player_item);
-            LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT);
-            rowParams.bottomMargin = dp(6);
-            row.setLayoutParams(rowParams);
-            row.setPadding(dp(14), dp(10), dp(14), dp(10));
-
-            // Bullet
-            TextView tvBullet = new TextView(requireContext());
-            tvBullet.setText("⬡");
-            tvBullet.setTextColor(0xFF3D4F72);
-            tvBullet.setTextSize(12f);
-            tvBullet.setPadding(0, 0, dp(10), 0);
-
-            TextView tvName = new TextView(requireContext());
-            tvName.setText(p.getName());
-            tvName.setTextColor(0xFFF0F4FF);
-            tvName.setTextSize(14f);
-            tvName.setLayoutParams(new LinearLayout.LayoutParams(
-                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-
-            TextView btnDelete = new TextView(requireContext());
-            btnDelete.setText("✕");
-            btnDelete.setTextColor(0xFF3D4F72);
-            btnDelete.setTextSize(15f);
-            btnDelete.setPadding(dp(12), dp(2), dp(4), dp(2));
-            btnDelete.setClickable(true);
-            btnDelete.setFocusable(true);
-            int playerId = p.getId();
-            btnDelete.setOnClickListener(v -> {
-                // Fade out then remove
-                row.animate().alpha(0f).translationX(dp(20)).setDuration(180)
-                        .withEndAction(() -> {
-                            engine.removePlayer(playerId);
-                            refreshPlayersList();
-                            updateImpostorPickerMax();
-                        }).start();
-            });
-            btnDelete.setOnTouchListener((v, event) -> {
-                if (event.getAction() == android.view.MotionEvent.ACTION_DOWN)
-                    btnDelete.setTextColor(0xFFE53E3E);
-                else if (event.getAction() == android.view.MotionEvent.ACTION_UP
-                        || event.getAction() == android.view.MotionEvent.ACTION_CANCEL)
-                    btnDelete.setTextColor(0xFF3D4F72);
-                v.performClick();
-                return false;
-            });
-
-            row.addView(tvBullet);
-            row.addView(tvName);
-            row.addView(btnDelete);
-
-            // Staggered slide-in
-            row.setAlpha(0f);
-            row.setTranslationX(-dp(20));
-            final int delay = idx * 40;
-            row.animate().alpha(1f).translationX(0f)
-                    .setStartDelay(delay).setDuration(250)
-                    .setInterpolator(new OvershootInterpolator(0.6f)).start();
-
-            playersView.addView(row);
+        if (viewModel != null) {
+            updatePlayersList(viewModel.getPlayers().getValue());
         }
-        updateImpostorPickerMax();
     }
 
-    private RadioButton makeRadioBtn(String label) {
-        RadioButton rb = new RadioButton(requireContext());
-        rb.setId(View.generateViewId());
-        rb.setText(label);
-        rb.setTextColor(0xFF8A9BC4);
-        rb.setButtonTintList(ColorStateList.valueOf(0xFFF0B429));
-        rb.setPadding(0, 0, dp(20), 0);
-        rb.setTextSize(13f);
-        return rb;
+    private void updatePlayersList(List<String> players) {
+        playersView.removeAllViews();
+        int count = players != null ? players.size() : 0;
+        tvPlayerCount.setText(String.valueOf(count));
+        tvNoPlayers.setVisibility(count == 0 ? View.VISIBLE : View.GONE);
+
+        if (players != null) {
+            for (int i = 0; i < players.size(); i++) {
+                playersView.addView(createPlayerItem(players.get(i), i));
+            }
+        }
+        
+        // Auto-adjust impostor count if players were removed
+        int maxAllowed = Math.max(1, (count - 1) / 2);
+        if (impostorCount > maxAllowed) {
+            impostorCount = maxAllowed;
+            if (tvImpostorCount != null) tvImpostorCount.setText(String.valueOf(impostorCount));
+        }
+    }
+
+    private View createPlayerItem(String name, int index) {
+        LinearLayout item = new LinearLayout(getContext());
+        item.setOrientation(LinearLayout.HORIZONTAL);
+        item.setGravity(Gravity.CENTER_VERTICAL);
+        item.setBackgroundResource(R.drawable.bg_agent_item);
+        
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, dp(72));
+        params.setMargins(0, 0, 0, dp(12));
+        item.setLayoutParams(params);
+        item.setPadding(dp(16), 0, dp(16), 0);
+
+        // Side indicator bar
+        View bar = new View(getContext());
+        LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(dp(3), dp(32));
+        bar.setLayoutParams(barParams);
+        bar.setBackgroundColor(index % 2 == 0 ? 0xFF448AFF : 0xFF4CAF50); // Alternating colors
+        item.addView(bar);
+
+        // Avatar container
+        FrameLayout avatarFrame = new FrameLayout(getContext());
+        LinearLayout.LayoutParams frameParams = new LinearLayout.LayoutParams(dp(44), dp(44));
+        frameParams.setMargins(dp(16), 0, dp(16), 0);
+        avatarFrame.setLayoutParams(frameParams);
+        avatarFrame.setBackgroundResource(R.drawable.bg_timer_ring);
+        avatarFrame.setBackgroundTintList(ColorStateList.valueOf(0x208A9BC4));
+        
+        TextView emoji = new TextView(getContext());
+        emoji.setText(index % 2 == 0 ? "🕵️" : "🎭");
+        emoji.setTextSize(20);
+        emoji.setGravity(Gravity.CENTER);
+        avatarFrame.addView(emoji);
+        item.addView(avatarFrame);
+
+        // Text container
+        LinearLayout textContainer = new LinearLayout(getContext());
+        textContainer.setOrientation(LinearLayout.VERTICAL);
+        textContainer.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView label = new TextView(getContext());
+        label.setText("AGENT " + String.format("%02d", index + 1));
+        label.setTextSize(10);
+        label.setTextColor(0xFF448AFF);
+        label.setTypeface(null, Typeface.BOLD);
+        label.setLetterSpacing(0.2f);
+        textContainer.addView(label);
+
+        TextView nameTv = new TextView(getContext());
+        nameTv.setText(name);
+        nameTv.setTextSize(18);
+        nameTv.setTextColor(Color.WHITE);
+        nameTv.setTypeface(null, Typeface.BOLD);
+        textContainer.addView(nameTv);
+        
+        item.addView(textContainer);
+
+        // Remove button
+        ImageView removeBtn = new ImageView(getContext());
+        removeBtn.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
+        removeBtn.setColorFilter(0x408A9BC4);
+        removeBtn.setPadding(dp(8), dp(8), dp(8), dp(8));
+        removeBtn.setClickable(true);
+        removeBtn.setFocusable(true);
+        removeBtn.setOnClickListener(v -> viewModel.removePlayer(index));
+        item.addView(removeBtn);
+
+        return item;
+    }
+
+    private void hideKeyboard() {
+        if (getView() != null) {
+            InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+        }
     }
 
     private int dp(int dp) {
-        return Math.round(dp * requireContext().getResources().getDisplayMetrics().density);
+        return Math.round(dp * getResources().getDisplayMetrics().density);
     }
-
-    @Override
-    public void onDestroyView() { stopPolling(); super.onDestroyView(); }
 }

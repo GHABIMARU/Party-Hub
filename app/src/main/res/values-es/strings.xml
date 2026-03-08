@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Mix Party</string>
+    <string name="app_name">Party Hub</string>
     <string name="role_impostor">%1$s\nEres el IMPOSTOR</string>
     <string name="role_word">%1$s\nPalabra: %2$s</string>
     <string name="home_spyfall_desc">Encuentra al espía antes de\nque descubra la ubicación</string>
